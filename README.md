@@ -1,2 +1,29 @@
-# integer-linear-programming-notes
+# Integer Linear Programming Notes
 A structured study series on Integer Linear Programming, from linear programming foundations to branch-and-bound, cutting planes, column generation, and decomposition methods.
+
+These notes were originally written in Chinese and are being rewritten and translated into English for public sharing.
+
+## Notes
+
+| No. | Title | Status |
+|---|---|---|
+| 01 | [Simplex Method and Linear Programming Duality](notes/01-simplex-method-and-lp-duality.md) | Completed |
+| 02 | Branch and Bound | Planned |
+| 03 | Cutting Plane | Planned |
+| 04 | Branch and Cut | Planned |
+| 05 | Column Generation | Planned |
+| 06 | Branch and Price | Planned |
+| 07 | Lagrangian Relaxation and Duality | Planned |
+| 08 | Dantzig-Wolfe Decomposition | Planned |
+| 09 | Benders Decomposition | Planned |
+| 10 | Computational Complexity Theory | Planned |
+| 11 | Dynamic Programming | Planned |
+| 12 | Knapsack Problem | Planned |
+| 13 | Assignment Problem | Planned |
+| 14 | Summary of Three Major ILP Methods | Planned |
+
+## License
+
+This repository is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+
+You are free to share and adapt the material, provided that appropriate credit is given.
