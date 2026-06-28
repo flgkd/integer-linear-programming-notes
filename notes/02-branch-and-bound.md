@@ -174,7 +174,7 @@ comes from the indivisibility of the decision variables.
 
 This is exactly why integer programming is harder than linear programming.
 
-## 3. Why Integer Programming Is Hard*
+## 3. Why Integer Programming Is Hard⭐
 
 When we studied calculus, a common way to find an optimum was to take derivatives and set them equal to zero.
 
@@ -192,7 +192,7 @@ This is one of the intuitive reasons why integer programming is difficult.
 
 In fact, many classical NP-hard problems can be formulated as integer programming problems.
 
-## 4. Basic Idea of Branch and Bound*
+## 4. Basic Idea of Branch and Bound⭐
 
 If rounding does not work, another simple idea is enumeration.
 
@@ -462,19 +462,38 @@ $$
 The whole process can be summarized as follows:
 
 ```text
-Root B:    x=(4.81,1.82), z=356, UB=356
+Root B:
+x1 = 4.81, x2 = 1.82, z = 356
+LB = 0, UB = 356
+Branch on x1.
+
 |
-|-- B1: x1 <= 4, x=(4.00,2.10), z=349
-|   |
-|   |-- B3: x2 <= 2, x=(4,2), z=340, integer feasible, incumbent
-|   |
-|   |-- B4: x2 >= 3, x=(1.42,3.00), z=327, prune by bound
+|-- B1: x1 <= 4
+|   x1 = 4.00, x2 = 2.10, z1 = 349
+|   LB = 0, UB = 349
+|   Branch on x2.
 |
-|-- B2: x1 >= 5, x=(5.00,1.57), z=341
+|   |-- B3: x2 <= 2
+|   |   x1 = 4.00, x2 = 2.00, z3 = 340
+|   |   Integer feasible.
+|   |   Update incumbent: LB = 340.
+|   |
+|   |-- B4: x2 >= 3
+|       x1 = 1.42, x2 = 3.00, z4 = 327
+|       Prune by bound since z4 < LB.
+|
+|-- B2: x1 >= 5
+    x1 = 5.00, x2 = 1.57, z2 = 341
+    LB = 340, UB = 341
+    Branch on x2.
+
+    |-- B5: x2 <= 1
+    |   x1 = 5.44, x2 = 1.00, z5 = 308
+    |   Prune by bound since z5 < LB.
     |
-    |-- B5: x2 <= 1, x=(5.44,1.00), z=308, prune by bound
-    |
-    |-- B6: x2 >= 2, infeasible, prune
+    |-- B6: x2 >= 2
+        Infeasible.
+        Prune by infeasibility.
 ```
 
 The final incumbent is
@@ -483,7 +502,7 @@ $$
 (x_1,x_2)=(4,2), \quad z=340.
 $$
 
-## 7. General Steps of Branch and Bound for Maximization*
+## 7. General Steps of Branch and Bound for Maximization⭐
 
 Let the original integer programming problem be problem $A$.
 
@@ -565,7 +584,7 @@ Repeat branching, bounding, and pruning until no active branches remain.
 
 At that point, the incumbent solution is the optimal integer solution.
 
-## 8. Epsilon-Optimality*
+## 8. Epsilon-Optimality⭐
 
 Branch and Bound works by continuously narrowing the gap between the upper bound and the lower bound.
 
@@ -598,25 +617,7 @@ When the problem is large and exact optimality is too expensive, we can set an a
 
 This is why commercial solvers often provide parameters such as an absolute gap or a relative MIP gap.
 
-## 9. Terminology
-
-| Chinese | English | Note |
-|---|---|---|
-| 整数线性规划 | Integer Linear Programming, ILP | Linear programming with integrality restrictions. |
-| 松弛问题 | LP Relaxation | The problem obtained by removing integer constraints. |
-| 分支定界 | Branch and Bound | A smarter form of enumeration using bounds. |
-| 分支 | Branching | Splitting a problem into subproblems by adding constraints. |
-| 定界 | Bounding | Using LP relaxation values and incumbent values to bound the optimum. |
-| 剪支 | Pruning / Fathoming | Discarding a branch that cannot improve the incumbent. |
-| 穷举法 | Complete Enumeration | Enumerating all possible integer solutions. |
-| 隐枚举法 | Implicit Enumeration | Enumeration where many branches are skipped by bounds. |
-| 上界 | Upper Bound, UB | For maximization, usually obtained from LP relaxations. |
-| 下界 | Lower Bound, LB | For maximization, usually obtained from integer feasible solutions. |
-| 当前最好整数解 | Incumbent | The best integer feasible solution found so far. |
-| 整数可行解 | Integer Feasible Solution | A feasible solution satisfying all integrality constraints. |
-| 近似最优 | Epsilon-Optimal | A solution whose objective value is close enough to the optimum. |
-
-## 10. Key Takeaways
+## 9. Key Takeaways
 
 1. Solving the LP relaxation and rounding the result is not a reliable way to solve ILP.
 2. The LP relaxation is still very useful because it provides a bound.
@@ -631,5 +632,5 @@ This is why commercial solvers often provide parameters such as an absolute gap 
 
 ## References
 
-1. Textbook Editorial Group of *Operations Research*. *Operations Research*, 4th ed. Beijing: Tsinghua University Press, 2012. ISBN: 978-7-302-28879-4.  
-   （《运筹学》教材编写组：《运筹学》第4版，北京：清华大学出版社，2012年。ISBN：978-7-302-28879-4。）
+1. Textbook Editorial Group of *Operations Research*. *Operations Research*, 4th ed. Beijing: Tsinghua University Press, 2012. ISBN: 978-7-302-28879-4.（《运筹学》教材编写组：《运筹学》第4版，北京：清华大学出版社，2012年。ISBN：978-7-302-28879-4。）
+   
