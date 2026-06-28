@@ -100,10 +100,6 @@ A simplex is a generalization of geometric objects such as points, line segments
 - In 3-dimensional space, a simplex is a tetrahedron.
 - In \(n\)-dimensional space, a simplex is a polytope with \(n+1\) vertices.
 
-The original note includes the following textbook illustration:
-
-![Meaning of simplex](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651299338803-be65ced6-125f-458b-9f7b-8c81d383a5c5.png)
-
 ### 3.2.2 Determining an Initial Basic Feasible Solution
 
 The simplex method starts from an initial basic feasible solution.
@@ -117,54 +113,132 @@ These methods are especially important when the original constraints do not natu
 
 ### 3.2.3 Optimality Test and Solution Classification
 
-One of the most important parts of the simplex method is the optimality test.
+One of the most important parts of the simplex method is the **optimality test**.
+The key idea is to rewrite the objective function in terms of the non-basic variables. Then the coefficient of each non-basic variable indicates whether introducing that variable into the basis can improve the objective value.
 
-After rewriting the objective function in terms of non-basic variables, the coefficient of each non-basic variable indicates whether introducing that variable into the basis can improve the objective value. These coefficients are called **reduced costs** or **optimality indicators**.
+After several simplex iterations, the current system can be written as
 
-In many Chinese operations research textbooks, this quantity is denoted by:
+$$
+x_i = b_i^{\prime} - \sum_{j=m+1}^{n} a_{ij}^{\prime}x_j,
+\qquad i = 1,2,\ldots,m.
+\qquad \text{(2-24)}
+$$
 
-```math
-\sigma_j = c_j - z_j.
-```
+Here, $x_1,\ldots,x_m$ are the current basic variables, while $x_{m+1},\ldots,x_n$ are the current non-basic variables.
 
-For a maximization problem, if all reduced costs of non-basic variables satisfy:
+Substituting Eq. (2-24) into the objective function gives
 
-```math
+$$
+z =
+\sum_{i=1}^{m} c_i b_i^{\prime}
++
+\sum_{j=m+1}^{n}
+\left(
+c_j - \sum_{i=1}^{m} c_i a_{ij}^{\prime}
+\right)x_j.
+\qquad \text{(2-25)}
+$$
+
+Define
+
+$$
+z_0 = \sum_{i=1}^{m} c_i b_i^{\prime},
+\qquad
+z_j = \sum_{i=1}^{m} c_i a_{ij}^{\prime},
+\qquad j=m+1,\ldots,n.
+$$
+
+Then Eq. (2-25) can be rewritten as
+
+$$
+z =
+z_0
++
+\sum_{j=m+1}^{n}
+(c_j - z_j)x_j.
+\qquad \text{(2-26)}
+$$
+
+Let
+
+$$
+\sigma_j = c_j - z_j,
+\qquad j=m+1,\ldots,n.
+$$
+
+Then the objective function becomes
+
+$$
+z =
+z_0
++
+\sum_{j=m+1}^{n}
+\sigma_j x_j.
+\qquad \text{(2-27)}
+$$
+
+The quantity $\sigma_j = c_j - z_j$ is called the **reduced cost** or **optimality indicator** of the non-basic variable $x_j$.
+
+For a maximization problem, the interpretation is as follows:
+
+* If $\sigma_j > 0$, increasing $x_j$ may increase the objective value, so $x_j$ can be selected as an entering variable.
+* If $\sigma_j < 0$, increasing $x_j$ would decrease the objective value.
+* If $\sigma_j = 0$, increasing $x_j$ does not change the objective value, which may indicate the existence of alternative optimal solutions.
+
+#### Optimality Criterion
+
+For a maximization problem, if the current solution is a basic feasible solution and
+
+$$
 \sigma_j \le 0,
-```
+\qquad j=m+1,\ldots,n,
+$$
 
-then the current basic feasible solution is optimal.
+then no non-basic variable can enter the basis to further improve the objective value. Therefore, the current basic feasible solution is optimal.
 
-The original note emphasizes that it is necessary to understand the meaning of these reduced costs rather than only memorizing the computational rule.
+#### Criterion for Infinitely Many Optimal Solutions
 
-The original textbook derivation is shown below:
+If the current solution is a basic feasible solution,
 
-![Optimality test and solution classification](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651299487027-4344d605-56c2-41fb-bccc-0e96ce34a654.png)
+$$
+\sigma_j \le 0,
+\qquad j=m+1,\ldots,n,
+$$
 
-![Reduced cost derivation](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651299498307-31147614-9f58-482c-a978-9e69c63b30a4.png)
+and there exists at least one non-basic variable $x_k$ such that
 
-![Criteria for optimality, multiple optima, and unboundedness](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651299578063-01e3c917-4993-44a5-bbfe-59e7d74cba4e.png)
+$$
+\sigma_k = 0,
+$$
 
-![Unboundedness criterion continued](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651299591460-28f94e77-e075-4473-9b45-786b06726e73.png)
+then introducing $x_k$ into the basis may produce another basic feasible solution with the same objective value. In this case, the linear programming problem has infinitely many optimal solutions, because every convex combination of two optimal solutions is also optimal.
 
-#### Summary of the Main Rules
+#### Criterion for an Unbounded Solution
 
-For a maximization problem:
+If there exists a non-basic variable $x_k$ such that
 
-1. **Optimal solution**  
-   If all reduced costs satisfy \(\sigma_j \le 0\), the current basic feasible solution is optimal.
+$$
+\sigma_k > 0,
+$$
 
-2. **Infinitely many optimal solutions**  
-   If all reduced costs satisfy \(\sigma_j \le 0\), and at least one non-basic variable has \(\sigma_j = 0\), then there may exist another optimal basic feasible solution. In this case, all convex combinations between the two optimal solutions are also optimal.
+and all coefficients in its corresponding pivot column satisfy
 
-3. **Unbounded solution**  
-   If there exists a non-basic variable with positive reduced cost, but all entries in the corresponding pivot column prevent a valid leaving variable from being selected, then the objective value can increase indefinitely, and the LP is unbounded.
+$$
+a_{ik}^{\prime} \le 0,
+\qquad i=1,2,\ldots,m,
+$$
 
-The key idea is:
+then no valid leaving variable can be selected by the minimum ratio test. Therefore, $x_k$ can increase indefinitely while maintaining feasibility, and the objective value can increase without bound.
 
-> A reduced cost tells us whether bringing a non-basic variable into the basis can improve the objective value.
+In this case, the linear programming problem is unbounded.
 
-This interpretation will be especially useful later when studying column generation, where the pricing subproblem searches for new columns with favorable reduced costs.
+#### Key Point
+
+The reduced cost $\sigma_j$ measures the marginal change in the objective value when a non-basic variable $x_j$ is introduced into the basis.
+
+This idea is especially important for later topics such as **column generation**, where the pricing subproblem searches for new variables, or columns, with favorable reduced costs.
+
+
 
 ### 3.2.4 Artificial Variable Methods
 
