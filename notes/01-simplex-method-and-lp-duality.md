@@ -75,7 +75,13 @@ Several basic concepts are central to the simplex method:
 
 The relationship among general solutions, feasible solutions, basic solutions, and basic feasible solutions is illustrated in the original note as follows:
 
-![Relationship among infeasible solutions, feasible solutions, basic solutions, and basic feasible solutions](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651298994732-3fdadf99-be03-4c1d-8639-a52f7287ae37.png)
+<p align="center">
+  <img src="../figures/chapter-01/chapter-01-fig1.jpg" alt="Relationship among solution concepts in linear programming" width="600">
+</p>
+
+<p align="center">
+  <b>Figure 1.</b> Relationship among infeasible solutions, feasible solutions, basic solutions, and basic feasible solutions.
+</p>
 
 ### 3.1.4 Geometric Interpretation
 
@@ -258,10 +264,6 @@ When artificial variables are introduced, infeasibility can be detected after si
 
 If, in the final tableau, all optimality conditions are satisfied but at least one artificial variable remains in the basis with a nonzero value, then the original problem has no feasible solution.
 
-The original note includes the following textbook explanation:
-
-![Criterion for infeasibility with artificial variables](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651299771586-b0e0b9ca-d7ba-4c8a-9a7f-91e8cc79bb8f.png)
-
 ### 3.2.6 Degeneracy
 
 Degeneracy occurs when at least one basic variable in a basic feasible solution is equal to zero.
@@ -332,13 +334,6 @@ For a maximization problem, the current basic feasible solution is optimal if:
 ```math
 \bar{c}_N \le 0.
 ```
-
-The original note includes the corresponding textbook matrix derivation:
-
-![Matrix description of the simplex method](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651300088271-2ffd8110-1f6a-4c00-9ff1-ad918f918c0a.png)
-
-![Simplex tableau and matrix representation](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651307275410-b851cf42-5f1e-45b1-892b-0954dd0ecb79.png)
-
 #### Matrix Representation of Reduced Costs
 
 A particularly important formula is:
@@ -348,10 +343,6 @@ A particularly important formula is:
 ```
 
 If slack variables are included, their reduced costs can also be expressed using \(B^{-1}\). This is why the inverse of the basis matrix plays such a central role in simplex computations.
-
-The original note highlights this point:
-
-![Matrix representation of reduced costs](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651300145425-2f1c6558-932c-4f44-83b1-1a65537741f7.png)
 
 This formula is also the bridge to column generation:
 
@@ -370,10 +361,6 @@ The dual simplex method works in the opposite way:
 - Through pivot operations, it gradually restores primal feasibility.
 - Once both primal feasibility and dual feasibility hold, optimality is obtained.
 
-The original note gives the textbook explanation:
-
-![Principle of the dual simplex method](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651300524325-0ecbefa7-7dba-4c98-8988-54a1c0b68b8a.png)
-
 #### Advantages
 
 The dual simplex method has several advantages:
@@ -385,10 +372,6 @@ The dual simplex method has several advantages:
 5. It is often used in cutting-plane methods for integer programming.
 
 However, the dual simplex method is not always easy to apply independently, because it may be difficult to find an initial dual feasible basis.
-
-The original note includes the following summary:
-
-![Advantages of the dual simplex method](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651300600003-63deac18-d0ea-4f5e-bfb8-6c939bb8f01b.png)
 
 ---
 
@@ -434,14 +417,6 @@ Dual problem:
 y \ge 0.
 ```
 
-The original note includes several textbook tables summarizing the primal-dual correspondence:
-
-![Primal-dual relationship](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651300708147-0585e6f2-a02a-483d-bf57-6719dd881de8.png)
-
-![Primal-dual correspondence table](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651300731415-b22e5f14-b12d-45af-b2da-d3b68ed34fc1.png)
-
-![General transformation rules between primal and dual problems](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651300798370-f394f190-f0d9-4b31-8903-d6f4dc58c542.png)
-
 > Note: If some of the image links from the original Yuque export fail after migration, these tables should be rewritten manually using LaTeX or Markdown tables.
 
 ### 3.3.3 Basic Properties of LP Duality
@@ -460,10 +435,6 @@ For a primal maximization problem and its dual minimization problem, if \(x\) is
 c^\top x \le b^\top y.
 ```
 
-The original note includes the corresponding textbook statement:
-
-![Weak duality](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651301035940-268cdedf-7bfa-4bec-b3e4-85676b5ef6cb.png)
-
 #### 3. Unboundedness
 
 If the primal problem is unbounded, then the dual problem is infeasible.
@@ -480,10 +451,6 @@ c^\top x = b^\top y,
 
 then both \(x\) and \(y\) are optimal solutions.
 
-The original note includes the following statement:
-
-![Optimality from equal objective values](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651301106362-500410ba-6da2-42ed-aebf-3ebc57cb0347.png)
-
 #### 5. Strong Duality Theorem
 
 If the primal problem has an optimal solution, then the dual problem also has an optimal solution, and their optimal objective values are equal.
@@ -494,10 +461,6 @@ Complementary slackness describes the relationship between primal slack variable
 
 For a primal-dual optimal pair, if a primal constraint is not tight, then the corresponding dual variable must be zero. Conversely, if a dual variable is positive, then the corresponding primal constraint must be tight.
 
-The original note includes the following textbook statement:
-
-![Complementary slackness](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651301205685-6ab49667-56e8-44ea-bba6-b41a4d8eb381.png)
-
 #### 7. Relationship Between Primal Reduced Costs and Dual Basic Solutions
 
 This is one of the most important points in this note:
@@ -507,10 +470,6 @@ This is one of the most important points in this note:
 The original note refers to the following paper for a more detailed explanation:
 
 > Zhan Bingjun, *On the Role of Reduced Costs in Solving Dual Problems*.
-
-The original note includes the following figure:
-
-![Relationship between reduced costs and dual basic solutions](https://cdn.nlark.com/yuque/0/2022/png/12963648/1651301245595-49b6ce64-b8f8-462e-8b79-1ff04208b9f2.png)
 
 This observation is important because it explains why simplex optimality can be interpreted through primal-dual relationships.
 
