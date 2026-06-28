@@ -49,7 +49,7 @@ A typical standard form is:
 ```
 
 ```math
-x \ge 0.
+\quad \quad \quad x \ge 0.
 ```
 
 For inequality constraints, slack variables, surplus variables, or artificial variables may be introduced depending on the form of the original constraints.
@@ -127,12 +127,12 @@ After several simplex iterations, the current system can be written as
 $$
 x_i = b_i^{\prime} - \sum_{j=m+1}^{n} a_{ij}^{\prime}x_j,
 \qquad i = 1,2,\ldots,m.
-\qquad \text{(2-24)}
+\qquad 
 $$
 
 Here, $x_1,\ldots,x_m$ are the current basic variables, while $x_{m+1},\ldots,x_n$ are the current non-basic variables.
 
-Substituting Eq. (2-24) into the objective function gives
+Substituting above equation into the objective function gives
 
 $$
 z =
@@ -142,7 +142,7 @@ z =
 \left(
 c_j - \sum_{i=1}^{m} c_i a_{ij}^{\prime}
 \right)x_j.
-\qquad \text{(2-25)}
+\qquad 
 $$
 
 Define
@@ -154,7 +154,7 @@ z_j = \sum_{i=1}^{m} c_i a_{ij}^{\prime},
 \qquad j=m+1,\ldots,n.
 $$
 
-Then Eq. (2-25) can be rewritten as
+Then above equation can be rewritten as
 
 $$
 z =
@@ -162,7 +162,7 @@ z_0
 +
 \sum_{j=m+1}^{n}
 (c_j - z_j)x_j.
-\qquad \text{(2-26)}
+\qquad 
 $$
 
 Let
@@ -180,7 +180,7 @@ z_0
 +
 \sum_{j=m+1}^{n}
 \sigma_j x_j.
-\qquad \text{(2-27)}
+\qquad 
 $$
 
 The quantity $\sigma_j = c_j - z_j$ is called the **reduced cost** or **optimality indicator** of the non-basic variable $x_j$.
@@ -429,7 +429,7 @@ The dual of the dual problem is the primal problem.
 
 #### 2. Weak Duality
 
-For a primal maximization problem and its dual minimization problem, if \(x\) is primal feasible and \(y\) is dual feasible, then:
+For a primal maximization problem and its dual minimization problem, if $x$ is primal feasible and $y$ is dual feasible, then:
 
 ```math
 c^\top x \le b^\top y.
@@ -443,13 +443,13 @@ Similarly, if the dual problem is unbounded, then the primal problem is infeasib
 
 #### 4. Optimality from Equal Objective Values
 
-If \(x\) is primal feasible, \(y\) is dual feasible, and:
+If $x$ is primal feasible, $y$ is dual feasible, and:
 
 ```math
 c^\top x = b^\top y,
 ```
 
-then both \(x\) and \(y\) are optimal solutions.
+then both $x$ and $y$ are optimal solutions.
 
 #### 5. Strong Duality Theorem
 
