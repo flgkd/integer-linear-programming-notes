@@ -7,7 +7,7 @@ A structured study series on Integer Linear Programming, from linear programming
 | No. | Title | Status |
 |---|---|---|
 | 01 | [Simplex Method and Linear Programming Duality](notes/01-simplex-method-and-lp-duality.md) | Completed |
-| 02 | Branch and Bound | Planned |
+| 02 | [Branch and Bound](notes/02-branch-and-bound.md) | Completed |
 | 03 | Cutting Plane | Planned |
 | 04 | Branch and Cut | Planned |
 | 05 | Column Generation | Planned |
