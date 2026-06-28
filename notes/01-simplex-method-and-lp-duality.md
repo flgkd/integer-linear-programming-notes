@@ -548,3 +548,11 @@ $$
 - LP duality and sensitivity analysis.
 - Reduced cost and simplex tableau interpretation.
 - Column generation and Dantzig-Wolfe decomposition.
+
+## References
+
+1. Textbook Editorial Group of *Operations Research*. *Operations Research*, 4th ed. Beijing: Tsinghua University Press, 2012. ISBN: 978-7-302-28879-4.  
+   （《运筹学》教材编写组：《运筹学》第4版，北京：清华大学出版社，2012年。ISBN：978-7-302-28879-4。）
+
+2. Zhan, Bingjun, and Lu, Shuqiang. “On the Role of Reduced Costs in Solving Dual Problems.” *Journal of Daqing Normal University*, Vol. 33, No. 6, November 2013.  
+   （展丙军、卢树强：《论检验数在求解对偶问题中的作用》，《大庆师范学院学报》，第33卷第6期，2013年11月。）
