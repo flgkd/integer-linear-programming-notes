@@ -46,9 +46,6 @@ The question is:
 
 Let $x_1$ and $x_2$ denote the numbers of boxes of Goods A and Goods B, respectively. Since boxes cannot be divided, both variables must be nonnegative integers.
 
-- $x_1$ be the number of boxes of Goods A.
-- $x_2$ be the number of boxes of Goods B.
-
 The integer programming model is
 
 $$
@@ -524,7 +521,7 @@ Find any integer feasible solution of $A$, if possible.
 
 Its objective value is used as an initial lower bound $LB$.
 
-If no integer feasible solution is known, the lower bound can be treated as unknown or very small.
+If no integer feasible solution is known, the lower bound can be initialized as $-\infty$ for a maximization problem.
 
 ### Step 3: Branch
 
@@ -610,6 +607,8 @@ Equivalently, if a relative gap is used, one may stop when
 $$
 \frac{UB-LB}{|LB|} \le \varepsilon.
 $$
+
+(Here $LB \ne 0$, in practice, solvers usually use a carefully defined relative MIP gap to avoid division by zero or numerical instability.)
 
 This idea is very practical.
 
