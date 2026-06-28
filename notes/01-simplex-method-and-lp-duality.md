@@ -1,7 +1,6 @@
 # Integer Linear Programming Notes 01: Simplex Method and Linear Programming Duality
 
-> Original Chinese note by LH.  
-> Rewritten and translated for GitHub.
+> Author: Hang Li (@flgkd)
 
 ## 1. Preface
 
@@ -16,10 +15,6 @@ The simplex method is a general-purpose algorithm for solving linear programming
 ## 2. Simplex Method
 
 The simplex method contains many technical details. This note does not attempt to give a full textbook-style derivation of the simplex algorithm. Instead, it records several key concepts in linear programming and the simplex method that are especially important for later study of integer programming and decomposition-based optimization methods.
-
-For a more systematic introduction to the simplex method, refer to Chapters 2 and 3 of the fourth edition of *Operations Research* published by Tsinghua University Press.
-
-> Note: The original Yuque document linked to a local/reference PDF. For GitHub publication, it is better to replace this with a formal bibliographic reference instead of linking to an attachment.
 
 ---
 
