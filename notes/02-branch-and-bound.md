@@ -227,7 +227,7 @@ Let problem $B$ be the LP relaxation of problem $A$.
 
 Branch and Bound relies on two basic facts.
 
-### 5.1 Integer Feasible Solutions Give Lower Bounds
+### 5.1 Core Idea I:: Integer Feasible Solutions Give Lower Bounds
 
 Any feasible integer solution of problem $A$ gives a valid lower bound on the optimal value of $A$.
 
@@ -239,7 +239,7 @@ $$
 
 This best known integer solution is often called the **incumbent**.
 
-### 5.2 LP Relaxations Give Upper Bounds
+### 5.2 Core Idea II: LP Relaxations Give Upper Bounds
 
 The optimal value of the LP relaxation gives an upper bound for the maximization ILP.
 
@@ -251,7 +251,7 @@ $$
 
 This happens because the LP relaxation has a larger feasible region than the ILP. It removes the integer restriction, so it can only make the maximization problem easier.
 
-### 5.3 Branching and Bounding
+### 5.3 Putting the Two Ideas Together
 
 Branch and Bound solves the ILP by repeatedly splitting the feasible region of the LP relaxation into smaller subregions.
 
