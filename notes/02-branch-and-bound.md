@@ -632,4 +632,16 @@ This is why commercial solvers often provide parameters such as an absolute gap 
 
 ## References
 Textbook Editorial Group of *Operations Research*. *Operations Research*, 4th ed. Beijing: Tsinghua University Press, 2012. ISBN: 978-7-302-28879-4.（《运筹学》教材编写组：《运筹学》第4版，北京：清华大学出版社，2012年，ISBN：978-7-302-28879-4）
-   
+
+## Suggested Follow-up Reading
+
+- Integer Linear Programming
+- LP Relaxation
+- Branching Rules
+- Bounding and Pruning
+- Optimality Gap
+- Branch and Cut
+- Branch and Price
+- Commercial MIP Solvers such as CPLEX and Gurobi
+
+These topics are useful for later notes on cutting planes, column generation, and branch-and-price.
