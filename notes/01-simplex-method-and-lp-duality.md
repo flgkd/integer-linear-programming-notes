@@ -2,7 +2,7 @@
 
 > Author: Hang Li (@flgkd)
 > 
-> Note: Titles marked with `*` highlight key concepts and important summaries.
+> Note: Titles marked with ⭐ highlight key concepts and important summaries.
 
 ## 1. Preface
 
@@ -124,7 +124,7 @@ However, if the constraints contain equality constraints, $\ge$ constraints, or 
 1. the Big-M method;
 2. the two-phase method.
 
-### 4.3 Matrix Description of a Simplex Basis*
+### 4.3 Matrix Description of a Simplex Basis⭐
 
 Consider the LP in standard equality form:
 
@@ -214,7 +214,7 @@ For a maximization problem:
 
 This is why reduced costs are central to simplex, column generation, and branch-and-price.
 
-### 4.5 Optimality Test and Solution Classification*
+### 4.5 Optimality Test and Solution Classification⭐
 
 Assume that the current basis is primal feasible, i.e.,
 
@@ -305,7 +305,7 @@ $$
 
 Degeneracy may cause the objective value to remain unchanged after a pivot. In extreme cases, it may lead to cycling. Anti-cycling rules, such as Bland's rule, can be used to avoid cycling.
 
-### 4.8 Simplex Tableau and Basis Inverse*
+### 4.8 Simplex Tableau and Basis Inverse⭐
 
 The simplex tableau after choosing a basis $B$ can be expressed entirely using $B^{-1}$.
 
@@ -365,13 +365,13 @@ Its limitation is that finding an initial dual feasible basis is not always easy
 
 ## 6. Linear Programming Duality
 
-### 6.1 Essence of LP Duality*
+### 6.1 Essence of LP Duality⭐
 
 LP duality can be viewed as a special and highly structured form of Lagrangian duality for linear programs.
 
 The dual problem provides bounds on the primal objective value. At optimality, under standard feasibility and boundedness assumptions, the primal and dual objective values are equal.
 
-### 6.2 Primal-Dual Pair*
+### 6.2 Primal-Dual Pair⭐
 
 Consider the primal maximization problem
 
@@ -409,7 +409,7 @@ The correspondence between a primal problem and its dual can be summarized as fo
 | Variable $x_j \le 0$ in a max primal | Dual constraint $(A^T y)_j \le c_j$ |
 | Variable $x_j$ unrestricted | Dual constraint $(A^T y)_j = c_j$ |
 
-### 6.3 Basic Properties of LP Duality*
+### 6.3 Basic Properties of LP Duality⭐
 
 The following properties are stated for the primal-dual pair above.
 
@@ -472,7 +472,7 @@ These equations mean:
 - if a primal constraint is not tight, then the corresponding dual variable must be zero;
 - if a primal variable is positive, then the corresponding dual constraint must be tight.
 
-### 6.4 Reduced Costs and the Dual Basic Solution*
+### 6.4 Reduced Costs and the Dual Basic Solution⭐
 
 One of the most important relationships between simplex and LP duality is that the reduced-cost row of the primal simplex tableau corresponds to a dual basic solution.
 
