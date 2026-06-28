@@ -631,6 +631,5 @@ This is why commercial solvers often provide parameters such as an absolute gap 
 10. Branch and Bound is a core idea behind modern MILP solvers.
 
 ## References
-
-1. Textbook Editorial Group of *Operations Research*. *Operations Research*, 4th ed. Beijing: Tsinghua University Press, 2012. ISBN: 978-7-302-28879-4.（《运筹学》教材编写组：《运筹学》第4版，北京：清华大学出版社，2012年。ISBN：978-7-302-28879-4。）
+Textbook Editorial Group of *Operations Research*. *Operations Research*, 4th ed. Beijing: Tsinghua University Press, 2012. ISBN: 978-7-302-28879-4.（《运筹学》教材编写组：《运筹学》第4版，北京：清华大学出版社，2012年，ISBN：978-7-302-28879-4）
    
