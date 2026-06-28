@@ -124,7 +124,7 @@ However, if the constraints contain equality constraints, $\ge$ constraints, or 
 1. the Big-M method;
 2. the two-phase method.
 
-### 4.3 Matrix Description of Simplex*
+### 4.3 Matrix Description of a Simplex Basis*
 
 Consider the LP in standard equality form:
 
@@ -305,7 +305,7 @@ $$
 
 Degeneracy may cause the objective value to remain unchanged after a pivot. In extreme cases, it may lead to cycling. Anti-cycling rules, such as Bland's rule, can be used to avoid cycling.
 
-### 4.8 Matrix Form of the Simplex Tableau*
+### 4.8 Simplex Tableau and Basis Inverse*
 
 The simplex tableau after choosing a basis $B$ can be expressed entirely using $B^{-1}$.
 
