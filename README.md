@@ -1,7 +1,6 @@
 # Integer Linear Programming Notes
-A structured study series on Integer Linear Programming, from linear programming foundations to branch-and-bound, cutting planes, column generation, and decomposition methods.
 
-These notes were originally written in Chinese and are being rewritten and translated into English for public sharing.
+A structured study series on Integer Linear Programming, from linear programming foundations to branch-and-bound, cutting planes, column generation, and decomposition methods.
 
 ## Notes
 
