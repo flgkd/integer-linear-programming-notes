@@ -1,6 +1,7 @@
 # Integer Linear Programming Notes 01: Simplex Method and Linear Programming Duality
 
 > Author: Hang Li (@flgkd)
+> 
 > Note: Titles marked with `*` highlight key concepts and important summaries.
 
 ## 1. Preface
