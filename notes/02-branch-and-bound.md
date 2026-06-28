@@ -222,7 +222,7 @@ It is not magic. It is just a much smarter way to enumerate.
 
 Branch and Bound can be used for both pure integer programming and mixed-integer programming. It is also one of the core ideas behind commercial solvers such as CPLEX and Gurobi.
 
-## 5. Two Core Ideas of Branch and Bound*
+## 5. Two Core Ideas of Branch and Bound⭐
 
 Assume that the original ILP is a maximization problem. Call it problem $A$.
 
@@ -270,7 +270,7 @@ The goal is to gradually:
 
 When no remaining branch can improve the incumbent, the current incumbent is optimal.
 
-## 6. Example: Solving an ILP by Branch and Bound*
+## 6. Example: Solving an ILP by Branch and Bound
 
 Consider the following integer programming problem:
 
