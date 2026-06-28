@@ -1,533 +1,549 @@
 # Integer Linear Programming Notes 01: Simplex Method and Linear Programming Duality
 
 > Author: Hang Li (@flgkd)
+> Note: Titles marked with `*` highlight key concepts and important summaries.
 
 ## 1. Preface
 
-Integer Linear Programming (ILP) can be viewed as a special form of Linear Programming (LP) with additional integrality restrictions on some or all decision variables.
+Integer Linear Programming (ILP) is closely related to Linear Programming (LP). In many ILP algorithms, the first step is to relax the integrality restrictions and solve the corresponding LP relaxation. Therefore, a solid understanding of LP, especially the simplex method and LP duality, is essential.
 
-In many ILP algorithms, the integer restrictions are first relaxed, and the corresponding LP relaxation is solved. Therefore, before studying ILP algorithms in depth, it is necessary to understand the basic theory and solution methods of linear programming, especially the simplex method.
+The simplex method is a general-purpose algorithm for solving linear programs. It is **not a polynomial-time algorithm in the worst case**. Polynomial-time algorithms for LP include the **ellipsoid method** and **interior-point methods**. Nevertheless, the simplex method is still widely used because of its clear geometric interpretation and strong practical performance.
 
-This is also important because some later algorithms, such as **column generation**, are closely related to the simplex method.
+**Column generation**, which appears later in this note series, is also deeply connected to the simplex method: the pricing subproblem can be understood as the search for a nonbasic variable with a favorable reduced cost.
 
-The simplex method is a general-purpose algorithm for solving linear programming problems. However, it is **not a polynomial-time algorithm in the worst case**. Polynomial-time algorithms for LP include the **ellipsoid method** and **interior-point methods**. Even so, the simplex method is still widely used in practice because of its intuitive principle, clear geometric interpretation, and strong practical performance.
+## 2. The Simplex Method
 
-## 2. Simplex Method
+The simplex method contains many details. **This note does not aim to provide a complete step-by-step tutorial**. Instead, it summarizes several key concepts that are important for understanding LP, simplex, LP duality, and later ILP algorithms.
 
-The simplex method contains many technical details. This note does not attempt to give a full textbook-style derivation of the simplex algorithm. Instead, it records several key concepts in linear programming and the simplex method that are especially important for later study of integer programming and decomposition-based optimization methods.
+## 3. Key Concepts in Linear Programming
 
----
+### 3.1 Possible Outcomes of a Linear Program
 
-## 3. Key Concepts
+For a linear programming problem, the result may fall into one of the following cases:
 
-## 3.1 Linear Programming
+1. a unique optimal solution;
+2. multiple optimal solutions;
+3. infinitely many optimal solutions;
+4. an unbounded objective value;
+5. no feasible solution.
 
-### 3.1.1 Possible Solution Outcomes
+In continuous linear programming, if there are two distinct optimal solutions, then every convex combination of them is also optimal. Therefore, multiple optimal solutions usually imply infinitely many optimal solutions.
 
-When solving a linear programming problem, the result may fall into one of the following cases:
+### 3.2 Standard Form
 
-1. Unique optimal solution
-2. Multiple optimal solutions
-3. Infinitely many optimal solutions
-4. Unbounded solution
-5. No feasible solution
+A common maximization form of an LP is
 
-These cases are important because simplex-based algorithms do not merely compute a numerical solution. They also provide criteria for identifying optimality, infeasibility, unboundedness, and alternative optima.
+$$
+\max \quad z = c^T x
+$$
 
-### 3.1.2 Standard Form
+$$
+Ax \le b, \quad x \ge 0.
+$$
 
-A linear programming problem is often converted into standard form before applying the simplex method.
+By adding slack variables $s \ge 0$, it can be transformed into the standard equality form:
 
-A typical standard form is:
+$$
+\max \quad z = c^T x + 0^T s
+$$
 
-```math
-\max \quad c^\top x
-```
+$$
+Ax + Is = b, \quad x \ge 0, \quad s \ge 0.
+$$
 
-```math
-\text{s.t.} \quad Ax = b,
-```
+Here, $I$ is an identity matrix. Slack variables are often used to obtain an initial basis.
 
-```math
-\quad \quad \quad x \ge 0.
-```
+### 3.3 Solution Concepts
 
-For inequality constraints, slack variables, surplus variables, or artificial variables may be introduced depending on the form of the original constraints.
+For an LP in equality form,
 
-### 3.1.3 Concepts of Solutions
+$$
+Ax = b,\quad x \ge 0,
+$$
 
-Several basic concepts are central to the simplex method:
+where $A \in \mathbf{R}^{m \times n}$ and $rank(A)=m$, the following concepts are important.
 
-1. **Feasible solution**  
-   A solution satisfying all constraints, including non-negativity constraints.
+| Concept | Meaning |
+|---|---|
+| Feasible solution | A vector $x$ satisfying all equality and non-negativity constraints. |
+| Basis | A set of $m$ linearly independent columns of $A$. |
+| Basic solution | A solution obtained by setting the $n-m$ nonbasic variables to zero and solving for the $m$ basic variables. |
+| Basic feasible solution | A basic solution that also satisfies $x \ge 0$. |
+| Feasible basis | A basis whose corresponding basic solution is feasible. |
 
-2. **Basis**  
-   A set of linearly independent columns selected from the constraint matrix.
-
-3. **Basic solution**  
-   A solution obtained by setting non-basic variables to zero and solving for the basic variables.
-
-4. **Basic feasible solution**  
-   A basic solution that also satisfies the non-negativity constraints.
-
-5. **Feasible basis**  
-   A basis corresponding to a basic feasible solution.
-
-The relationship among general solutions, feasible solutions, basic solutions, and basic feasible solutions is illustrated in the original note as follows:
+The relationship among these concepts can be illustrated as follows.
 
 <p align="center">
   <img src="../figures/chapter-01/chapter-01-fig1.jpg" alt="Relationship among solution concepts in linear programming" width="600">
 </p>
 
 <p align="center">
-  <b>Figure 1.</b> Relationship among infeasible solutions, feasible solutions, basic solutions, and basic feasible solutions.
+  Relationship among infeasible solutions, feasible solutions, basic solutions, and basic feasible solutions.
 </p>
 
-### 3.1.4 Geometric Interpretation
+### 3.4 Geometric Interpretation
 
-Linear programming has an important geometric interpretation:
+The feasible region of a linear program is a convex set. For a standard LP, each basic feasible solution corresponds to a vertex, or extreme point, of the feasible region.
 
-1. The feasible region of an LP is a **convex set**.
-2. A basic feasible solution corresponds to a **vertex** or **extreme point** of the feasible region.
+The simplex method moves from one vertex to an adjacent vertex, trying to improve the objective value at each step.
 
-The simplex method can therefore be understood as an algorithm that moves from one vertex of the feasible region to another adjacent vertex, improving the objective value until no further improvement is possible.
+## 4. Key Concepts in the Simplex Method
 
----
+### 4.1 Meaning of a Simplex
 
-## 3.2 Simplex Method
+A simplex is the simplest possible polytope in a given dimension:
 
-### 3.2.1 Meaning of “Simplex”
+| Dimension   | Simplex                               |
+| ----------- | ------------------------------------- |
+| 0D          | Point                                 |
+| 1D          | Line segment                          |
+| 2D          | Triangle                              |
+| 3D          | Tetrahedron                           |
+| <em>n</em>D | Polytope with <em>n</em> + 1 vertices |
 
-A simplex is a generalization of geometric objects such as points, line segments, triangles, and tetrahedra:
-
-- In 0-dimensional space, a simplex is a point.
-- In 1-dimensional space, a simplex is a line segment.
-- In 2-dimensional space, a simplex is a triangle.
-- In 3-dimensional space, a simplex is a tetrahedron.
-- In \(n\)-dimensional space, a simplex is a polytope with \(n+1\) vertices.
-
-### 3.2.2 Determining an Initial Basic Feasible Solution
-
-The simplex method starts from an initial basic feasible solution.
-
-For some LPs, an initial basic feasible solution can be obtained directly from slack variables. However, when such an initial feasible basis is not obvious, artificial variables may need to be introduced. This leads to methods such as:
-
-1. The Big-M method
-2. The two-phase method
-
-These methods are especially important when the original constraints do not naturally provide an identity matrix as the initial basis.
-
-### 3.2.3 Optimality Test and Solution Classification
-
-One of the most important parts of the simplex method is the **optimality test**.
-The key idea is to rewrite the objective function in terms of the non-basic variables. Then the coefficient of each non-basic variable indicates whether introducing that variable into the basis can improve the objective value.
-
-After several simplex iterations, the current system can be written as
+The standard <em>n</em>-simplex can be written as
 
 $$
-x_i = b_i^{\prime} - \sum_{j=m+1}^{n} a_{ij}^{\prime}x_j,
-\qquad i = 1,2,\ldots,m.
-\qquad 
+\Delta^n = \{ x \in \mathbf{R}^{n+1} : \sum_{i=1}^{n+1} x_i = 1, \ x_i \ge 0, \ i=1,\ldots,n+1 \}.
 $$
 
-Here, $x_1,\ldots,x_m$ are the current basic variables, while $x_{m+1},\ldots,x_n$ are the current non-basic variables.
-
-Substituting above equation into the objective function gives
+For example, in three-dimensional space, a tetrahedron with unit intercepts has vertices
 
 $$
-z =
-\sum_{i=1}^{m} c_i b_i^{\prime}
-+
-\sum_{j=m+1}^{n}
-\left(
-c_j - \sum_{i=1}^{m} c_i a_{ij}^{\prime}
-\right)x_j.
-\qquad 
+(0,0,0),\quad (1,0,0),\quad (0,1,0),\quad (0,0,1).
 $$
 
-Define
+
+### 4.2 Initial Basic Feasible Solution
+
+If an LP is written in the form $Ax \le b$, $x \ge 0$, and $b \ge 0$, then slack variables can often provide an initial basic feasible solution.
+
+However, if the constraints contain equality constraints, $\ge$ constraints, or negative right-hand-side terms, an initial basic feasible solution may not be obvious. In such cases, artificial variables are introduced. The two common methods are:
+
+1. the Big-M method;
+2. the two-phase method.
+
+### 4.3 Matrix Description of Simplex*
+
+Consider the LP in standard equality form:
 
 $$
-z_0 = \sum_{i=1}^{m} c_i b_i^{\prime},
-\qquad
-z_j = \sum_{i=1}^{m} c_i a_{ij}^{\prime},
-\qquad j=m+1,\ldots,n.
+\max \quad z = c^T x
 $$
 
-Then above equation can be rewritten as
-
 $$
-z =
-z_0
-+
-\sum_{j=m+1}^{n}
-(c_j - z_j)x_j.
-\qquad 
+Ax = b, \quad x \ge 0.
 $$
 
-Let
+Let $B$ be a basis matrix and $N$ be the matrix of nonbasic columns. Partition the variables and objective coefficients as
 
 $$
-\sigma_j = c_j - z_j,
-\qquad j=m+1,\ldots,n.
+x = (x_B, x_N), \quad c = (c_B, c_N).
 $$
 
-Then the objective function becomes
+Then the constraints can be written as
 
 $$
-z =
-z_0
-+
-\sum_{j=m+1}^{n}
-\sigma_j x_j.
-\qquad 
-$$
-
-The quantity $\sigma_j = c_j - z_j$ is called the **reduced cost** or **optimality indicator** of the non-basic variable $x_j$.
-
-For a maximization problem, the interpretation is as follows:
-
-* If $\sigma_j > 0$, increasing $x_j$ may increase the objective value, so $x_j$ can be selected as an entering variable.
-* If $\sigma_j < 0$, increasing $x_j$ would decrease the objective value.
-* If $\sigma_j = 0$, increasing $x_j$ does not change the objective value, which may indicate the existence of alternative optimal solutions.
-
-#### Optimality Criterion
-
-For a maximization problem, if the current solution is a basic feasible solution and
-
-$$
-\sigma_j \le 0,
-\qquad j=m+1,\ldots,n,
-$$
-
-then no non-basic variable can enter the basis to further improve the objective value. Therefore, the current basic feasible solution is optimal.
-
-#### Criterion for Infinitely Many Optimal Solutions
-
-If the current solution is a basic feasible solution,
-
-$$
-\sigma_j \le 0,
-\qquad j=m+1,\ldots,n,
-$$
-
-and there exists at least one non-basic variable $x_k$ such that
-
-$$
-\sigma_k = 0,
-$$
-
-then introducing $x_k$ into the basis may produce another basic feasible solution with the same objective value. In this case, the linear programming problem has infinitely many optimal solutions, because every convex combination of two optimal solutions is also optimal.
-
-#### Criterion for an Unbounded Solution
-
-If there exists a non-basic variable $x_k$ such that
-
-$$
-\sigma_k > 0,
-$$
-
-and all coefficients in its corresponding pivot column satisfy
-
-$$
-a_{ik}^{\prime} \le 0,
-\qquad i=1,2,\ldots,m,
-$$
-
-then no valid leaving variable can be selected by the minimum ratio test. Therefore, $x_k$ can increase indefinitely while maintaining feasibility, and the objective value can increase without bound.
-
-In this case, the linear programming problem is unbounded.
-
-#### Key Point
-
-The reduced cost $\sigma_j$ measures the marginal change in the objective value when a non-basic variable $x_j$ is introduced into the basis.
-
-This idea is especially important for later topics such as **column generation**, where the pricing subproblem searches for new variables, or columns, with favorable reduced costs.
-
-
-
-### 3.2.4 Artificial Variable Methods
-
-When an initial basic feasible solution is not directly available, artificial variables can be added.
-
-Two commonly used methods are:
-
-1. **Big-M method**  
-   Artificial variables are penalized by a very large coefficient \(M\) in the objective function.
-
-2. **Two-phase method**  
-   Phase I minimizes the sum of artificial variables to find an initial feasible basis. Phase II then solves the original objective function starting from the feasible basis obtained in Phase I.
-
-### 3.2.5 Criterion for Infeasibility
-
-When artificial variables are introduced, infeasibility can be detected after simplex iterations.
-
-If, in the final tableau, all optimality conditions are satisfied but at least one artificial variable remains in the basis with a nonzero value, then the original problem has no feasible solution.
-
-### 3.2.6 Degeneracy
-
-Degeneracy occurs when at least one basic variable in a basic feasible solution is equal to zero.
-
-Degeneracy is important because it may cause simplex iterations that do not improve the objective value. In extreme cases, cycling may occur if pivot rules are not chosen carefully.
-
-### 3.2.7 Matrix Description of the Simplex Method
-
-The matrix form of the simplex method is extremely important. It helps clarify the relationship among simplex iterations, duality theory, sensitivity analysis, and later decomposition methods such as column generation.
-
-Consider the standard-form LP:
-
-```math
-\max \quad c^\top x
-```
-
-```math
-\text{s.t.} \quad Ax = b,
-```
-
-```math
-x \ge 0.
-```
-
-Suppose the columns of \(A\) are divided into a basis matrix \(B\) and a non-basis matrix \(N\). The corresponding variables and cost coefficients are denoted by:
-
-```math
-x =
-\begin{bmatrix}
-x_B \\
-x_N
-\end{bmatrix},
-\quad
-c =
-\begin{bmatrix}
-c_B \\
-c_N
-\end{bmatrix}.
-```
-
-The constraint can be written as:
-
-```math
 Bx_B + Nx_N = b.
-```
+$$
 
-Solving for the basic variables gives:
+Solving for the basic variables gives
 
-```math
+$$
 x_B = B^{-1}b - B^{-1}Nx_N.
-```
+$$
 
-Substituting this into the objective function gives:
+Substituting this expression into the objective function gives
 
-```math
-z = c_B^\top B^{-1}b
-+ \left(c_N^\top - c_B^\top B^{-1}N\right)x_N.
-```
+$$
+z = c_B^T x_B + c_N^T x_N
+$$
 
-Therefore, the reduced cost vector of non-basic variables is:
+$$
+z = c_B^T B^{-1}b + (c_N^T - c_B^T B^{-1}N)x_N .
+$$
 
-```math
-\bar{c}_N^\top = c_N^\top - c_B^\top B^{-1}N.
-```
+When $x_N = 0$, the corresponding basic solution is
 
-For a maximization problem, the current basic feasible solution is optimal if:
+$$
+x_B = B^{-1}b, \qquad z_0 = c_B^T B^{-1}b .
+$$
 
-```math
-\bar{c}_N \le 0.
-```
-#### Matrix Representation of Reduced Costs
+### 4.4 Reduced Cost
 
-A particularly important formula is:
+The coefficient of a nonbasic variable in the rewritten objective function is called its reduced cost, or simplex optimality indicator.
 
-```math
-\bar{c}_N^\top = c_N^\top - c_B^\top B^{-1}N.
-```
+For all nonbasic variables, the reduced-cost row vector is
 
-If slack variables are included, their reduced costs can also be expressed using \(B^{-1}\). This is why the inverse of the basis matrix plays such a central role in simplex computations.
+$$
+\overline{c}_N^T = c_N^T - c_B^T B^{-1}N .
+$$
 
-This formula is also the bridge to column generation:
+Equivalently, if the reduced costs are written as a column vector, then
 
-> In column generation, the pricing subproblem essentially tries to find a new column whose reduced cost can improve the master problem.
+$$
+\overline{c}_N = c_N - N^T (B^{-1})^T c_B .
+$$
 
-### 3.2.8 Dual Simplex Method
+For a single nonbasic variable $x_j$ with column $a_j$, its reduced cost is
 
-#### Principle
+$$
+\overline{c}_j = c_j - c_B^T B^{-1}a_j .
+$$
 
-In the primal simplex method, the algorithm maintains primal feasibility and gradually improves dual feasibility through pivot operations.
+In many Chinese textbooks, the reduced cost is written as
 
-The dual simplex method works in the opposite way:
+$$
+\sigma_j = c_j - z_j, \quad z_j = c_B^T B^{-1}a_j.
+$$
 
-- It maintains dual feasibility.
-- It starts from a primal infeasible basis.
-- Through pivot operations, it gradually restores primal feasibility.
-- Once both primal feasibility and dual feasibility hold, optimality is obtained.
+Thus,
 
-#### Advantages
+$$
+\sigma_j = \overline{c}_j.
+$$
+
+The reduced cost measures whether increasing a nonbasic variable can improve the objective value.
+
+For a maximization problem:
+
+- if $\overline{c}_j > 0$, increasing $x_j$ may improve the objective value;
+- if $\overline{c}_j < 0$, increasing $x_j$ decreases the objective value;
+- if $\overline{c}_j = 0$, increasing $x_j$ does not change the objective value locally.
+
+This is why reduced costs are central to simplex, column generation, and branch-and-price.
+
+### 4.5 Optimality Test and Solution Classification*
+
+Assume that the current basis is primal feasible, i.e.,
+
+$$
+B^{-1}b \ge 0.
+$$
+
+For a maximization problem, the following criteria are used.
+
+#### Unique Optimal Solution
+
+If the current basic feasible solution is nondegenerate and
+
+$$
+\overline{c}_j < 0, \quad \forall j \in \mathcal{N},
+$$
+
+then the current solution is the unique optimal solution.
+
+#### Alternative Optimal Solutions
+
+If
+
+$$
+\overline{c}_j \le 0, \quad \forall j \in \mathcal{N},
+$$
+
+and at least one nonbasic variable satisfies
+
+$$
+\overline{c}_j = 0,
+$$
+
+then another optimal basis may exist. If pivoting on such a variable leads to a distinct feasible solution, then the LP has multiple optimal solutions. Since the feasible region is convex, two distinct optimal solutions imply infinitely many optimal solutions.
+
+#### Unbounded Objective Value
+
+If there exists a nonbasic variable $x_j$ such that
+
+$$
+\overline{c}_j > 0,
+$$
+
+but
+
+$$
+B^{-1}a_j \le 0,
+$$
+
+then increasing $x_j$ can improve the objective value without violating feasibility. Therefore, the maximization problem is unbounded.
+
+More generally, let
+
+$$
+d = B^{-1}a_j .
+$$
+
+If $d$ has at least one positive component, the leaving variable is determined by the minimum ratio test. The ratio is computed only for indices satisfying $d_i>0$:
+
+$$
+\theta^\ast = \min \frac{(B^{-1}b)_i}{d_i}, \quad d_i>0.
+$$
+
+The basic variable corresponding to the index attaining this minimum ratio leaves the basis.
+
+### 4.6 Artificial Variables and Infeasibility
+
+Artificial variables are introduced only to construct an initial basis. They are not part of the original problem and should eventually be removed from the basis.
+
+In the Big-M method, artificial variables are penalized by a sufficiently large constant $M$ in the objective function.
+
+In the two-phase method:
+
+1. Phase I minimizes the sum of artificial variables.
+2. Phase II solves the original LP after artificial variables have been removed.
+
+If, at the end of Phase I, the optimal value of the artificial-variable objective is positive, then the original LP is infeasible.
+
+Equivalently, if an artificial variable remains positive in the final basis, the original problem has no feasible solution.
+
+### 4.7 Degeneracy
+
+A basic feasible solution is degenerate if at least one basic variable is equal to zero:
+
+$$
+x_{B_i}=0.
+$$
+
+Degeneracy may cause the objective value to remain unchanged after a pivot. In extreme cases, it may lead to cycling. Anti-cycling rules, such as Bland's rule, can be used to avoid cycling.
+
+### 4.8 Matrix Form of the Simplex Tableau*
+
+The simplex tableau after choosing a basis $B$ can be expressed entirely using $B^{-1}$.
+
+| Tableau component | Matrix expression |
+|---|---|
+| Right-hand side | $B^{-1}b$ |
+| Coefficients of nonbasic variables | $B^{-1}N$ |
+| Objective value | $c_B^T B^{-1}b$ |
+| Reduced costs of nonbasic variables | $c_N^T - c_B^T B^{-1}N$ |
+| Reduced costs of slack variables | $-c_B^T B^{-1}$, when slack-variable costs are zero |
+
+This representation explains why the inverse basis matrix $B^{-1}$ is so important in simplex computations.
+
+For slack variable columns $e_i$, the reduced costs are
+
+$$
+\overline{c}_{s_i} = 0 - c_B^T B^{-1}e_i.
+$$
+
+Thus, the reduced costs of slack variables can be written compactly as
+
+$$
+\overline{c}_s^T = -c_B^T B^{-1}.
+$$
+
+This relationship becomes especially important when studying LP duality and sensitivity analysis.
+
+## 5. Dual Simplex Method
+
+### 5.1 Principle
+
+In the simplex tableau, the right-hand-side column corresponds to a primal basic solution, while the reduced-cost row corresponds to a dual basic solution.
+
+The primal simplex method maintains primal feasibility and tries to reach dual feasibility.
+
+The dual simplex method does the opposite: it maintains dual feasibility and iteratively repairs primal infeasibility. For a maximization problem in the convention used above, dual feasibility corresponds to
+
+$$
+\overline{c}_j \le 0, \quad \forall j \in \mathcal{N}.
+$$
+
+If the reduced-cost condition is already satisfied but some components of $B^{-1}b$ are negative, the current basis is dual feasible but primal infeasible. The dual simplex method can pivot until primal feasibility is restored.
+
+Once both primal feasibility and dual feasibility hold, the current solution is optimal.
+
+### 5.2 Advantages
 
 The dual simplex method has several advantages:
 
-1. The initial solution does not need to be primal feasible.
-2. In some cases, artificial variables can be avoided.
-3. When the number of variables is smaller than the number of constraints, solving the dual problem may reduce computational effort.
-4. It is useful in sensitivity analysis.
-5. It is often used in cutting-plane methods for integer programming.
+1. The initial primal solution does not have to be feasible, as long as the reduced-cost condition satisfies dual feasibility.
+2. It can avoid artificial variables in some cases.
+3. It is useful in sensitivity analysis.
+4. It is frequently used in cutting-plane methods and branch-and-cut algorithms for integer programming.
+5. It is efficient for re-optimization after adding new constraints.
 
-However, the dual simplex method is not always easy to apply independently, because it may be difficult to find an initial dual feasible basis.
+Its limitation is that finding an initial dual feasible basis is not always easy for a general LP.
 
----
+## 6. Linear Programming Duality
 
-## 3.3 Duality Theory of Linear Programming
+### 6.1 Essence of LP Duality*
 
-### 3.3.1 Essence of LP Duality
+LP duality can be viewed as a special and highly structured form of Lagrangian duality for linear programs.
 
-Linear programming duality can be viewed as a special equivalent form of **Lagrangian duality** applied to linear programming problems.
+The dual problem provides bounds on the primal objective value. At optimality, under standard feasibility and boundedness assumptions, the primal and dual objective values are equal.
 
-This viewpoint is helpful because it connects LP duality with more general optimization theory.
+### 6.2 Primal-Dual Pair*
 
-### 3.3.2 Relationship Between Primal and Dual Problems
+Consider the primal maximization problem
 
-For a maximization primal problem with “less than or equal to” constraints, the corresponding dual problem is usually a minimization problem.
+$$
+(P) \quad \max \quad c^T x
+$$
 
-A typical primal-dual pair is:
+$$
+Ax \le b, \quad x \ge 0.
+$$
 
-Primal problem:
+The corresponding dual problem is
 
-```math
-\max \quad c^\top x
-```
+$$
+(D) \quad \min \quad b^T y
+$$
 
-```math
-\text{s.t.} \quad Ax \le b,
-```
+$$
+A^T y \ge c, \quad y \ge 0.
+$$
 
-```math
-x \ge 0.
-```
+The correspondence between a primal problem and its dual can be summarized as follows.
 
-Dual problem:
+| Primal element | Dual element |
+|---|---|
+| Maximization objective | Minimization objective |
+| $m$ constraints | $m$ dual variables |
+| $n$ variables | $n$ dual constraints |
+| Primal right-hand side $b_i$ | Objective coefficient of dual variable $y_i$ |
+| Primal objective coefficient $c_j$ | Right-hand side of the $j$-th dual constraint |
+| Constraint $a_i^T x \le b_i$ in a max primal | Dual variable $y_i \ge 0$ |
+| Constraint $a_i^T x \ge b_i$ in a max primal | Dual variable $y_i \le 0$ |
+| Equality constraint $a_i^T x = b_i$ | Dual variable $y_i$ is unrestricted |
+| Variable $x_j \ge 0$ in a max primal | Dual constraint $(A^T y)_j \ge c_j$ |
+| Variable $x_j \le 0$ in a max primal | Dual constraint $(A^T y)_j \le c_j$ |
+| Variable $x_j$ unrestricted | Dual constraint $(A^T y)_j = c_j$ |
 
-```math
-\min \quad b^\top y
-```
+### 6.3 Basic Properties of LP Duality*
 
-```math
-\text{s.t.} \quad A^\top y \ge c,
-```
+The following properties are stated for the primal-dual pair above.
 
-```math
-y \ge 0.
-```
-
-> Note: If some of the image links from the original Yuque export fail after migration, these tables should be rewritten manually using LaTeX or Markdown tables.
-
-### 3.3.3 Basic Properties of LP Duality
-
-The following properties are valid for linear programming problems.
-
-#### 1. Symmetry
+#### Symmetry
 
 The dual of the dual problem is the primal problem.
 
-#### 2. Weak Duality
+#### Weak Duality
 
-For a primal maximization problem and its dual minimization problem, if $x$ is primal feasible and $y$ is dual feasible, then:
+If $x$ is feasible for the primal problem and $y$ is feasible for the dual problem, then
 
-```math
-c^\top x \le b^\top y.
-```
+$$
+c^T x \le b^T y.
+$$
 
-#### 3. Unboundedness
+Thus, any dual feasible solution gives an upper bound on the primal maximization problem.
+
+#### Unboundedness
 
 If the primal problem is unbounded, then the dual problem is infeasible.
 
 Similarly, if the dual problem is unbounded, then the primal problem is infeasible.
 
-#### 4. Optimality from Equal Objective Values
+The converse is not always true: infeasibility of one problem does not necessarily imply unboundedness of the other.
 
-If $x$ is primal feasible, $y$ is dual feasible, and:
+#### Optimality Criterion
 
-```math
-c^\top x = b^\top y,
-```
+If $x$ is primal feasible, $y$ is dual feasible, and
+
+$$
+c^T x = b^T y,
+$$
 
 then both $x$ and $y$ are optimal solutions.
 
-#### 5. Strong Duality Theorem
+#### Strong Duality
 
-If the primal problem has an optimal solution, then the dual problem also has an optimal solution, and their optimal objective values are equal.
+If the primal problem has a finite optimal solution, then the dual problem also has a finite optimal solution, and their optimal objective values are equal:
 
-#### 6. Complementary Slackness
+$$
+c^T x^{opt} = b^T y^{opt}.
+$$
 
-Complementary slackness describes the relationship between primal slack variables and dual variables at optimality.
+#### Complementary Slackness
 
-For a primal-dual optimal pair, if a primal constraint is not tight, then the corresponding dual variable must be zero. Conversely, if a dual variable is positive, then the corresponding primal constraint must be tight.
+For the primal-dual pair above, optimal solutions $x^{opt}$ and $y^{opt}$ satisfy
 
-#### 7. Relationship Between Primal Reduced Costs and Dual Basic Solutions
+$$
+y_i^{opt}(b_i-a_i^T x^{opt})=0, \quad i=1,\ldots,m.
+$$
 
-This is one of the most important points in this note:
+and
 
-> The reduced-cost row of the primal simplex tableau corresponds to a basic solution of the dual problem.
+$$
+x_j^{opt}((A^T y^{opt})_j-c_j)=0, \quad j=1,\ldots,n.
+$$
 
-The original note refers to the following paper for a more detailed explanation:
+These equations mean:
 
-> Zhan Bingjun, *On the Role of Reduced Costs in Solving Dual Problems*.
+- if a primal constraint is not tight, then the corresponding dual variable must be zero;
+- if a primal variable is positive, then the corresponding dual constraint must be tight.
 
-This observation is important because it explains why simplex optimality can be interpreted through primal-dual relationships.
+### 6.4 Reduced Costs and the Dual Basic Solution*
 
-In the primal simplex method:
+One of the most important relationships between simplex and LP duality is that the reduced-cost row of the primal simplex tableau corresponds to a dual basic solution.
 
-- The right-hand side column represents a primal basic solution.
-- The reduced-cost row represents information related to a dual basic solution.
-- When both primal feasibility and dual feasibility are satisfied, the current solution is optimal.
+For a basis $B$, define the simplex multiplier, or the dual basic solution, by
 
-This perspective is also useful for understanding:
+$$
+y^T = c_B^T B^{-1}.
+$$
 
-1. Dual simplex method
-2. Sensitivity analysis
-3. Cutting-plane methods
-4. Column generation
-5. Reduced-cost-based pricing problems
+Then the reduced cost of variable $x_j$ can be written as
 
-### 3.3.4 Shadow Price
+$$
+\overline{c}_j = c_j - y^T a_j.
+$$
 
-A shadow price describes how the optimal objective value changes when the right-hand side of a constraint changes marginally.
+The dual constraint corresponding to $x_j$ is
 
-In LP duality, the optimal value of a dual variable can often be interpreted as the shadow price of the corresponding primal constraint.
+$$
+y^T a_j \ge c_j.
+$$
 
-For example, if a resource constraint has a positive shadow price, then increasing the availability of that resource may improve the optimal objective value. If the shadow price is zero, then that resource is not currently limiting the optimal solution.
+Therefore, the dual slack of this constraint is
 
----
+$$
+s_j^D = y^T a_j - c_j.
+$$
 
-## 4. Key Takeaways
+Combining the reduced-cost expression and the dual-slack expression, we obtain
 
-This note records the LP foundations needed for studying integer linear programming and decomposition algorithms.
+$$
+s_j^D = -\overline{c}_j.
+$$
 
-The most important points are:
+This explains the connection between primal reduced costs and dual feasibility:
 
-1. The simplex method moves among basic feasible solutions.
-2. A basic feasible solution corresponds to a vertex of the feasible region.
-3. Reduced costs determine whether a non-basic variable can improve the objective value.
-4. The matrix form of reduced costs is:
+- for a maximization problem, $\overline{c}_j \le 0$ means $s_j^D \ge 0$;
+- therefore, the reduced-cost optimality condition is exactly the dual feasibility condition.
 
-   ```math
-   \bar{c}_N^\top = c_N^\top - c_B^\top B^{-1}N.
-   ```
+This is also the theoretical reason why reduced cost is the key quantity in column generation.
 
-5. Artificial variables are used when an initial feasible basis is not directly available.
-6. The dual simplex method maintains dual feasibility and restores primal feasibility.
-7. LP duality is closely related to Lagrangian duality.
-8. Reduced costs in the primal simplex tableau are closely connected to basic solutions of the dual problem.
-9. Shadow prices are interpretations of optimal dual variables.
-10. These ideas are fundamental for column generation, cutting-plane methods, branch-and-bound, and other ILP algorithms.
+### 6.5 Shadow Price
 
----
+The optimal dual variable $y_i^\ast$ is often called the shadow price of resource $i$.
 
-## 5. Suggested Follow-up Reading
+Within the valid sensitivity-analysis range, it measures the marginal change in the optimal objective value when the right-hand-side value $b_i$ changes:
 
-- Simplex Method
-- Dual Simplex Method
-- Linear Programming Duality
-- Sensitivity Analysis
-- Column Generation
-- Dantzig-Wolfe Decomposition
-- Branch-and-Bound
-- Cutting-Plane Methods
+$$
+y_i^\ast = \frac{\partial z^\ast}{\partial b_i}.
+$$
+
+For example, if $b_i$ represents the capacity of a resource, then $y_i^\ast$ measures the marginal value of increasing that resource capacity by one unit.
+
+## 7. Key Takeaways
+
+1. ILP algorithms often rely on LP relaxation, so LP and simplex are foundational.
+2. A basic feasible solution corresponds to a vertex of the LP feasible region.
+3. The simplex method moves among basic feasible solutions.
+4. Reduced cost determines whether a nonbasic variable should enter the basis.
+5. The matrix expression of reduced cost is
+
+$$
+\overline{c}_j = c_j - c_B^T B^{-1}a_j.
+$$
+
+6. The simplex tableau naturally contains dual information.
+7. The reduced-cost condition for primal optimality is equivalent to dual feasibility.
+8. Dual simplex is useful for re-optimization, sensitivity analysis, and cutting-plane methods.
+9. LP duality is the basis for many advanced optimization methods, including decomposition, column generation, branch-and-price, and Lagrangian relaxation.
+
+## Suggested Follow-up Reading
+
+- Linear programming and simplex method chapters in standard operations research textbooks.
+- LP duality and sensitivity analysis.
+- Reduced cost and simplex tableau interpretation.
+- Column generation and Dantzig-Wolfe decomposition.
