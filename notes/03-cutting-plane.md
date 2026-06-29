@@ -23,11 +23,11 @@ However, total unimodularity is a rather strong condition and does not apply to 
 Now consider the figure below. Suppose the feasible region of an integer linear programming problem consists of all the green points inside region $X_2$. These green points are integer points, and we denote the set of these integer feasible points by $X_1$. The region $X_2$ is the feasible region of the LP relaxation.
 
 <p align="center">
-  <img src="../figures/chapter-03/chapter-03-fig1.png" alt="Relationship among solution concepts in linear programming" width="600">
+  <img src="../figures/chapter-03/chapter-03-fig1.png" alt="Convex Hull of Integer Feasible Points" width="600">
 </p>
 
 <p align="center">
-  Relationship among infeasible solutions, feasible solutions, basic solutions, and basic feasible solutions.
+  Convex Hull of Integer Feasible Points.
 </p>
 
 If we want the LP relaxation to directly return an optimal integer solution, then, according to the principle of the simplex method, we only need to remove the redundant parts of $X_2$ and keep the smallest convex hull containing $X_1$.
