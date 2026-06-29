@@ -749,7 +749,7 @@ $$
 0<f_i<1.
 $$
 
-Using the nonnegativity and integrality of all variables, we obtain the Gomory fractional cut, we obtain the Gomory fractional cut
+Using the nonnegativity and integrality of all variables, we obtain the Gomory fractional cut
 
 $$
 \sum_{j\in N} f_{ij}x_j \ge f_i.
