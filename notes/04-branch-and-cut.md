@@ -15,7 +15,7 @@ Therefore, before studying Branch and Cut, it is helpful to understand the follo
 - [Branch and Bound](02-branch-and-bound.md)
 - [Cutting Plane](03-cutting-plane.md)
 
-A more detailed reference on this topic is the classic survey-style document *Branch-and-Cut Algorithms for Combinatorial Optimization Problems*.
+A more detailed reference on this topic is Mitchell's classic survey-style chapter *Branch-and-Cut Algorithms for Combinatorial Optimization Problems*.
 
 ## 2. Overall Description⭐
 
