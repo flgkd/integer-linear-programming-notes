@@ -21,7 +21,6 @@ A structured study series on Integer Linear Programming, from linear programming
 | 11 | Dynamic Programming | Planned |
 | 12 | Knapsack Problem | Planned |
 | 13 | Assignment Problem | Planned |
-| 14 | Summary of Three Major ILP Methods | Planned |
 
 ## License
 
