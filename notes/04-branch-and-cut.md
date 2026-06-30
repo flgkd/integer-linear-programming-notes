@@ -6,9 +6,9 @@
 
 ## 1. Preface
 
-This note introduces **Branch and Cut**, a method for solving integer linear programming problems. 
+This note introduces **Branch and Cut**, a method for solving integer linear programming problems.
 
-In essence, Branch and Cut is based on **Branch and Bound**, but it also uses **cutting planes** to remove unnecessary parts of the LP relaxation feasible region. By tightening LP relaxations, Branch and Cut can often make Branch and Bound converge faster.
+In essence, Branch and Cut is based on **Branch and Bound**, but it also uses **cutting planes to remove unnecessary parts of the LP relaxation feasible region. By tightening LP relaxations**, Branch and Cut can often make Branch and Bound converge faster.
 
 Therefore, before studying Branch and Cut, it is helpful to understand the following two topics:
 
@@ -19,293 +19,358 @@ A more detailed reference on this topic is Mitchell's classic survey-style chapt
 
 ## 2. Overall Description⭐
 
-As mentioned above, Branch and Cut is closely related to Branch and Bound. In fact, it can be viewed as an enhanced version of Branch and Bound.
+As mentioned above, Branch and Cut is closely related to Branch and Bound. In fact, it can be viewed as **Branch and Bound strengthened by cutting planes**.
 
-Recall the basic logic of Branch and Bound. For a maximization integer programming problem:
+Before introducing Branch and Cut, let us briefly review the Branch and Bound process through the following example.
 
-- the optimal value of an LP relaxation gives an **upper bound**;
+<p align="center">
+  <img src="../figures/chapter-04/chapter-04-fig1.png" alt="Branch and Bound search tree" width="600">
+</p>
+
+<p align="center">
+  Branch and Bound search process.
+</p>
+
+For a maximization integer programming problem, when we solve the LP relaxation at a node:
+
+- the objective value of the LP relaxation gives an **upper bound** for that node;
 - the best integer feasible solution found so far gives a **lower bound**, also called the incumbent value;
-- if the upper bound of a node is no better than the current lower bound, then this node can be pruned;
-- if the LP relaxation solution is fractional and the bound is still promising, we branch further.
+- if the upper bound of a node is no better than the current lower bound, the node can be pruned;
+- otherwise, if the LP relaxation solution is fractional, we continue branching.
 
-In other words, Branch and Bound repeatedly solves LP relaxations and uses bounds to decide whether a node should be explored.
+In short, Branch and Bound repeatedly solves LP relaxations and uses bounds to decide whether a node is still worth exploring.
 
-Branch and Cut adds one more operation to this process:
+Now comes **the key idea of Branch and Cut**.
 
-> When solving the LP relaxation of a node, use cutting planes to tighten the LP relaxation before deciding whether to branch.
+> If cutting planes are used to tighten LP relaxations during Branch and Bound, then Branch and Bound becomes Branch and Cut.
 
-This means that if cutting planes are used to tighten LP relaxations inside Branch and Bound, the method becomes **Branch and Cut**.
+That is, before we immediately branch at a fractional LP solution, we may first try to add cutting planes to shrink the relaxation feasible region.
 
 ### 2.1 What Does a Cutting Plane Do?
 
 A cutting plane is a valid inequality added to the LP relaxation.
 
-It should satisfy two requirements:
-
-1. it removes the current fractional LP solution or other unnecessary fractional points;
-2. it does not remove any feasible integer solution.
-
-Geometrically, we can think of it as follows:
-
-- the integer feasible region is the true feasible region of the ILP;
-- the LP relaxation feasible region is usually larger;
-- a cut shrinks the LP relaxation feasible region while keeping the integer feasible region unchanged.
-
-Therefore, cuts can make the LP relaxation tighter and the bounds stronger.
-
-This is the main advantage of Branch and Cut over plain Branch and Bound.
+Geometrically, the idea can be illustrated as follows.
 
 <p align="center">
-  <img src="../figures/chapter-04/chapter-04-fig1.png" alt="Cutting planes tighten LP relaxations" width="600">
+  <img src="../figures/chapter-04/chapter-04-fig2.png" alt="Cutting plane tightens LP relaxation" width="700">
 </p>
 
 <p align="center">
-  Cutting planes tighten LP relaxations without removing integer feasible solutions.
+  Cutting planes tighten the LP relaxation without removing integer feasible solutions.
 </p>
 
-### 2.2 Why Branch and Cut Can Be Faster
+In the figure:
 
-In Branch and Bound, if a node has a promising LP bound but the relaxation solution is fractional, the algorithm usually branches immediately.
+- the red points represent the feasible integer solutions;
+- the blue region represents the feasible region of the LP relaxation;
+- the orange line represents a cutting plane.
 
-In Branch and Cut, we may first try to add cuts at that node.
+When solving the LP relaxation, **adding the orange cut reduces the LP relaxation feasible region. At the same time, it does not remove any feasible integer solution.**
 
-If the cuts make the LP bound worse enough, the node may be pruned without branching. In this case, Branch and Cut avoids unnecessary child nodes.
+**This makes the LP relaxation tighter and can make the algorithm converge faster.**
 
-That is the key idea:
+This is **the main advantage of Branch and Cut** compared with plain Branch and Bound:
 
-> Before branching, try to tighten the relaxation with cuts.
+> Branch and Cut tries to cut before it branches.
 
-This is why Branch and Cut may explore a smaller search tree than ordinary Branch and Bound.
+In this note, we will not discuss in detail how to generate cuts. That topic belongs to the previous note on cutting planes.
+
+- [Cutting Plane](03-cutting-plane.md)
 
 ## 3. A Simple Example
 
-To understand the essence of Branch and Cut, let us compare it with Branch and Bound on the same integer programming problem.
+To understand the essence of Branch and Cut, let us look at a small example.
 
-The original note uses a small example in which the only important difference occurs at subproblem $P_2$.
-
-<p align="center">
-  <img src="../figures/chapter-04/chapter-04-fig2.png" alt="Example problem for Branch and Cut" width="600">
-</p>
-
-<p align="center">
-  Example problem for comparing Branch and Cut with Branch and Bound.
-</p>
-
-The solving processes of Branch and Cut and Branch and Bound are shown conceptually below.
-
-<p align="center">
-  <img src="../figures/chapter-04/chapter-04-fig3.png" alt="Branch and Cut versus Branch and Bound" width="700">
-</p>
-
-<p align="center">
-  Branch and Cut versus Branch and Bound.
-</p>
-
-The difference between the two methods lies in how they handle subproblem $P_2$.
-
-### 3.1 Branch and Bound Treatment
-
-In the Branch and Bound process, solving the LP relaxation of subproblem $P_2$ gives
+Consider the following integer programming problem:
 
 $$
-Z=-29.5.
+\min \quad z=-6x_1-5x_2
 $$
 
-Suppose the current incumbent value is
+subject to
+
+$$
+3x_1+x_2\le 11
+$$
+
+$$
+-x_1+2x_2\le 5
+$$
+
+$$
+x_1,x_2\ge 0
+$$
+
+$$
+x_1,x_2\in \mathbf{Z}.
+$$
+
+The following figure compares the solving process of Branch and Cut with that of Branch and Bound on this same problem.
+
+<p align="center">
+  <img src="../figures/chapter-04/chapter-04-fig4.png" alt="Progress of branch-and-cut and branch-and-bound" width="850">
+</p>
+
+<p align="center">
+  Progress of Branch and Cut and Branch and Bound on the same example.
+</p>
+
+We can see that **the main difference between the two methods lies in how they handle subproblem $P_2$**.
+
+### 3.1 The Common First Step
+
+The LP relaxation of the original problem $P_0$ has the optimal solution
+
+$$
+\left(2\frac{3}{7},\ 3\frac{5}{7}\right)
+$$
+
+with objective value
+
+$$
+Z=-33\frac{1}{7}.
+$$
+
+This solution is fractional, so the algorithm branches on $x_1$.
+
+This creates two subproblems:
+
+$$
+x_1\ge 3
+$$
+
+and
+
+$$
+x_1\le 2.
+$$
+
+The left branch gives subproblem $P_1$. Its LP relaxation solution is
+
+$$
+(x_1,x_2)=(3,2),\quad Z=-28.
+$$
+
+This solution is integer feasible, so it becomes the incumbent solution.
+
+For this minimization problem, the incumbent value is therefore
 
 $$
 Z=-28.
 $$
 
-In this example, the problem is treated as a minimization problem, so a smaller objective value is better.
+### 3.2 Branch and Bound Treatment of Subproblem P2
 
-Since
+Now consider subproblem $P_2$.
 
-$$
--29.5 < -28,
-$$
-
-subproblem $P_2$ may still contain a better integer solution. Therefore, Branch and Bound continues branching from $P_2$.
-
-However, after branching into two child nodes, neither branch produces a better integer solution.
-
-So this branching effort turns out to be unnecessary.
-
-### 3.2 Branch and Cut Treatment
-
-Branch and Cut handles $P_2$ more carefully.
-
-After solving the LP relaxation and obtaining
+Solving its LP relaxation gives
 
 $$
-Z=-29.5,
+(x_1,x_2)=(2,3.5),\quad Z=-29.5.
 $$
 
-it does not branch immediately.
+This solution is not integer feasible.
 
-Instead, it tries to find a cutting plane that removes part of the LP relaxation feasible region without removing any integer feasible solution.
+Since this is a minimization problem, a smaller objective value is better. Because
+
+$$
+-29.5<-28,
+$$
+
+subproblem $P_2$ may still contain an integer solution better than the incumbent. Therefore, plain Branch and Bound cannot prune it directly.
+
+So Branch and Bound branches again, this time on $x_2$.
+
+It creates two child subproblems:
+
+$$
+x_2\le 3
+$$
+
+and
+
+$$
+x_2\ge 4.
+$$
+
+After solving these branches, it turns out that no better integer solution is found:
+
+- one branch gives an integer solution with value $Z=-27$, which is worse than $Z=-28$ for a minimization problem;
+- the other branch is infeasible.
+
+So Branch and Bound spends one more branching step, but this effort does not improve the incumbent.
+
+### 3.3 Branch and Cut Treatment of Subproblem P2⭐
+
+Branch and Cut handles subproblem $P_2$ differently.
+
+When the LP relaxation of $P_2$ gives
+
+$$
+(x_1,x_2)=(2,3.5),\quad Z=-29.5,
+$$
+
+Branch and Cut does not immediately branch.
+
+Instead, it tries to add a cutting plane that removes the current fractional LP solution without removing any feasible integer solution.
 
 In this example, a valid cut is found:
 
 $$
-2x_1+x_2 \le 7.
+2x_1+x_2\le 7.
 $$
 
-After adding this cut, a tightened subproblem $P_3$ is obtained.
+After adding this cut, the new tightened subproblem is denoted by $P_3$.
 
 Solving the LP relaxation of $P_3$ gives
 
 $$
-Z=-27.8.
+(x_1,x_2)=(1.8,3.4),\quad Z=-27.8.
 $$
+
+Now compare this value with the incumbent value $Z=-28$.
 
 Since this is a minimization problem and
 
 $$
--27.8 > -28,
+-27.8>-28,
 $$
 
-this node cannot improve the current incumbent. Therefore, it can be pruned.
+this node cannot contain a better integer solution than the incumbent.
 
-### 3.3 Main Lesson of the Example⭐
+Therefore, Branch and Cut can prune this branch directly.
 
-For this example:
+### 3.4 Main Lesson of the Example⭐
 
-- Branch and Bound needs to branch from $P_2$ and explore additional nodes;
+From the example above:
+
+- Branch and Bound branches from $P_2$ and needs to explore two more child nodes;
 - Branch and Cut adds a cut at $P_2$, tightens the relaxation, and prunes the node directly.
+
+Therefore, for this example:
+
+- Branch and Cut finishes in fewer major steps;
+- Branch and Bound spends extra branching effort that does not improve the solution.
 
 The key lesson is:
 
 > A good cut can prevent unnecessary branching.
 
-This is the main reason why Branch and Cut can be more efficient than plain Branch and Bound.
+This is the core idea of Branch and Cut.
 
-## 4. Branch and Cut Algorithm⭐
+## 4. Algorithm Process⭐
 
-Compared with Branch and Bound, Branch and Cut adds a **cut generation** step.
-
-The overall procedure can be summarized as follows:
-
-```text
-Start with the original ILP
-→ solve the LP relaxation of the current node
-→ if infeasible, prune the node
-→ if the bound is not promising, prune the node
-→ if the LP solution is integer feasible, update the incumbent
-→ if the LP solution is fractional, try to generate violated cuts
-→ if cuts are found, add them and re-solve the LP relaxation
-→ if no useful cut is found, branch
-→ repeat until no active nodes remain
-```
+The overall process of Branch and Cut can be summarized as follows.
 
 <p align="center">
-  <img src="../figures/chapter-04/chapter-04-fig4.png" alt="Branch and Cut algorithm process" width="700">
+  <img src="../figures/chapter-04/chapter-04-fig5.png" alt="Branch and Cut algorithm summary" width="850">
 </p>
 
 <p align="center">
-  General process of Branch and Cut.
+  General algorithm process of Branch and Cut.
 </p>
 
-### 4.1 Algorithm Logic for Maximization
+Compared with Branch and Bound, Branch and Cut adds one important step:
 
-For a maximization problem, the LP relaxation value of a node gives an upper bound.
+> use cutting planes to tighten LP relaxations before deciding whether to branch.
 
-Let
+Therefore, the algorithm repeatedly performs the following operations:
 
-$$
-LB
-$$
+1. solve the LP relaxation of the current problem;
+2. prune the problem if the relaxation is infeasible;
+3. prune the problem if its bound is not promising;
+4. update the incumbent if the LP solution is integer feasible;
+5. if the LP solution is fractional, try to find violated cutting planes;
+6. if useful cuts are found, add them and solve the LP relaxation again;
+7. if no useful cuts are found, branch and create new subproblems.
 
-be the value of the current incumbent, that is, the best integer feasible solution found so far.
+### 4.1 Algorithm Description for Maximization
 
-At a node, solve its LP relaxation and obtain value
+The original pseudocode assumes that the objective is to be maximized.
 
-$$
-UB_k.
-$$
+Let $L$ be the list of active problems, and let $x^{opt}$ be the best integer feasible solution found so far. Let $v^{opt}$ be its objective value.
 
-There are several cases.
+The algorithm can be summarized below.
 
-**Case 1: The LP relaxation is infeasible.**
+1. Add the initial ILP to $L$, the list of active problems.
+2. Set $x^{opt}$ to null and $v^{opt}=-\infty$.
+3. While $L$ is not empty:
+   1. Select and remove a problem from $L$.
+   2. Solve the LP relaxation of the problem.
+   3. If the relaxation is infeasible, prune this problem and continue.
+   4. Let the LP relaxation solution be $x$ with objective value $v$.
+   5. If $v\le v^{opt}$, prune this problem by bound and continue.
+   6. If $x$ is integer feasible, set $v^{opt}=v$, set $x^{opt}=x$, and continue.
+   7. If desired, search for cutting planes violated by $x$.
+   8. If violated cuts are found, add them to the relaxation and go back to solving the LP relaxation.
+   9. If no useful cuts are found, branch to partition the problem into new subproblems and add them to $L$.
+4. Return $x^{opt}$.
 
-Then this node contains no feasible solution and can be pruned.
+This is the same idea as Branch and Bound, except that Step 7 and Step 8 are inserted before branching.
 
-**Case 2: The LP bound is no better than the incumbent.**
-
-If
-
-$$
-UB_k \le LB,
-$$
-
-then this node cannot contain a better integer solution and can be pruned.
-
-**Case 3: The LP solution is integer feasible.**
-
-Then this solution is a feasible integer solution. If its objective value is better than the current incumbent, update the incumbent.
-
-**Case 4: The LP solution is fractional.**
-
-Try to find violated cutting planes.
-
-If violated cuts are found, add them to the current node relaxation and solve the strengthened LP relaxation again.
-
-If no useful cuts are found, branch on a fractional variable and create child nodes.
-
-## 5. Pseudocode
+### 4.2 Pseudocode
 
 The following pseudocode describes the main logic of Branch and Cut for a maximization problem.
 
 ```text
 BranchAndCut(initial_problem):
 
-    active_nodes = {initial_problem}
+    active_list = {initial_problem}
     incumbent_solution = None
-    LB = -infinity
+    best_objective = -infinity
 
-    while active_nodes is not empty:
+    while active_list is not empty:
 
-        node = select_and_remove_one_node(active_nodes)
+        current_problem = select_and_remove_one_problem(active_list)
 
         while true:
 
-            relaxation = LP_relaxation(node)
+            relaxation = LP_relaxation(current_problem)
             lp_solution = solve(relaxation)
 
             if lp_solution is infeasible:
-                prune node
+                prune current_problem
                 break
 
-            UB = objective_value(lp_solution)
+            value = objective_value(lp_solution)
 
-            if UB <= LB:
-                prune node by bound
+            if value <= best_objective:
+                prune current_problem by bound
                 break
 
             if lp_solution is integer feasible:
                 incumbent_solution = lp_solution
-                LB = UB
-                prune node by integrality
+                best_objective = value
+                prune current_problem by integrality
                 break
 
-            cuts = find_violated_cuts(lp_solution, node)
+            cuts = search_for_violated_cutting_planes(lp_solution)
 
             if cuts are not empty:
-                add cuts to node
+                add cuts to current_problem
                 continue
 
-            child_nodes = branch(node, lp_solution)
-            add child_nodes to active_nodes
+            child_problems = branch(current_problem, lp_solution)
+            add child_problems to active_list
             break
 
     return incumbent_solution
 ```
 
-This pseudocode emphasizes the key difference from Branch and Bound:
+The key difference from plain Branch and Bound is this part:
 
-> before branching, Branch and Cut first tries to find violated cuts and tighten the LP relaxation.
+```text
+cuts = search_for_violated_cutting_planes(lp_solution)
 
-## 6. Branch and Bound vs Branch and Cut
+if cuts are not empty:
+    add cuts to current_problem
+    continue
+```
+
+This means that Branch and Cut first tries to strengthen the current LP relaxation. Only when no useful cut is found does it branch.
+
+## 5. Branch and Bound vs Branch and Cut
 
 The relationship between Branch and Bound and Branch and Cut can be summarized as follows.
 
@@ -315,38 +380,38 @@ The relationship between Branch and Bound and Branch and Cut can be summarized a
 | Cutting Plane | Add valid inequalities | Tighten the relaxation by cuts |
 | Branch and Cut | Combine both | Try cuts first; if cuts are not enough, branch |
 
-Branch and Cut is not a completely separate idea from Branch and Bound.
+Branch and Cut is not a completely separate method from Branch and Bound.
 
 Rather, it is Branch and Bound strengthened by cutting planes.
 
-In modern MILP solvers, Branch and Cut is often the standard framework. Solvers do not simply branch blindly. Instead, they also use cuts, presolve, heuristics, node selection strategies, branching rules, and many other techniques.
+In modern MILP solvers, Branch and Cut is often the standard framework. Solvers usually do not simply branch blindly. Instead, they also use cuts, presolve, primal heuristics, node selection strategies, branching rules, and many other techniques.
 
-## 7. Key Takeaways
+## 6. Key Takeaways
 
-1. Branch and Cut is an enhancement of Branch and Bound.
-2. The main extra step in Branch and Cut is the use of cutting planes.
+1. Branch and Cut is Branch and Bound strengthened by cutting planes.
+2. The main extra step in Branch and Cut is cut generation.
 3. A cutting plane tightens the LP relaxation without removing feasible integer solutions.
 4. Stronger LP relaxations lead to stronger bounds.
 5. Stronger bounds can prune more nodes.
 6. A good cut can prevent unnecessary branching.
 7. If useful cuts cannot be found, the algorithm branches just like Branch and Bound.
-8. Branch and Cut is a core framework used in modern MILP solvers.
+8. In modern MILP solvers, Branch and Cut is a core solution framework.
 
 ## References
 
-1. Deng, Faheng. “Branch and Cut.” *Cnblogs*, 2019.  
-   （邓发恒：《Branch and Cut》，博客园，2019年。）
-
-2. Padberg, M., and Rinaldi, G. “A Branch-and-Cut Algorithm for the Resolution of Large-Scale Symmetric Traveling Salesman Problems.” *SIAM Review*, 33(1), 1991, pp. 60–100.
+1. Deng, Faheng. “Branch and Cut.” *Cnblogs*, 2019.（邓发恒：《Branch and Cut》，博客园，2019年）  
+   
+2. Mitchell, John E. *Branch-and-Cut Algorithms for Combinatorial Optimization Problems*. To appear in *Handbook of Applied Optimization*, Oxford University Press, 2000. April 19, 1999; revised September 7, 1999.
 
 ## Suggested Follow-up Reading
 
 - Branch and Bound
 - Cutting Plane
-- Branching Rules
 - Cut Separation
 - Node Selection Strategy
-- Branch and Cut
+- Branching Rules
+- Local Cuts and Global Cuts
+- Branch and Price
 - Modern MILP Solvers such as CPLEX and Gurobi
 
 These topics are useful for later notes on Branch and Price and large-scale integer programming methods.
