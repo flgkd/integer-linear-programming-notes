@@ -2,6 +2,8 @@
 
 A structured study series on Integer Linear Programming, from linear programming foundations to branch-and-bound, cutting planes, column generation, and decomposition methods.
 
+> These notes are based on my original Chinese study notes and have been carefully rewritten, expanded, and organized in English.
+
 ## Notes
 
 | No. | Title | Status |
