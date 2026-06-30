@@ -399,7 +399,7 @@ In modern MILP solvers, Branch and Cut is often the standard framework. Solvers 
 
 ## References
 
-1. Deng, Faheng. “Branch and Cut.” *Cnblogs*, 2019.（邓发恒：《Branch and Cut》，博客园，2019年）  
+1. Duan Duan De Lu Zou Zou Ting Ting. “A 10-Minute Introduction to Branch and Cut Algorithms with C++ Code for Solving TSP.” *Cnblogs*, August 13, 2019.（短短的路走走停停：《[干货 | 10分钟掌握branch and cut（分支剪界）算法原理附带C++求解TSP问题代码](https://www.cnblogs.com/dengfaheng/p/11344488.html)》，博客园，2019年8月13日。）
    
 2. Mitchell, John E. “Branch-and-Cut Algorithms for Combinatorial Optimization Problems.” To appear in *Handbook of Applied Optimization*, Oxford University Press, 2000. April 19, 1999; revised September 7, 1999.
 
