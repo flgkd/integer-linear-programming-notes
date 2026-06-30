@@ -8,7 +8,7 @@
 
 This note introduces **Branch and Cut**, a method for solving integer linear programming problems.
 
-In essence, Branch and Cut is based on **Branch and Bound**, but it also uses **cutting planes to remove unnecessary parts of the LP relaxation feasible region. By tightening LP relaxations**, Branch and Cut can often make Branch and Bound converge faster.
+In essence, Branch and Cut is based on **Branch and Bound**, but it also uses **cutting planes** to remove unnecessary parts of the LP relaxation feasible region. By tightening LP relaxations, Branch and Cut can often make Branch and Bound converge faster.
 
 Therefore, before studying Branch and Cut, it is helpful to understand the following two topics:
 
@@ -401,7 +401,7 @@ In modern MILP solvers, Branch and Cut is often the standard framework. Solvers 
 
 1. Deng, Faheng. “Branch and Cut.” *Cnblogs*, 2019.（邓发恒：《Branch and Cut》，博客园，2019年）  
    
-2. Mitchell, John E. *Branch-and-Cut Algorithms for Combinatorial Optimization Problems*. To appear in *Handbook of Applied Optimization*, Oxford University Press, 2000. April 19, 1999; revised September 7, 1999.
+2. Mitchell, John E. “Branch-and-Cut Algorithms for Combinatorial Optimization Problems.” To appear in *Handbook of Applied Optimization*, Oxford University Press, 2000. April 19, 1999; revised September 7, 1999.
 
 ## Suggested Follow-up Reading
 
