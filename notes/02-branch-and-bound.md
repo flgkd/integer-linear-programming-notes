@@ -148,11 +148,11 @@ This is the first important lesson:
 The LP relaxation has a continuous feasible region. The ILP feasible region is only the set of integer lattice points inside that region.
 
 <p align="center">
-  <img src="../figures/chapter-02/chapter-02-fig1.png" alt="Geometric Interpretation of the Shipping Example" width="500">
+  <img src="../figures/chapter-02/chapter-02-fig1.png" alt="LP Relaxation and Integer Optimum in the Shipping Example" width="500">
 </p>
 
 <p align="center">
-  Geometric Interpretation of the Shipping Example.
+  LP Relaxation and Integer Optimum in the Shipping Example.
 </p>
 
 In the example above, the LP relaxation reaches its optimum at the fractional point
@@ -304,11 +304,11 @@ $$
 First ignore the integer constraints and solve the LP relaxation.
 
 <p align="center">
-  <img src="../figures/chapter-02/chapter-02-fig2.png" alt="Geometric Interpretation of the Example" width="500">
+  <img src="../figures/chapter-02/chapter-02-fig2.png" alt="Root LP Relaxation of the Branch-and-Bound Example" width="500">
 </p>
 
 <p align="center">
-  Geometric Interpretation of the Example.
+  Root LP Relaxation of the Branch-and-Bound Example.
 </p>
 
 The LP relaxation has the optimal solution
@@ -362,11 +362,11 @@ $$
 This creates two subproblems.
 
 <p align="center">
-  <img src="../figures/chapter-02/chapter-02-fig3.png" alt="Geometric Interpretation of Two Subproblems" width="500">
+  <img src="../figures/chapter-02/chapter-02-fig3.png" alt="First Branch into Subproblems B1 and B2" width="500">
 </p>
 
 <p align="center">
-  Geometric Interpretation of Two Subproblems.
+  First Branch into Subproblems B1 and B2.
 </p>
 
 | Node | Added constraint | LP relaxation solution | LP bound |
@@ -518,12 +518,13 @@ Branch on x1.
 ```
 
 <p align="center">
-  <img src="../figures/chapter-02/chapter-02-fig4.png" alt="The Whole Branch-and-Bound Tree of the Example" width="500">
+  <img src="../figures/chapter-02/chapter-02-fig4.png" alt="Complete Branch-and-Bound Tree of the Example" width="800">
 </p>
 
 <p align="center">
-  The Whole Branch-and-Bound Tree of the Example.
+  Complete Branch-and-Bound Tree of the Example.
 </p>
+
 The final incumbent is
 
 $$
