@@ -12,7 +12,7 @@ Column Generation is easy to misunderstand if the connection among the simplex m
 
 1. linear programming and LP duality;
 2. the principles of the simplex method, especially why a basis change is needed and how pivoting is performed;
-3. reduced costs, dual variables, and the relationship between them, particularly how the reduced costs of the primal problem are related to a basic solution of the dual problem;
+3. reduced costs, dual variables, and the relationship between them, particularly how a simplex basis induces dual variables and how these dual variables determine reduced costs;
 4. the matrix form of the simplex method and the matrix form of reduced costs.
 
 A useful prerequisite is:
@@ -76,7 +76,7 @@ In many problems, we can reformulate a compact ILP into a pattern-based, path-ba
 
 ## 2. Basic Idea of Column Generation⭐
 
-**Column Generation** is a highly efficient method for solving large-scale linear optimization problems. Its theoretical foundation can be traced back to the decomposition principle proposed by Dantzig and Wolfe in 1960.
+**Column Generation** is a highly efficient method for solving large-scale linear optimization problems. Its theoretical foundation can be traced back to the decomposition principle proposed by Dantzig and Wolfe in 1960 [1].
 
 In essence, Column Generation is closely related to the simplex method and is fundamentally designed to solve linear programming problems.
 
@@ -87,7 +87,7 @@ Column Generation has been widely applied to many well-known large-scale combina
 - Vehicle Routing Problems;
 - Single-Facility Location Problems.
 
-Many of these problems are NP-hard in their integer forms. Column Generation is typically used to solve their large-scale LP relaxations or the LP master problems arising from suitable reformulations.
+Many of these problems are NP-hard in their integer forms. Column Generation is typically used to solve their large-scale LP relaxations or the LP master problems arising from suitable reformulations. The role of Column Generation in large-scale integer programming is surveyed in [2,3].
 
 ### 2.1 Large-Scale Linear Programs with Many Columns
 
@@ -296,10 +296,10 @@ Let $\pi$ be the optimal dual solution associated with the RMP constraints.
 For a candidate column $a_j$, the reduced cost is
 
 $$
-\overline{c}_j = c_j-\pi^T a_j.
+r_j = c_j-\pi^T a_j.
 $$
 
-Therefore, the **Pricing Problem (PP)** (also called **Subroblem (SP)**) searches for a column with the minimum reduced cost:
+Therefore, the **Pricing Problem (PP)** (also called **Subproblem (SP)**) searches for a column with the minimum reduced cost:
 
 $$
 \min_j \quad c_j-\pi^T a_j.
@@ -308,7 +308,7 @@ $$
 If
 
 $$
-\overline{c}_j < 0,
+r_j < 0,
 $$
 
 then column $j$ can improve the current RMP solution and should be added.
@@ -316,7 +316,7 @@ then column $j$ can improve the current RMP solution and should be added.
 If the minimum reduced cost satisfies
 
 $$
-\overline{c}_j \ge 0,
+r_j \ge 0,
 $$
 
 then no omitted column can improve the current solution. The current RMP solution is therefore optimal for the full LP master problem.
@@ -353,13 +353,15 @@ This is the most direct interpretation from the simplex method.
 
 #### Method 2: Use the Dual Variables of the RMP
 
-The second method uses the relationship between the simplex multipliers and a basic solution of the dual problem.
+The second method uses the relationship between the simplex multipliers and the dual problem.
 
-Let $\pi$ denote the dual variables associated with the RMP constraints. At an optimal simplex basis,
+For a current basis $B$, define
 
 $$
 \pi^T=c_B^T B^{-1}.
 $$
+
+The vector $\pi$ is the dual solution induced by the current basis.
 
 Therefore,
 
@@ -367,7 +369,9 @@ $$
 r_j=c_j-\pi^T a_j.
 $$
 
-Thus, instead of explicitly working with $B^{-1}$, we can solve the RMP and directly obtain the dual variables $\pi$.
+At an optimal simplex basis, $\pi$ is dual feasible and optimal.
+
+Thus, instead of explicitly working with $B^{-1}$, we can solve the RMP and directly obtain the optimal dual variables $\pi$.
 
 The Pricing Problem then uses these dual values to evaluate, or generate, candidate columns.
 
@@ -434,7 +438,7 @@ To generate a useful column, we do not always need to find the most negative red
 Any column satisfying
 
 $$
-\overline{c}_j < 0
+r_j < 0
 $$
 
 can be added to the RMP.
@@ -482,14 +486,19 @@ ColumnGeneration:
 ```
 
 ---
+<p align="center">
+  <img src="../figures/chapter-05/chapter-05-fig1.png" alt="The basic Column Generation algorithm for a minimization LP." width="400">
+</p>
 
-## 4. Cutting Stock Problem
+<p align="center">
+  The basic Column Generation algorithm for a minimization LP.
+</p>
 
-The Cutting Stock Problem is one of the classical examples of Column Generation.
+## 4. Cutting Stock Problem: Two Formulations and Column Generation⭐
 
-### 4.1 Problem Description
+The **Cutting Stock Problem** is a classical integer linear programming problem and one of the most important applications of Column Generation.
 
-Suppose a factory has large stock rolls of fixed length
+Suppose a factory has stock rolls of fixed length
 
 $$
 W.
@@ -499,29 +508,77 @@ Customers request smaller pieces of different lengths.
 
 For item type $i$:
 
-- the required length is $w_i$;
-- the demand is $d_i$.
+- $w_i$ is the required length;
+- $d_i$ is the demand.
 
-The goal is to cut the large stock rolls so that all customer demands are satisfied while minimizing the number of stock rolls used, or equivalently reducing material waste.
+The objective considered in this note is to satisfy all demands while minimizing the number of stock rolls used.
 
-The key difficulty is that there may be an enormous number of possible cutting patterns.
+Minimizing trim loss is a closely related objective, but it is not always equivalent when overproduction is allowed.
 
-### 4.2 A Direct Formulation
+Before applying Column Generation, an important modeling question must be answered:
 
-A direct formulation may explicitly model individual stock rolls and the number of items cut from each roll.
+> **How should the Cutting Stock Problem be formulated?**
 
-Such a formulation is intuitive.
+There are two natural formulations.
 
-However, it can have two major problems:
+### 4.1 Formulation I: A Direct Roll-Based ILP
 
-1. the formulation may be large;
-2. its LP relaxation may be weak.
+The most intuitive idea is to explicitly model individual stock rolls.
 
-This motivates a different modeling idea.
+Let $K$ be a sufficiently large finite set of candidate stock rolls, where $|K|$ is chosen as a valid upper bound on the number of rolls that may be needed.
 
-### 4.3 Pattern-Based Formulation⭐
+For each stock roll $k$:
 
-Instead of modeling each physical stock roll directly, consider all feasible cutting patterns.
+- $y_k=1$ if roll $k$ is used, and $y_k=0$ otherwise;
+- $x_{ik}$ is the number of pieces of item type $i$ cut from roll $k$.
+
+A direct ILP formulation is
+
+$$
+\min \quad \sum_{k\in K} y_k
+$$
+
+subject to
+
+$$
+\sum_{k\in K} x_{ik}\ge d_i,
+\quad i=1,\ldots,m
+$$
+
+$$
+\sum_{i=1}^{m}w_i x_{ik}\le Wy_k,
+\quad k\in K
+$$
+
+$$
+x_{ik}\in\mathbf{Z}_+,
+\quad i=1,\ldots,m,\ k\in K
+$$
+
+$$
+y_k\in\{0,1\},
+\quad k\in K.
+$$
+
+This formulation is easy to understand.
+
+Each stock roll is modeled explicitly, and the capacity constraint ensures that the total length cut from one roll does not exceed $W$.
+
+However, this direct formulation has an important weakness:
+
+> **Its LP relaxation can be weak.**
+
+After relaxing the integer restrictions, the model may use fractional values of $y_k$ and distribute items fractionally across stock rolls.
+
+As a result, the LP relaxation may provide a poor bound for the original ILP.
+
+This is one reason why a more structured formulation is attractive.
+
+### 4.2 Formulation II: A Pattern-Based ILP⭐
+
+The classical pattern-based approach to the Cutting Stock Problem goes back to Gilmore and Gomory [4].
+
+Instead of modeling each stock roll directly, we can model complete cutting patterns.
 
 Let
 
@@ -537,7 +594,7 @@ $$
 a_{ij}
 $$
 
-is the number of pieces of item type $i$ produced by pattern $j$.
+denotes the number of pieces of item type $i$ produced by pattern $j$.
 
 Let
 
@@ -547,21 +604,21 @@ $$
 
 be the number of times pattern $j$ is used.
 
-The integer master formulation is
+The pattern-based integer formulation is
 
 $$
-\min \quad \sum_{j\in P} x_j
+\min \quad \sum_{j\in P}x_j
 $$
 
 subject to
 
 $$
-\sum_{j\in P} a_{ij}x_j \ge d_i,
+\sum_{j\in P}a_{ij}x_j\ge d_i,
 \quad i=1,\ldots,m
 $$
 
 $$
-x_j \in \mathbf{Z}_+,
+x_j\in\mathbf{Z}_+,
 \quad j\in P.
 $$
 
@@ -577,12 +634,12 @@ a_{mj}
 \end{bmatrix}
 $$
 
-represents one feasible cutting pattern.
+represents one complete cutting pattern.
 
-A pattern is feasible only if
+A valid pattern must satisfy
 
 $$
-\sum_{i=1}^{m} w_i a_{ij}\le W
+\sum_{i=1}^{m}w_i a_{ij}\le W
 $$
 
 and
@@ -591,41 +648,116 @@ $$
 a_{ij}\in\mathbf{Z}_+.
 $$
 
-The formulation is conceptually simple.
-
-The problem is that the number of feasible patterns can be enormous.
-
-This is exactly the type of structure where Column Generation becomes useful.
-
-### 4.4 LP Master Problem
-
-Standard Column Generation solves the LP relaxation of the pattern-based master problem:
+For example, if
 
 $$
-\min \quad \sum_{j\in P} x_j
+W=16
+$$
+
+and the item lengths are 3, 6, and 7, then
+
+$$
+\begin{bmatrix}
+1\\
+1\\
+1
+\end{bmatrix}
+$$
+
+is a feasible pattern because
+
+$$
+3+6+7=16.
+$$
+
+The main advantage of the pattern-based formulation is that one variable already represents a complete feasible cutting structure.
+
+Its LP relaxation is often much stronger than that of the direct roll-based formulation.
+
+The disadvantage is obvious:
+
+> **The number of feasible cutting patterns may be enormous.**
+
+We may not be able to enumerate all columns in $P$ explicitly.
+
+This is exactly where Column Generation becomes useful.
+
+### 4.3 Comparing the Two Formulations
+
+The two formulations describe the same type of integer optimization problem, but from very different viewpoints.
+
+| Formulation | Main modeling unit | Main advantage | Main difficulty |
+|---|---|---|---|
+| Direct roll-based formulation | Individual stock roll | Intuitive and compact | LP relaxation can be weak |
+| Pattern-based formulation | Complete cutting pattern | Stronger structural representation and often a tighter LP relaxation | Potentially enormous number of columns |
+
+The important point is:
+
+> **Column Generation is not useful simply because the Cutting Stock Problem is large. It becomes useful because the pattern-based formulation has a huge number of structured columns.**
+
+This distinction is fundamental.
+
+### 4.4 The Cutting Stock Problem Is Still an ILP
+
+The pattern-based formulation is
+
+$$
+\min \quad \sum_{j\in P}x_j
 $$
 
 subject to
 
 $$
-\sum_{j\in P} a_{ij}x_j \ge d_i,
+\sum_{j\in P}a_{ij}x_j\ge d_i,
 \quad i=1,\ldots,m
 $$
 
 $$
-x_j \ge 0,
+x_j\in\mathbf{Z}_+.
+$$
+
+Therefore, the Cutting Stock Problem is still an **integer linear programming problem**.
+
+This does not mean that Column Generation can directly solve the original Cutting Stock Problem to integer optimality.
+
+Standard Column Generation solves linear programming problems.
+
+Therefore, before applying Column Generation, we relax the integer restrictions:
+
+$$
+x_j\ge 0,
 \quad j\in P.
 $$
 
-We call this the LP Master Problem.
+The resulting LP Master Problem is
+
+$$
+\min \quad \sum_{j\in P}x_j
+$$
+
+subject to
+
+$$
+\sum_{j\in P}a_{ij}x_j\ge d_i,
+\quad i=1,\ldots,m
+$$
+
+$$
+x_j\ge 0,
+\quad j\in P.
+$$
+
+Column Generation is used to solve this **LP relaxation**.
 
 Its solution may be fractional.
 
 That is expected.
 
-Column Generation is being used to solve the LP relaxation.
+> **Column Generation participates in solving the Cutting Stock Problem by solving its large-scale LP relaxation. It does not, by itself, enforce the integrality of the pattern variables.**
 
-### 4.5 Restricted LP Master Problem
+To obtain an integer solution, additional techniques are needed, such as rounding or repair heuristics, solving a restricted integer master problem, or using Branch and Price.
+
+### 4.5 Restricted Master Problem and Dual Variables
 
 Choose a small subset
 
@@ -633,23 +765,23 @@ $$
 P' \subset P
 $$
 
-such that the resulting RMP is feasible.
+such that the resulting Restricted Master Problem is feasible.
 
-Then solve
+The RMP is
 
 $$
-\min \quad \sum_{j\in P'} x_j
+\min \quad \sum_{j\in P'}x_j
 $$
 
 subject to
 
 $$
-\sum_{j\in P'} a_{ij}x_j \ge d_i,
+\sum_{j\in P'}a_{ij}x_j\ge d_i,
 \quad i=1,\ldots,m
 $$
 
 $$
-x_j \ge 0,
+x_j\ge 0,
 \quad j\in P'.
 $$
 
@@ -664,13 +796,13 @@ be the dual variable associated with demand constraint $i$.
 The dual of the RMP is
 
 $$
-\max \quad \sum_{i=1}^{m} d_i\pi_i
+\max \quad \sum_{i=1}^{m}d_i\pi_i
 $$
 
 subject to
 
 $$
-\sum_{i=1}^{m} a_{ij}\pi_i \le 1,
+\sum_{i=1}^{m}a_{ij}\pi_i\le 1,
 \quad j\in P'
 $$
 
@@ -679,22 +811,18 @@ $$
 \quad i=1,\ldots,m.
 $$
 
-### 4.6 Reduced Cost of a Cutting Pattern
+The objective coefficient of every pattern variable is 1.
 
-The objective coefficient of every pattern variable $x_j$ is 1.
-
-Therefore, the reduced cost of a candidate pattern is
+Therefore, the reduced cost of a candidate cutting pattern is
 
 $$
-\overline{c}_j
-=
-1-\sum_{i=1}^{m}\pi_i a_{ij}.
+r_j=1-\sum_{i=1}^{m}\pi_i a_{ij}.
 $$
 
-For a minimization problem, we want
+For a minimization problem, an improving column must satisfy
 
 $$
-\overline{c}_j<0.
+r_j<0.
 $$
 
 Equivalently,
@@ -703,7 +831,11 @@ $$
 \sum_{i=1}^{m}\pi_i a_{ij}>1.
 $$
 
-Therefore, the pricing problem can be written as
+### 4.6 The Pricing Problem Is an ILP⭐
+
+The Pricing Problem searches for a new cutting pattern.
+
+It can be written as
 
 $$
 \max \quad \sum_{i=1}^{m}\pi_i a_i
@@ -720,91 +852,326 @@ a_i\in\mathbf{Z}_+,
 \quad i=1,\ldots,m.
 $$
 
-This is an **integer knapsack problem**.
+This is an **unbounded integer knapsack problem**.
 
-Let the optimal pricing objective be
+Why are the pricing variables integer?
 
-$$
-\theta^{opt}.
-$$
-
-Then the minimum reduced cost is
-
-$$
-1-\theta^{opt}.
-$$
-
-If
-
-$$
-\theta^{opt}>1,
-$$
-
-we have found a negative reduced-cost column.
-
-If
-
-$$
-\theta^{opt}\le 1,
-$$
-
-no improving column exists and Column Generation terminates.
-
-### 4.7 Why Is the Pricing Problem an ILP?⭐
-
-This is an important point.
-
-The master problem currently being solved by Column Generation is an LP.
-
-However, the pricing problem is an integer knapsack problem.
-
-Why?
-
-Because a column represents a cutting pattern.
-
-For example,
+Because
 
 $$
 a_i
 $$
 
-means the number of pieces of item type $i$ cut from one stock roll.
+represents the number of pieces of item type $i$ cut from one stock roll.
 
-Naturally,
+A cutting pattern such as
 
 $$
-a_i
+a_i=1.5
 $$
 
-must be an integer.
+has no physical meaning.
 
-Therefore, the pricing problem contains integer variables.
+Therefore, the column generation rules require
 
-This leads to an important conclusion:
+$$
+a_i\in\mathbf{Z}_+.
+$$
 
-> **The pricing problem can be an ILP because the column generation rules are discrete. This does not change the fact that standard Column Generation is solving an LP master problem.**
+This gives an important observation:
 
-In the Cutting Stock Problem, the pricing problem happens to be a knapsack problem.
+> **The Pricing Problem can be an ILP even though Column Generation is solving an LP Master Problem.**
 
-Although knapsack is NP-hard, it can be solved by dynamic programming in pseudo-polynomial time when the capacity is represented numerically and is not too large.
+There is no contradiction.
 
-### 4.8 Column Generation for Cutting Stock
+The LP master variables describe how many times columns are used in the relaxed master problem.
 
-The process is:
+The pricing variables describe the internal structure of one valid column.
+
+The pricing problem is integer because a cutting pattern has a discrete combinatorial structure.
+
+In the Cutting Stock Problem, the Pricing Problem happens to be a knapsack problem.
+
+Although knapsack is NP-hard, when the item lengths and stock length are integral, or can be scaled to integers, it can be solved by dynamic programming in pseudo-polynomial time when the numerical capacity is not too large.
+
+### 4.7 Column Generation Process for Cutting Stock
+
+The Column Generation process is:
 
 1. construct a feasible initial set of cutting patterns;
-2. solve the RMP;
+2. solve the LP RMP;
 3. obtain the dual variables $\pi$;
-4. solve the knapsack pricing problem;
-5. if the optimal pricing value is greater than 1, add the generated pattern;
-6. repeat;
-7. stop when the pricing value is no greater than 1.
+4. solve the integer knapsack Pricing Problem;
+5. if the pricing objective is greater than 1, the generated pattern has negative reduced cost and is added to the RMP;
+6. solve the enlarged RMP again;
+7. repeat until exact pricing confirms that no improving pattern exists.
+
+At termination, we have solved the LP relaxation of the full pattern-based master problem.
+
+We have **not necessarily solved the original integer Cutting Stock Problem**.
+
+### 4.8 A Modeling Lesson: Column Generation Requires the Right Formulation⭐⭐
+
+**The Cutting Stock Problem reveals an important fact about Column Generation.**
+
+The direct roll-based formulation is intuitive, but its variables do not naturally represent a reusable set of complete cutting patterns.
+
+The pattern-based formulation is different.
+
+Each variable corresponds to one feasible structure, and the set of all such structures can be searched through a Pricing Problem.
+
+This is exactly the type of formulation that is suitable for Column Generation.
+
+Therefore:
+
+> **To use Column Generation, the problem usually needs to be modeled in a form where variables represent structured feasible objects that can be generated by an optimization subproblem.**
+
+Sometimes this structure is easy to see directly.
+
+For Cutting Stock, it is natural to think in terms of cutting patterns.
+
+For routing, it may be natural to think in terms of paths or routes.
+
+For scheduling, it may be natural to think in terms of feasible schedules.
+
+However, for many problems, the original intuitive formulation is not obviously suitable for Column Generation.
+
+This leads to an important question:
+
+> Can we systematically transform a structured formulation into a column-based form suitable for Column Generation?
+
+One major answer is **Dantzig-Wolfe Decomposition**.
+
+**For optimization models with a suitable decomposable structure (typically characterized by a block-angular constraint structure), Dantzig-Wolfe Decomposition provides a systematic way to reformulate the problem, or its LP relaxation, into a Master Problem with implicitly represented columns and one or more subproblems [1,3,5].**
+
+This topic will be introduced in a later note in this series.
 
 ---
 
-## 5. A Detailed Cutting Stock Example⭐
+## 5. Two Cutting Stock Examples
 
-Consider stock rolls of length
+The first example gives a short view of how a Pricing Problem generates a new cutting pattern.
+
+The second example follows the complete Column Generation process in more detail.
+
+### 5.1 Example 1: A Short Column Generation Walkthrough
+
+Suppose a steel company has stock rods of length
+
+$$
+218\text{ cm}.
+$$
+
+Customers require:
+
+- 44 pieces of length 81 cm;
+- 3 pieces of length 70 cm;
+- 48 pieces of length 68 cm.
+
+We begin with three extremely simple patterns:
+
+$$
+a_1=
+\begin{bmatrix}
+1\\
+0\\
+0
+\end{bmatrix},
+\quad
+a_2=
+\begin{bmatrix}
+0\\
+1\\
+0
+\end{bmatrix},
+\quad
+a_3=
+\begin{bmatrix}
+0\\
+0\\
+1
+\end{bmatrix}.
+$$
+
+Each initial pattern cuts only one requested piece from a stock rod.
+
+The initial LP RMP is
+
+$$
+\min \quad x_1+x_2+x_3
+$$
+
+subject to
+
+$$
+x_1\ge 44
+$$
+
+$$
+x_2\ge 3
+$$
+
+$$
+x_3\ge 48
+$$
+
+$$
+x_1,x_2,x_3\ge 0.
+$$
+
+The optimal dual variables are
+
+$$
+\pi=
+\begin{bmatrix}
+1\\
+1\\
+1
+\end{bmatrix}.
+$$
+
+The initial Pricing Problem is
+
+$$
+\max \quad z_1+z_2+z_3
+$$
+
+subject to
+
+$$
+81z_1+70z_2+68z_3\le 218
+$$
+
+$$
+z_1,z_2,z_3\in\mathbf{Z}_+.
+$$
+
+One optimal pricing solution is
+
+$$
+z=
+\begin{bmatrix}
+0\\
+0\\
+3
+\end{bmatrix}.
+$$
+
+Therefore, the generated column is
+
+$$
+a_4=
+\begin{bmatrix}
+0\\
+0\\
+3
+\end{bmatrix}.
+$$
+
+This pattern cuts three 68 cm pieces from one stock rod.
+
+Its pricing objective is
+
+$$
+3.
+$$
+
+Therefore, its reduced cost is
+
+$$
+r_4=1-3=-2.
+$$
+
+Since
+
+$$
+r_4<0,
+$$
+
+the new pattern is added to the RMP.
+
+The enlarged RMP becomes
+
+$$
+\min \quad x_1+x_2+x_3+x_4
+$$
+
+subject to
+
+$$
+x_1\ge 44
+$$
+
+$$
+x_2\ge 3
+$$
+
+$$
+x_3+3x_4\ge 48
+$$
+
+$$
+x_1,x_2,x_3,x_4\ge 0.
+$$
+
+After re-solving the RMP, the dual values change and a new Pricing Problem is obtained.
+
+For example, the new dual vector is
+
+$$
+\pi=
+\begin{bmatrix}
+1\\
+1\\
+\frac{1}{3}
+\end{bmatrix}.
+$$
+
+The next Pricing Problem is
+
+$$
+\max \quad z_1+z_2+\frac{1}{3}z_3
+$$
+
+subject to
+
+$$
+81z_1+70z_2+68z_3\le 218
+$$
+
+$$
+z_1,z_2,z_3\in\mathbf{Z}_+.
+$$
+
+The same process continues:
+
+```text
+Solve RMP
+   ↓
+Obtain new dual variables
+   ↓
+Solve the knapsack Pricing Problem
+   ↓
+Generate an improving cutting pattern
+   ↓
+Add the pattern to the RMP
+```
+
+This short example shows the basic mechanism of Column Generation:
+
+> **The Pricing Problem does not choose among a pre-enumerated list of cutting patterns. It directly generates a new pattern from the dual information of the current RMP.**
+
+After the LP master problem has been solved, we still need an additional method to recover an integer solution to the original Cutting Stock Problem.
+
+For a covering formulation, rounding pattern-use variables upward can produce a feasible integer solution, although the solution may not be optimal.
+
+If exact integer optimality is required, Branch and Price can be used.
+
+### 5.2 Example 2: A Detailed Three-Iteration Process
+
+Now consider a second example.
+
+Each stock roll has length
 
 $$
 W=16.
@@ -818,31 +1185,15 @@ Customers require:
 
 We want to minimize the number of stock rolls used.
 
-### 5.1 Full Master Problem
+#### 5.2.1 Integer Master Problem
 
 Let $P$ be the set of all feasible cutting patterns.
 
-For pattern $j$,
+For pattern $j$:
 
-$$
-a_{1j}
-$$
-
-is the number of 3-unit pieces,
-
-$$
-a_{2j}
-$$
-
-is the number of 6-unit pieces,
-
-and
-
-$$
-a_{3j}
-$$
-
-is the number of 7-unit pieces.
+- $a_{1j}$ is the number of 3-unit pieces;
+- $a_{2j}$ is the number of 6-unit pieces;
+- $a_{3j}$ is the number of 7-unit pieces.
 
 Let
 
@@ -852,10 +1203,10 @@ $$
 
 be the number of times pattern $j$ is used.
 
-The integer master problem is
+The integer pattern-based Master Problem is
 
 $$
-\min \quad \sum_{j\in P} y_j
+\min \quad \sum_{j\in P}y_j
 $$
 
 subject to
@@ -876,7 +1227,7 @@ $$
 y_j\in\mathbf{Z}_+.
 $$
 
-Every pattern must satisfy
+Every cutting pattern must satisfy
 
 $$
 3a_{1j}+6a_{2j}+7a_{3j}\le 16
@@ -886,9 +1237,23 @@ $$
 a_{1j},a_{2j},a_{3j}\in\mathbf{Z}_+.
 $$
 
-### 5.2 Initial RMP
+Again, this is an ILP.
 
-Choose three simple cutting patterns:
+To apply Column Generation, we relax
+
+$$
+y_j\in\mathbf{Z}_+
+$$
+
+to
+
+$$
+y_j\ge 0.
+$$
+
+#### 5.2.2 Initial RMP
+
+Choose three simple patterns:
 
 $$
 a_1=
@@ -912,6 +1277,12 @@ a_3=
 2
 \end{bmatrix}.
 $$
+
+These patterns correspond to:
+
+- five 3-unit pieces;
+- two 6-unit pieces;
+- two 7-unit pieces.
 
 The initial LP RMP is
 
@@ -937,9 +1308,9 @@ $$
 y_1,y_2,y_3\ge 0.
 $$
 
-### 5.3 Iteration 1
+#### 5.2.3 Iteration 1
 
-Solving the initial RMP gives the dual solution
+Solving the initial RMP gives
 
 $$
 \pi=
@@ -950,23 +1321,34 @@ $$
 \end{bmatrix}.
 $$
 
-The pricing problem is
+The Pricing Problem is
 
 $$
-\max \quad 0.2a_1+0.5a_2+0.5a_3
+\max \quad 0.2z_1+0.5z_2+0.5z_3
 $$
 
 subject to
 
 $$
-3a_1+6a_2+7a_3\le 16
+3z_1+6z_2+7z_3\le 16
 $$
 
 $$
-a_1,a_2,a_3\in\mathbf{Z}_+.
+z_1,z_2,z_3\in\mathbf{Z}_+.
 $$
 
 An optimal pricing solution is
+
+$$
+z=
+\begin{bmatrix}
+1\\
+2\\
+0
+\end{bmatrix}.
+$$
+
+Therefore, the generated column is
 
 $$
 a_4=
@@ -977,27 +1359,27 @@ a_4=
 \end{bmatrix}.
 $$
 
-Its pricing objective is
+The pricing objective is
 
 $$
 0.2+2(0.5)=1.2.
 $$
 
-Therefore, its reduced cost is
+Therefore,
 
 $$
-\overline{c}_4=1-1.2=-0.2.
+r_4=1-1.2=-0.2.
 $$
 
 Since
 
 $$
-\overline{c}_4<0,
+r_4<0,
 $$
 
-add column $a_4$ to the RMP.
+column $a_4$ is added to the RMP.
 
-### 5.4 Iteration 2
+#### 5.2.4 Iteration 2
 
 The new RMP is
 
@@ -1034,23 +1416,34 @@ $$
 \end{bmatrix}.
 $$
 
-The pricing problem becomes
+The Pricing Problem becomes
 
 $$
-\max \quad 0.2a_1+0.4a_2+0.5a_3
+\max \quad 0.2z_1+0.4z_2+0.5z_3
 $$
 
 subject to
 
 $$
-3a_1+6a_2+7a_3\le 16
+3z_1+6z_2+7z_3\le 16
 $$
 
 $$
-a_1,a_2,a_3\in\mathbf{Z}_+.
+z_1,z_2,z_3\in\mathbf{Z}_+.
 $$
 
-An optimal solution is
+An optimal pricing solution is
+
+$$
+z=
+\begin{bmatrix}
+1\\
+1\\
+1
+\end{bmatrix}.
+$$
+
+Therefore, the generated column is
 
 $$
 a_5=
@@ -1067,15 +1460,15 @@ $$
 0.2+0.4+0.5=1.1.
 $$
 
-Thus,
+Therefore,
 
 $$
-\overline{c}_5=1-1.1=-0.1.
+r_5=1-1.1=-0.1.
 $$
 
-Add column $a_5$ to the RMP.
+Column $a_5$ is added to the RMP.
 
-### 5.5 Iteration 3
+#### 5.2.5 Iteration 3
 
 The RMP now contains five columns.
 
@@ -1090,23 +1483,23 @@ $$
 \end{bmatrix}.
 $$
 
-The pricing problem is
+The Pricing Problem is
 
 $$
-\max \quad 0.2a_1+0.4a_2+0.4a_3
+\max \quad 0.2z_1+0.4z_2+0.4z_3
 $$
 
 subject to
 
 $$
-3a_1+6a_2+7a_3\le 16
+3z_1+6z_2+7z_3\le 16
 $$
 
 $$
-a_1,a_2,a_3\in\mathbf{Z}_+.
+z_1,z_2,z_3\in\mathbf{Z}_+.
 $$
 
-The optimal pricing value is
+The optimal pricing objective is
 
 $$
 1.
@@ -1122,9 +1515,9 @@ No negative reduced-cost column exists.
 
 Column Generation terminates.
 
-### 5.6 Final LP Solution
+#### 5.2.6 Final LP Solution
 
-The optimal solution of the final RMP is
+The optimal solution of the final LP RMP is
 
 $$
 y=
@@ -1153,11 +1546,13 @@ This is not an integer.
 
 There is no contradiction.
 
-We relaxed the integer master problem before applying Column Generation.
+The original pattern-based Cutting Stock formulation is an ILP, but Column Generation has solved its LP relaxation.
 
-Therefore, the result is the optimal solution of the **LP relaxation**, not the optimal integer solution of the original Cutting Stock Problem.
+Therefore:
 
-If we solve the integer restricted master problem using the five generated columns, one integer solution is
+> **The Column Generation result is the optimal LP solution of the full pattern-based Master Problem, not automatically the optimal integer solution of the Cutting Stock Problem.**
+
+If we restore integrality and solve the integer restricted master problem using the five generated columns, one solution is
 
 $$
 y=
@@ -1176,15 +1571,33 @@ $$
 21.
 $$
 
-For this small example, this solution is also optimal for the full integer pattern formulation.
+For this small example, 21 is also the optimal value of the full integer pattern formulation.
 
-However, this last observation should not be generalized carelessly.
+This can be verified directly from the total required length:
 
-This leads to the most important part of this note.
+$$
+25(3)+20(6)+18(7)=321.
+$$
+
+Since each stock roll has length 16, any integer solution needs at least
+
+$$
+\left\lceil \frac{321}{16} \right\rceil = 21
+$$
+
+stock rolls.
+
+The solution above uses exactly 21 rolls and is therefore optimal.
+
+However, this conclusion cannot be generalized.
+
+Columns that are unnecessary for the LP optimum may still be useful for a better integer combination.
+
+This issue will become important when we discuss the use of Column Generation in ILP.
 
 ---
 
-## 6. How Column Generation Is Used in Integer Linear Programming⭐
+## 6. How Column Generation Is Used in Integer Linear Programming⭐⭐⭐
 
 We have repeatedly emphasized:
 
@@ -1192,7 +1605,7 @@ We have repeatedly emphasized:
 
 Then how can Column Generation be used in ILP?
 
-There are several different approaches.
+There are three common approaches.
 
 ### 6.1 Approach I: Solve the LP Relaxation and Round
 
@@ -1200,16 +1613,16 @@ The simplest approach is:
 
 1. relax the ILP;
 2. solve the LP relaxation by Column Generation;
-3. round or otherwise repair the fractional solution.
+3. round or repair the fractional solution.
 
 This is only a heuristic.
 
 As discussed in the Branch and Bound note:
 
 - rounding may destroy feasibility;
-- a feasible rounded solution may have poor quality.
+- even if the rounded solution is feasible, its quality may be poor.
 
-Therefore, this approach is simple but unreliable.
+Therefore, this approach is simple, but usually unreliable.
 
 ### 6.2 Approach II: Branch and Price
 
@@ -1222,203 +1635,282 @@ At every branch-and-bound node:
 3. branch if necessary;
 4. repeat.
 
-This framework is called **Branch and Price**.
-
-For a maximization problem:
-
-- Column Generation solves the LP relaxation and provides an upper bound;
-- integer feasible solutions provide lower bounds;
-- Branch and Bound manages the search tree.
+This framework is called **Branch and Price** [2,5].
 
 If implemented correctly with exact pricing and valid branching, Branch and Price can prove integer optimality.
 
+> **If the optimal integer solution must be guaranteed, Branch and Price is the standard exact framework.**
+
 This topic will be introduced in the next note.
 
-### 6.3 Approach III: Generate Columns at the Root and Solve the Restricted Integer Master
+### 6.3 Approach III: Generate Columns and Solve the Final Restricted Integer Master⭐⭐⭐
 
-Another practical approach is:
+The third approach is the main focus of this section.
 
-1. reformulate the original ILP as a column-based integer master problem;
-2. relax the master problem;
-3. run Column Generation until the LP relaxation is solved;
-4. restore integrality on the generated master variables;
-5. solve the resulting restricted integer master problem using Branch and Bound, a solver, or a heuristic.
+The basic idea is simple:
 
-This approach is often computationally attractive.
+> **Use Column Generation to construct a relatively small set of promising columns, and then solve an integer master problem using only these generated columns.**
 
-However:
+This approach can be viewed as a **CG-based integer heuristic** or a **price-and-branch style approach**. In the literature, solving a MIP over the columns generated for the LP relaxation is also described as a **restricted master heuristic** or **price-and-branch** [6].
 
-> **It is generally not an exact method.**
+Unlike Branch and Price, it does not continue Column Generation throughout a branch-and-bound tree.
 
-The reason is subtle but very important.
+Instead, Column Generation is first performed on the LP relaxation. The generated columns are then passed to a final integer Restricted Master Problem.
 
-Column Generation terminates when no omitted column has negative reduced cost for the **LP relaxation**.
+#### 6.3.1 Complete Procedure
 
-This only proves that the current column set is sufficient for the LP optimum.
+The complete procedure can be described as follows.
 
-It does not prove that the current column set contains every column needed by the optimal integer solution.
+##### Step 1: Reformulate the Original ILP
 
-A column with nonnegative reduced cost at the LP optimum may still be useful in a better integer combination.
-
-Therefore, solving the integer RMP after root-node Column Generation may produce a suboptimal integer solution.
-
-This explains a phenomenon that is sometimes confusing:
-
-> Even after Column Generation has fully converged for the LP, solving the integer RMP over the generated columns may still fail to recover the optimal solution of the full integer master problem.
-
-The issue is not that the solver failed.
-
-The issue is that the restricted integer master may be missing columns that are irrelevant to LP improvement but important for integer combinatorial structure.
-
-This approach is better understood as a **CG-based integer heuristic** or a **price-and-branch style approach**, unless additional procedures are used to guarantee exactness.
-
-### 6.4 Why Reformulate the Original ILP?⭐
-
-Suppose the original compact integer formulation is
+Let the original integer linear programming problem be denoted by
 
 $$
 OP.
 $$
 
-Through a problem-specific reformulation or Dantzig-Wolfe decomposition, we obtain an equivalent integer master formulation
+Reformulate it into a column-based integer Master Problem
 
 $$
 MP.
 $$
 
-At the integer level, $MP$ can represent the same feasible solutions as $OP$.
+This reformulation may be obtained through:
 
-Why do this if $MP$ contains far more variables?
-
-Because the LP relaxation of the reformulated master problem can be much tighter.
-
-The important relationship is often
-
-$$
-LP(MP)
-$$
-
-provides a stronger bound than
-
-$$
-LP(OP).
-$$
-
-The reason is that a column in $MP$ may already represent a complete feasible substructure.
-
-For example:
-
-- a feasible cutting pattern;
-- a feasible vehicle route;
-- a feasible crew schedule;
-- a feasible network embedding;
-- a feasible configuration.
-
-The pricing problem enforces the internal feasibility of each column.
-
-Therefore, part of the combinatorial structure of the original ILP is already captured inside the columns.
-
-This leads to one of the most important conclusions in this note:
-
-> **An appropriate Dantzig-Wolfe or column-based reformulation can have a substantially tighter LP relaxation than the original compact ILP formulation.**
-
-The price is that the reformulation may contain an enormous number of columns.
-
-Column Generation is the mechanism that makes such a formulation computationally usable.
-
-This gives the complete picture:
-
-```text
-Compact ILP
-    ↓
-Column-based / Dantzig-Wolfe reformulation
-    ↓
-Potentially stronger LP relaxation
-    ↓
-Enormously many columns
-    ↓
-Column Generation
-```
-
-### 6.5 A General Workflow for Large-Scale ILP
-
-A general workflow is:
-
-#### Step 1: Reformulate the Original ILP
-
-Convert the original problem into a column-based master formulation.
-
-This may be derived through:
-
-- Dantzig-Wolfe decomposition;
-- a path-based formulation;
+- Dantzig-Wolfe Decomposition;
 - a pattern-based formulation;
+- a path-based formulation;
 - a schedule-based formulation;
 - a configuration-based formulation;
 - direct problem-specific modeling.
 
-The resulting integer master problem should represent the original problem correctly.
+The important point is that each master variable should represent a meaningful feasible structure, such as a cutting pattern, route, schedule, path, or network embedding.
 
-#### Step 2: Construct an Initial Restricted Master Problem
+At the integer level, the reformulated MP should represent the original problem correctly.
 
-Select a small feasible set of columns.
+##### Step 2: Select Initial Columns
 
-The restricted master problem is still an integer formulation conceptually.
+Select a small set of feasible columns.
 
-#### Step 3: Relax the Restricted Master Problem
+These columns define a restricted integer master problem. After relaxing the integrality restrictions, they also define the initial LP RMP used by Column Generation.
 
-Relax the integer master variables.
+The initial columns may come from:
 
-The resulting problem is an LP RMP.
+- direct observation;
+- a simple constructive rule;
+- another heuristic algorithm;
+- a previously known feasible solution.
 
-#### Step 4: Solve the LP RMP and Pricing Problems
+This is one important place where other heuristics can be combined with Column Generation.
 
-Solve the LP RMP and obtain dual variables.
+A good heuristic solution can be decomposed into columns and used to warm-start the RMP.
 
-Use these dual variables to construct the pricing problem.
+##### Step 3: Construct the Initial LP RMP
 
-The pricing problem may be:
+Relax the integrality restrictions on the restricted master variables.
 
-- an LP;
-- an ILP;
-- a shortest path problem;
-- a resource-constrained shortest path problem;
-- a knapsack problem;
-- another combinatorial optimization problem.
+The resulting LP is the initial Restricted Master Problem used by Column Generation.
 
-If the decomposition creates multiple independent pricing problems, they can often be solved in parallel.
+##### Step 4: Run Column Generation on the LP RMP
 
-To generate columns, it is sufficient to find improving columns.
+Solve the LP RMP and obtain the dual variables.
 
-However, to certify LP convergence, exact pricing is eventually required unless another valid optimality certificate is available.
+Use these dual values to construct and solve the Pricing Problem.
 
-If an improving column is found, add it and repeat.
+If improving columns are found, add them to the RMP and solve the LP RMP again.
 
-#### Step 5: Recover an Integer Solution
+Repeat this process until exact pricing confirms that no improving column exists.
 
-After solving the LP relaxation, possible approaches include:
+At this point, the LP relaxation of the full column-based Master Problem has been solved.
 
-1. Branch and Price for exact integer optimization;
-2. solve the restricted integer master as a heuristic;
-3. use Branch and Bound on the restricted integer master;
-4. use a commercial MILP solver on the restricted integer master;
-5. design problem-specific rounding, repair, or primal heuristics.
+##### Step 5: Check Whether the Final LP Solution Is Already Integer⭐
 
-The choice depends on whether exact optimality is required and how large the problem is.
+Before solving another ILP, first check the final LP solution.
 
-### 6.6 A Useful Idea for Heuristic Design
+If the final Column Generation solution is already integer, then no additional integer RMP needs to be solved.
 
-There is another useful lesson.
+Assuming Column Generation has converged with exact pricing and the MP is an equivalent integer reformulation of the original problem:
 
-When the full optimization problem is extremely complicated, designing a heuristic directly for the entire problem may be difficult.
+> **An integer optimal solution of the LP Master Problem is already an optimal solution of the integer Master Problem.**
 
-However, the pricing problem often has a much clearer problem-specific meaning.
+Therefore, the algorithm can stop directly.
+
+This situation can occur in practice.
+
+##### Step 6: Otherwise, Solve the Final Integer RMP
+
+If the final LP solution is fractional, restore the integer restrictions on the generated master variables.
+
+Then solve the final integer RMP using only the generated columns.
+
+There are two possible outcomes:
+
+1. the final integer RMP is feasible, in which case an integer solution can be obtained;
+2. the final integer RMP is infeasible, because the generated column pool may not contain a valid integer combination.
+
+Therefore, feasibility of the LP RMP does not guarantee feasibility of the final integer RMP.
+
+The complete workflow is therefore:
+
+```text
+Final LP solution integer?
+    ├── Yes → Stop
+    │         Integer optimum obtained
+    │
+    └── No  → Restore integrality
+              ↓
+              Solve final integer RMP
+              ↓
+              Integer feasible?
+              ├── Yes → Obtain an integer solution
+              │
+              └── No  → Column pool is insufficient
+                         for an integer feasible solution
+```
+
+#### 6.3.2 This Method Does Not Guarantee the ILP Optimum
+
+This distinction is extremely important.
+
+Column Generation terminates when no omitted column can improve the **LP relaxation**.
+
+This proves that the generated columns are sufficient for the LP optimum.
+
+However, it does not prove that they contain every column needed by the optimal integer solution.
+
+A column may have non-improving reduced cost at the LP optimum but still be useful in a better integer combination.
 
 Therefore:
 
-> Instead of designing a heuristic for the entire ILP, it may be easier to design a heuristic for the pricing problem.
+> **Solving the final integer RMP does not generally guarantee the optimal solution of the full ILP.**
 
-For example, a pricing heuristic may exploit:
+This limitation is also emphasized in the literature on restricted master heuristics and price-and-branch methods [6].
+
+The solver may solve the final integer RMP to proven optimality, but that optimality is only with respect to the generated column set.
+
+The missing column set may still contain a column needed by the true integer optimum.
+
+In some problems, the generated columns may not even admit an integer feasible solution [6].
+
+This is exactly the difference from Branch and Price.
+
+> **Approach III may produce the ILP optimum, but Branch and Price is the method that can systematically guarantee and prove integer optimality.**
+
+There is one important exception discussed above:
+
+> If exact Column Generation converges and the final LP solution itself is integer, then that solution is already integer optimal.
+
+#### 6.3.3 Why Can This Approach Work Very Well for Some Models?
+
+Although Approach III is not exact in general, it can work extremely well for some structured optimization problems.
+
+The key is the formulation.
+
+Suppose the original compact ILP has a suitable decomposable structure, especially a **block-angular constraint structure**.
+
+Through Dantzig-Wolfe Decomposition or a direct column-based formulation, each column can represent a complete feasible solution of one local substructure.
+
+For example:
+
+- one cutting pattern in Cutting Stock;
+- one route in Vehicle Routing;
+- one feasible schedule in Crew Scheduling;
+- one complete feasible solution of a decomposable subproblem in a network optimization problem.
+
+To make this idea more concrete, consider a **Service Function Chain (SFC) deployment problem**. A classical reference on the placement and chaining of virtual network functions is [7].
+
+An SFC describes an ordered sequence of network functions that a service flow must traverse. In an NFV environment, these functions can be implemented as **Virtual Network Functions (VNFs)**. For example, a flow may need to pass through a firewall, a load balancer, and other network functions in a specified order.
+
+In a typical SFC deployment problem, we need to decide where the required VNFs are placed and how each service flow is routed through the network. Readers unfamiliar with this problem can refer to [7] for a classical formulation of VNF placement and chaining.
+
+Suppose the problem has a block-angular structure and can be decomposed by service flow.
+
+Then one column may represent a **complete feasible deployment of one flow**, including its routing decisions and the placement of the required network functions.
+
+The local feasibility requirements of that flow can therefore be enforced inside the column.
+
+The Master Problem mainly coordinates the shared network resources used by different flows.
+
+In this type of model, Column Generation can generate a relatively small set of promising complete deployment solutions for each flow.
+
+As a result, the final column pool may already contain the columns required by the optimal integer solution.
+
+Therefore:
+
+> **For some structured models and favorable instances, the final integer RMP may recover the full ILP optimum, even though this is not theoretically guaranteed.**
+
+Whether this happens frequently is model-dependent and should be evaluated computationally.
+
+#### 6.3.4 Why Is the Final Integer RMP Often Easier for a Solver?⭐
+
+There are two main reasons.
+
+**First, the final RMP contains far fewer variables.**
+
+The full Master Problem may contain millions or exponentially many possible columns.
+
+Column Generation only keeps a relatively small set of generated columns that were useful during the LP solution process.
+
+Therefore, the final integer RMP presented to a solver can be dramatically smaller than the full integer Master Problem.
+
+**Second, a good column-based reformulation may have a much tighter LP relaxation than the original compact formulation.**
+
+Each column already represents a complete feasible substructure.
+
+Part of the combinatorial difficulty of the original problem is therefore captured inside the columns.
+
+An important distinction is needed here.
+
+A Dantzig-Wolfe reformulation of a continuous LP does not automatically improve the LP bound; it is an equivalent reformulation of the same LP.
+
+The strengthening effect arises when the column-based formulation captures discrete feasible substructures, for example by representing integer-feasible configurations of the decomposed subproblems.
+
+In this case, part of the local integrality structure is embedded inside the columns, and the resulting Master Problem may have a tighter LP relaxation than the original compact ILP formulation [5].
+
+This is a central motivation in the Column Generation and Branch-and-Price literature [2,3,5].
+
+A tighter LP relaxation usually means a smaller integrality gap and can greatly reduce the burden of the solver's branch-and-bound search.
+
+Therefore, the solver may face
+
+```text
+fewer master variables
+        +
+stronger LP relaxation
+        +
+columns that already represent feasible substructures
+```
+
+instead of directly attacking the original large compact ILP.
+
+This is why the final integer RMP can often be solved much faster.
+
+However, remember the trade-off:
+
+> Restricting the column set also creates the possibility that a column required by the true integer optimum has never been generated.
+
+That is the price paid for the loss of exactness.
+
+#### 6.3.5 Many Additional Techniques Can Be Combined with This Approach⭐
+
+Another advantage of this framework is its flexibility.
+
+**Heuristic warm starts.**  
+A problem-specific heuristic can first construct a feasible solution. The structures used by this solution can then be converted into initial columns and added to the initial RMP.
+
+**Parallel Pricing Problems.**  
+If the decomposition produces multiple independent Pricing Problems, they can often be solved in parallel.
+
+For example, in a decomposed network optimization problem, one Pricing Problem may be solved for each flow.
+
+**Problem-specific pricing heuristics.**  
+A Pricing Problem usually has a much clearer physical or combinatorial meaning than the complete ILP.
+
+Therefore:
+
+> **Instead of designing a heuristic for the entire ILP, it may be easier to design a heuristic specifically for the Pricing Problem.**
+
+A pricing heuristic may exploit:
 
 - path structure;
 - network topology;
@@ -1426,74 +1918,206 @@ For example, a pricing heuristic may exploit:
 - local feasibility;
 - domain-specific greedy rules.
 
-This can make column generation much faster.
+Any improving column can be added during the Column Generation process.
 
-Again, heuristic pricing is excellent for discovering useful columns.
+The most negative reduced-cost column is not required at every iteration.
 
-But an exact pricing step is still needed if we want to prove LP optimality.
+However, if LP optimality must be certified, exact pricing or another valid optimality certificate is still required before Column Generation terminates [3].
+
+**Different Pricing Problem solvers.**  
+Depending on the problem structure, a Pricing Problem may be solved by:
+
+- a MILP solver;
+- Branch and Bound;
+- dynamic programming;
+- a shortest-path algorithm;
+- a dedicated exact algorithm;
+- a heuristic algorithm.
+
+**Multiple columns per iteration.**  
+The algorithm may also add several improving columns in one iteration rather than only one column.
+
+These techniques make the framework highly customizable.
+
+#### 6.3.6 A Middle Ground Between an Exact Solver and a Pure Heuristic⭐
+
+For suitable models, Approach III can be viewed as a middle ground between solving the full ILP exactly and using a pure heuristic.
+
+A full exact solver or Branch and Price aims to prove optimality, but the computational cost can be high.
+
+A pure heuristic can be very fast, but its solution quality may be difficult to control.
+
+The third approach lies between them:
+
+```text
+Exact ILP / Branch and Price
+High solution guarantee
+Potentially high computational cost
+
+        ↓
+
+Column Generation
++ final integer RMP
+
+        ↓
+
+Pure heuristic
+Very fast
+Usually weaker solution guarantee
+```
+
+The third approach still uses optimization information:
+
+- LP relaxations;
+- dual variables;
+- reduced costs;
+- structured Pricing Problems;
+- a final integer optimization model.
+
+Therefore, it is much more optimization-guided than a pure heuristic.
+
+For some model classes, it may be substantially faster than directly solving the full ILP, while producing solutions of much higher quality than a simple heuristic.
+
+In favorable cases, the solution can even be optimal or extremely close to the optimum.
+
+Therefore:
+
+> **For certain structured large-scale ILPs, Column Generation followed by a final integer RMP can serve as a practical algorithmic framework between exact solvers and pure heuristics.**
+
+Its success depends strongly on:
+
+- the quality of the column-based formulation;
+- the strength of its LP relaxation;
+- the quality of the initial columns;
+- the design of the Pricing Problem;
+- the diversity and quality of the generated column pool.
+
+This is one reason why Column Generation is not merely an LP algorithm in practical large-scale optimization.
+
+Although standard Column Generation still solves an LP, the column-generation framework can be used to build powerful algorithms for large-scale ILPs.
 
 ---
 
-## 7. Column Generation and the Simplex Method: A Final Thought
+## 7. When Is Column Generation a Good Choice?⭐
 
-A natural question is:
+Column Generation is powerful, but it is not automatically better than solving a compact model directly.
 
-> Why does the ordinary simplex method not always use Column Generation?
+Before using Column Generation, it is useful to ask the following questions.
 
-The answer is that Column Generation is useful only when the column space has a structure that can be searched efficiently through a pricing problem.
+### 7.1 Is the Full Column Set Extremely Large?
 
-If all columns are already explicitly available and the LP is of manageable size, ordinary simplex methods can directly evaluate reduced costs and perform basis updates.
+The first signal is that the Master Problem contains a huge number of possible variables.
 
-Column Generation becomes attractive when:
+The columns may be:
 
-1. the number of possible columns is too large to enumerate;
-2. valid columns have an implicit mathematical structure;
-3. the minimum reduced-cost column can be found by solving a structured pricing problem.
+- millions or billions in number;
+- exponentially many;
+- impossible to enumerate explicitly.
 
-Therefore, the real power of Column Generation does not come only from "adding variables gradually."
+If the complete model is already small and easy to solve, Column Generation may add unnecessary complexity.
 
-Its real power comes from:
+### 7.2 Does One Column Represent a Meaningful Feasible Structure?
 
-> **replacing explicit enumeration of columns with optimization over the column space.**
+Column Generation is most natural when one variable can represent a complete structured object, such as:
+
+- a cutting pattern;
+- a vehicle route;
+- a crew schedule;
+- a path;
+- a configuration;
+- a complete feasible solution of one decomposable subproblem.
+
+This structure gives the Pricing Problem a clear meaning.
+
+### 7.3 Can the Pricing Problem Search the Column Space Efficiently?
+
+The key question is not simply whether there are many columns.
+
+The key question is:
+
+> **Can we search the huge column space by solving a structured optimization problem instead of enumerating all columns?**
+
+The Pricing Problem may itself be difficult, but it should expose useful problem structure.
+
+For example, it may become:
+
+- a knapsack problem;
+- a shortest-path problem;
+- a resource-constrained path problem;
+- a dynamic programming problem;
+- a smaller ILP with a clear physical meaning.
+
+If pricing is almost as difficult as the original problem and no useful structure can be exploited, Column Generation may not be attractive.
+
+### 7.4 For an ILP, What Level of Optimality Guarantee Is Required?
+
+For an integer problem, the algorithmic goal must also be clear.
+
+If a proof of integer optimality is required, Branch and Price is the standard exact framework [2,5].
+
+If the goal is to obtain high-quality solutions faster, Column Generation followed by a final integer RMP may be a practical alternative [6].
+
+Therefore, a useful rule of thumb is:
+
+> **Column Generation is attractive when the full variable space is huge, columns have meaningful structure, and the column space can be searched through a useful Pricing Problem.**
+
+A broader practical discussion of these design issues can be found in [3].
 
 ---
 
 ## 8. Key Takeaways
 
-1. Standard Column Generation is fundamentally an LP solution framework.
-2. It is especially useful for LPs with an enormous number of variables or columns.
-3. Column Generation solves a Restricted Master Problem and generates improving columns through a pricing problem.
-4. Reduced costs connect the RMP dual variables to the pricing problem.
-5. For a minimization problem, a column with negative reduced cost can improve the current RMP solution.
-6. A pricing problem may itself be an ILP because valid columns can have discrete combinatorial structure.
-7. Heuristic pricing can find useful columns, but exact pricing is needed to certify LP convergence.
-8. In the Cutting Stock Problem, the pricing problem is an integer knapsack problem.
-9. Column Generation can be embedded into Branch and Bound to form Branch and Price.
-10. Solving the integer RMP after root-node Column Generation is generally a heuristic and may miss the full integer optimum.
-11. A column-based or Dantzig-Wolfe reformulation can provide a much tighter LP relaxation than a compact ILP formulation.
-12. The real power of Column Generation is replacing explicit column enumeration with optimization over the column space.
+1. Standard Column Generation is fundamentally an LP solution framework. It does not directly enforce integer optimality.
+2. Column Generation is closely related to the simplex method: reduced costs still determine whether a new variable can improve the current LP solution.
+3. The Master Problem contains the full column space, the Restricted Master Problem contains only generated columns, and the Pricing Problem searches for improving columns.
+4. Dual variables provide a convenient way to construct reduced costs and the Pricing Problem.
+5. For a minimization problem, any column with negative reduced cost may be added. The most negative reduced-cost column is not required at every iteration.
+6. Heuristic pricing can generate useful columns, but exact pricing or another valid certificate is required to prove LP convergence.
+7. A Pricing Problem may itself be an ILP because the rules defining a valid column can be discrete.
+8. The Cutting Stock Problem is an ILP. Column Generation solves the LP relaxation of its pattern-based Master Problem, not the original ILP directly.
+9. Modeling matters. A pattern-, route-, schedule-, path-, or configuration-based formulation may be much more suitable for Column Generation than an intuitive compact formulation.
+10. Dantzig-Wolfe Decomposition provides a systematic reformulation framework for suitable decomposable models, especially those with block-angular structure. A continuous Dantzig-Wolfe reformulation is equivalent to the original LP; tighter ILP relaxations arise when discrete feasible substructures are embedded in the columns.
+11. Branch and Price embeds Column Generation into Branch and Bound and can prove integer optimality when implemented correctly.
+12. Solving a final integer RMP after root-level Column Generation is generally a heuristic. It may miss the full ILP optimum, and the generated column pool may even fail to admit an integer feasible solution.
+13. If exact Column Generation converges and the final LP solution is already integer, that solution is also optimal for the integer Master Problem.
+14. For suitable structured ILPs, Column Generation followed by a final integer RMP can provide a useful middle ground between a full exact solver and a pure heuristic.
+15. The framework can be combined with heuristic initial columns, parallel Pricing Problems, problem-specific pricing heuristics, and multiple columns per iteration.
+16. The real power of Column Generation is **replacing explicit enumeration of columns with optimization over an implicit column space**.
+
 
 ## References
 
-1. Dantzig, G. B., and Wolfe, P. “Decomposition Principle for Linear Programs.” *Operations Research*, 8(1), 1960, pp. 101–111.
+1. Dantzig, G. B., and Wolfe, P. “Decomposition Principle for Linear Programs.” *Operations Research*, 8(1), 1960, pp. 101–111. DOI: `10.1287/opre.8.1.101`.
 
-2. Gilmore, P. C., and Gomory, R. E. “A Linear Programming Approach to the Cutting-Stock Problem.” *Operations Research*, 9(6), 1961, pp. 849–859.
+2. Barnhart, C., Johnson, E. L., Nemhauser, G. L., Savelsbergh, M. W. P., and Vance, P. H. “Branch-and-Price: Column Generation for Solving Huge Integer Programs.” *Operations Research*, 46(3), 1998, pp. 316–329. DOI: `10.1287/opre.46.3.316`.
 
-3. Barnhart, C., Johnson, E. L., Nemhauser, G. L., Savelsbergh, M. W. P., and Vance, P. H. “Branch-and-Price: Column Generation for Solving Huge Integer Programs.” *Operations Research*, 46(3), 1998, pp. 316–329.
+3. Lübbecke, M. E., and Desrosiers, J. “Selected Topics in Column Generation.” *Operations Research*, 53(6), 2005, pp. 1007–1023. DOI: `10.1287/opre.1050.0234`.
 
-4. Lübbecke, M. E., and Desrosiers, J. “Selected Topics in Column Generation.” *Operations Research*, 53(6), 2005, pp. 1007–1023.
+4. Gilmore, P. C., and Gomory, R. E. “A Linear Programming Approach to the Cutting-Stock Problem.” *Operations Research*, 9(6), 1961, pp. 849–859. DOI: `10.1287/opre.9.6.849`.
+
+5. Vanderbeck, F. “On Dantzig-Wolfe Decomposition in Integer Programming and Ways to Perform Branching in a Branch-and-Price Algorithm.” *Operations Research*, 48(1), 2000, pp. 111–128. DOI: `10.1287/opre.48.1.111.12453`.
+
+6. Maher, S. J., and Rönnberg, E. “Integer Programming Column Generation: Accelerating Branch-and-Price Using a Novel Pricing Scheme for Finding High-Quality Solutions in Set Covering, Packing, and Partitioning Problems.” *Mathematical Programming Computation*, 15, 2023, pp. 509–548. DOI: `10.1007/s12532-023-00240-w`.
+
+7. Mehraghdam, S., Keller, M., and Karl, H. “Specifying and Placing Chains of Virtual Network Functions.” *2014 IEEE 3rd International Conference on Cloud Networking (CloudNet)*, 2014, pp. 7–13. DOI: `10.1109/CloudNet.2014.6968961`.
 
 ## Suggested Follow-up Reading
 
-- Dantzig-Wolfe Decomposition
-- Pricing Problems
-- Dual Stabilization
-- Degeneracy in Column Generation
-- Cutting Stock Problem
-- Knapsack Problem
-- Branch and Price
-- Heuristic Pricing
-- Parallel Pricing
-- Learning-Assisted Column Generation
+The most relevant next topics are:
 
-These topics are useful for later notes on Branch and Price, Dantzig-Wolfe decomposition, and large-scale network optimization.
+1. **Branch and Price**  
+   The exact extension of Column Generation for integer programming. This is the natural next topic after understanding why a final integer RMP does not generally guarantee the full ILP optimum.
+
+2. **Dantzig-Wolfe Decomposition**  
+   A systematic way to obtain column-based Master Problems from suitable decomposable models, especially models with block-angular structure.
+
+3. **Lagrangian Relaxation and Duality**  
+   Useful for understanding the dual viewpoint of decomposition methods and the close relationship among dual multipliers, pricing, and bounds.
+
+4. **Knapsack Problem**  
+   The Pricing Problem in the classical Cutting Stock example. Understanding dynamic programming for knapsack makes the example much more concrete.
+
+5. **Advanced Column Generation Implementation**  
+   Important practical topics include dual stabilization, degeneracy, exact and heuristic pricing, multi-column generation, column management, and parallel pricing.
+
+For this note series, **Branch and Price** and **Dantzig-Wolfe Decomposition** are the two most direct continuations of the present note.
