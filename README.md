@@ -13,7 +13,7 @@ A structured study series on Integer Linear Programming, from linear programming
 | 03 | [Cutting Plane](notes/03-cutting-plane.md) | Completed |
 | 04 | [Branch and Cut](notes/04-branch-and-cut.md) | Completed |
 | 05 | [Column Generation and Its Applications in Integer Linear Programming](notes/05-column-generation-and-ilp-applications.md) | Completed |
-| 06 | Branch and Price | Planned |
+| 06 | [Branch and Price](notes/06-branch-and-price.md) | Completed |
 | 07 | Lagrangian Relaxation and Duality | Planned |
 | 08 | Dantzig-Wolfe Decomposition | Planned |
 | 09 | Benders Decomposition | Planned |
