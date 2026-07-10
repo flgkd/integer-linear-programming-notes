@@ -209,7 +209,7 @@ $$
 
 Then the value is a valid lower bound for the integer solutions in that branch-and-bound node.
 
-> **In Branch and Price, Column Generation must solve the node LP relaxation sufficiently accurately before the resulting LP value is used as an exact Branch-and-Bound bound.**
+> **In an exact Branch-and-Price algorithm, the node LP bound must be validly certified before it is used for exact Branch-and-Bound pruning.**
 
 ---
 
@@ -270,11 +270,12 @@ At node $N$:
 
 1. construct or inherit the node RMP;
 2. impose the branching decisions of node $N$;
-3. solve the RMP;
-4. obtain the dual variables;
-5. solve the Pricing Problem under the branching decisions of node $N$;
-6. add improving columns;
-7. repeat until exact pricing confirms that no improving column exists.
+3. if necessary, restore RMP feasibility through a Phase I procedure, artificial variables, or another valid feasibility-recovery mechanism;
+4. solve the RMP;
+5. obtain the dual variables;
+6. solve the Pricing Problem consistently with the branching decisions of node $N$;
+7. add improving columns;
+8. repeat until exact pricing confirms that no improving column exists.
 
 The resulting objective value is the optimal value of the node LP relaxation.
 
@@ -324,11 +325,15 @@ Add the child nodes to the active node list.
 
 ### 4.5 Step 5: Repeat
 
-Repeat the process until the active node list is empty.
+For exact termination, repeat the process until the active node list is empty.
 
-Equivalently, if valid bounds for the active nodes are maintained, a global lower bound can be defined from the active-node bounds.
+If valid bounds are maintained for the active nodes, a global lower bound can also be defined from the active-node bounds. For a minimization problem,
 
-The algorithm terminates when the optimality gap is closed within the chosen tolerance.
+$$
+GLB=\min_{N\in L} LB(N).
+$$
+
+In practice, the algorithm may terminate earlier when the optimality gap is within a chosen tolerance.
 
 The overall process is shown below.
 
@@ -385,6 +390,12 @@ For a maximization problem, the roles of lower and upper bounds are reversed.
 ---
 
 ## 5. Reusing the Parent Node RMP⭐
+
+This gives the central intuition of Branch and Price:
+
+> **At each Branch-and-Bound node, the node LP relaxation is solved by Column Generation to obtain the node bound. After branching, child nodes inherit compatible columns from the parent RMP and continue pricing under the new branching decisions.**
+
+These two ideas together form the basic Branch-and-Price framework.
 
 A naive implementation might rebuild Column Generation from scratch at every branch-and-bound node.
 
@@ -449,6 +460,19 @@ It is
 
 If the LP solver supports basis warm starts, the parent LP information may also be useful for accelerating the child RMP solve.
 
+### 5.3 What If the Inherited Child RMP Is Infeasible?⭐
+
+After branching, the columns inherited from the parent node may no longer be sufficient to make the child RMP feasible.
+
+This does not necessarily mean that the full node LP relaxation is infeasible.
+
+The complete column space may still contain columns that can restore feasibility.
+
+Therefore, a Branch-and-Price implementation may need a Phase I procedure, artificial variables, or another feasibility-recovery mechanism before ordinary reduced-cost pricing is performed.
+
+Only after infeasibility of the full node LP relaxation has been correctly certified can the node be pruned as infeasible.
+
+
 ---
 
 ## 6. The Main Difficulty: Branching and Pricing Must Be Compatible⭐⭐⭐
@@ -459,33 +483,37 @@ The difficult part is usually the **branching strategy**.
 
 A branching decision changes the feasible region of a branch-and-bound node.
 
-Therefore, the same decision must also be respected by the Pricing Problem.
+Therefore, the node Master Problem and the Pricing Problem must remain consistent with the branching decision.
 
-Otherwise, the Pricing Problem may regenerate a column that violates the branch decision.
+Depending on the branching rule, this may require restricting the feasible column space or modifying the reduced-cost calculation through additional branching constraints and their dual variables.
+
+Otherwise, pricing may generate columns that are inconsistent with the current branch.
 
 This issue is central to Branch-and-Price algorithm design [1,2].
 
 ### 6.1 A Simple Route Example
 
-Suppose one column represents a feasible route.
+Suppose one column represents a feasible route for a particular flow, and the Master Problem selects one route for that flow.
+
+Let $x_{uv}^r$ indicate whether flow $r$ uses arc $(u,v)$.
 
 Assume the branching decision creates two child nodes:
 
 ```text
 Child 1:
-arc (u,v) is forbidden
+flow r must not use arc (u,v)
 
 Child 2:
-arc (u,v) is required
+flow r must use arc (u,v)
 ```
 
-Then the Pricing Problems must be modified accordingly.
+Then the Pricing Problem for flow $r$ must respect the corresponding branching decision.
 
-For Child 1, the pricing algorithm must not generate a route containing arc $(u,v)$.
+For Child 1, pricing must not generate a route for flow $r$ that contains arc $(u,v)$.
 
-For Child 2, the pricing algorithm must enforce the required branching decision.
+For Child 2, pricing must generate columns consistently with the requirement that flow $r$ uses arc $(u,v)$.
 
-If pricing ignores these restrictions, forbidden columns can simply re-enter the RMP.
+If pricing ignores these restrictions, columns that violate the current branch may re-enter the RMP.
 
 Then the branch decision has not actually been enforced.
 
@@ -521,7 +549,7 @@ For this reason, many Branch-and-Price algorithms prefer branching decisions def
 
 The important requirement is:
 
-> **The branching decision should partition the integer feasible solutions and should be enforceable in both the Master Problem and the Pricing Problem.**
+> **The branching decision should partition the integer feasible solutions, be correctly represented in the node Master Problem, and be consistently reflected in the Pricing Problem.**
 
 ### 6.3 Exactness Conditions
 
@@ -530,7 +558,7 @@ Branch and Price is an exact integer programming framework when the following co
 1. the column-based integer Master Problem correctly represents the original integer problem;
 2. the LP relaxation at every processed node is solved by valid Column Generation;
 3. exact pricing, or another valid optimality certificate, confirms node LP optimality;
-4. all branching decisions are correctly enforced in the Pricing Problem;
+4. all branching decisions are correctly represented at the node, and the Pricing Problem remains consistent with these decisions;
 5. the branching rule and pruning logic preserve the validity of Branch and Bound.
 
 Under these conditions, Branch and Price can systematically prove integer optimality [1,2].
@@ -574,70 +602,39 @@ This is one of the fundamental reasons Branch and Price can be exact.
 
 ---
 
-## 8. Practical Implementation Notes⭐
+## 8. Practical Notes⭐
 
-Several implementation techniques are especially useful in Branch and Price.
+Two practical issues are worth emphasizing.
 
-### 8.1 Use Good Initial Columns
+### 8.1 Exact Pricing and Warm Starts
 
-A feasible heuristic solution can provide useful root-node columns.
+Compatible columns and LP information can often be inherited from parent nodes and used as a warm start.
 
-Good initial columns may reduce the number of early Column Generation iterations.
-
-### 8.2 Inherit Columns Across the Tree
-
-Child nodes can reuse compatible parent columns.
-
-A global column pool may also be maintained, but every reused column must satisfy the branching decisions of the current node.
-
-### 8.3 Use Heuristic Pricing Before Exact Pricing
-
-As discussed in the previous note, a fast pricing heuristic may be used to find improving columns.
-
-However, failure of a heuristic pricing method does not prove node LP optimality.
+Heuristic pricing may accelerate the search, but failure of a heuristic pricing method does not prove node LP optimality.
 
 Therefore, exact pricing or another valid certificate is still required before an exact Branch-and-Price node is declared solved [3].
 
-### 8.4 Generate Multiple Columns per Iteration
-
-The Pricing Problem may return several improving columns in one iteration.
-
-This can reduce the number of RMP re-solves.
-
-### 8.5 Parallelize Independent Pricing Problems
-
-If the decomposition creates independent Pricing Problems, they can often be solved in parallel.
-
-For example, a decomposable network optimization problem may contain one Pricing Problem for each flow or commodity.
-
-### 8.6 Numerical Tolerances Matter
+### 8.2 Numerical Tolerances
 
 In practice, reduced-cost tests, integrality tests, bound comparisons, and optimality gaps should use suitable numerical tolerances.
 
 For example, a reduced cost that is numerically close to zero should not be treated carelessly as a strongly improving column.
 
-Branch and Price combines LP, dual, pricing, and tree-search logic.
-
-Small numerical inconsistencies can therefore propagate through several parts of the algorithm.
+Branch and Price combines LP, dual, pricing, and tree-search logic, so small numerical inconsistencies can propagate through several parts of the algorithm.
 
 ---
 
 ## 9. Key Takeaways
 
-1. Branch and Price combines Branch and Bound with Column Generation.
-2. Branch and Bound handles integrality, while Column Generation solves large-scale node LP relaxations.
-3. Column Generation does not simply replace the simplex method; it replaces direct solution of the full node LP with an RMP-and-Pricing procedure.
-4. For a minimization problem, the converged node LP relaxation provides a valid lower bound for the node.
-5. Before exact pricing confirms Column Generation convergence, the current RMP objective is not generally the exact node LP bound.
-6. A child node does not need to restart Column Generation from scratch.
-7. Compatible parent columns can be inherited and used to initialize the child-node RMP.
-8. Branching changes dual values, reduced costs, and possibly the feasible column space, so pricing must be performed again at child nodes.
-9. Branching decisions must be enforced in both the Master Problem and the Pricing Problem.
-10. A branching rule that is difficult to represent in the Pricing Problem may make Branch and Price computationally unattractive.
-11. Root-node Column Generation followed by a final integer RMP is not Branch and Price.
-12. Branch and Price continues Column Generation throughout the Branch-and-Bound tree and can prove integer optimality when implemented correctly.
-13. Heuristic pricing can accelerate the search, but exact pricing or another valid certificate is required to certify node LP optimality in an exact algorithm.
-14. Column inheritance, multiple-column generation, parallel pricing, and problem-specific pricing algorithms can substantially improve practical performance.
+1. Branch and Price combines Branch and Bound with Column Generation: Branch and Bound handles integrality, while Column Generation solves the large-scale LP relaxation at each node.
+2. Column Generation replaces direct solution of the full node LP with an RMP-and-Pricing procedure; the RMP itself may still be solved by the simplex method or another LP algorithm.
+3. For a minimization problem, a validly certified node LP optimum provides a lower bound for the integer solutions in that node. Before pricing certifies convergence, the current RMP objective is not generally the exact node LP bound.
+4. Child nodes do not need to restart Column Generation from scratch. Compatible parent columns can be inherited, although pricing must be performed again under the new branching decisions.
+5. An infeasible inherited child RMP does not necessarily imply that the full node LP is infeasible; Phase I, artificial variables, or another feasibility-recovery mechanism may be needed.
+6. Branching decisions must be correctly represented at the node and consistently reflected in pricing. This branching-pricing compatibility is one of the main difficulties of Branch and Price.
+7. Root-node Column Generation followed by a final integer RMP is not Branch and Price. Branch and Price continues pricing throughout the Branch-and-Bound tree.
+8. When the column-based formulation is valid, node LPs are correctly solved, branching is valid, and pricing remains consistent with the branch decisions, Branch and Price can prove integer optimality.
+9. Warm starts and heuristic pricing can improve practical performance, but exact pricing or another valid certificate is still required to certify node LP optimality in an exact algorithm.
 
 ## References
 
@@ -651,19 +648,19 @@ Small numerical inconsistencies can therefore propagate through several parts of
 
 The most relevant next topics are:
 
-1. **Dantzig-Wolfe Decomposition**  
+1. **Lagrangian Relaxation and Duality**  
+   Useful for understanding how dual multipliers, relaxed constraints, and lower bounds are used in decomposition methods.
+
+2. **Dantzig-Wolfe Decomposition**  
    The reformulation framework behind many column-based Master Problems and Pricing Problems.
 
-2. **Branching Strategies in Branch and Price**  
-   The main algorithmic difficulty in many applications. The branching decisions must be compatible with pricing.
+3. **Branching Strategies in Branch and Price**  
+   The main algorithmic difficulty in many applications. Branching decisions must be compatible with the column-generation structure.
 
-3. **Dual Stabilization and Degeneracy**  
+4. **Dual Stabilization and Degeneracy**  
    Important for improving the convergence behavior of Column Generation inside the Branch-and-Price tree.
 
-4. **Primal Heuristics in Branch and Price**  
-   Useful for obtaining good incumbents and improving the global upper bound early in the search.
+5. **Primal Heuristics and Column Management**  
+   Useful for obtaining good incumbents and reducing repeated work across branch-and-bound nodes.
 
-5. **Column Pool Management and Parallel Pricing**  
-   Practical techniques for reducing repeated work across nodes and accelerating large-scale implementations.
-
-For this note series, **Dantzig-Wolfe Decomposition** is the next major topic that explains where many Branch-and-Price Master Problems and Pricing Problems come from.
+For this note series, **Lagrangian Relaxation and Duality** comes next. **Dantzig-Wolfe Decomposition**, introduced later in the series, will explain the reformulation framework behind many column-based Master Problems and Pricing Problems.
