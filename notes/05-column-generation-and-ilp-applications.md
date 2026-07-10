@@ -8,12 +8,12 @@
 
 Finally, we arrive at **Column Generation**, one of the most important topics in this series.
 
-Column Generation is easy to misunderstand if the connection among the simplex method, reduced costs, LP duality, and basis changes is not clear. Therefore, before reading this note, it is strongly recommended to understand the following topics:
+Column Generation is easy to misunderstand if the connection among the simplex method, reduced costs, LP duality, and basis changes is not clear. Therefore, before reading this note, **it is strongly recommended to understand the following topics:**
 
 1. linear programming and LP duality;
-2. the basic idea of the simplex method, especially why and how a basis changes;
-3. reduced costs and dual variables;
-4. the matrix form of the simplex method and reduced costs.
+2. the principles of the simplex method, especially why a basis change is needed and how pivoting is performed;
+3. reduced costs, dual variables, and the relationship between them, particularly how the reduced costs of the primal problem are related to a basic solution of the dual problem;
+4. the matrix form of the simplex method and the matrix form of reduced costs.
 
 A useful prerequisite is:
 
@@ -64,17 +64,30 @@ This is where Column Generation becomes useful.
 
 > **One major role of Column Generation in large-scale ILP is to solve LP relaxations with a huge number of columns.**
 
-When Column Generation is embedded into Branch and Bound, we obtain **Branch and Price**.
+When Column Generation is embedded into Branch and Bound, we obtain **Branch and Price**, which will be discussed in a later note in this series.
 
-However, there is another important connection between Column Generation and ILP.
+However, **there is another important connection between Column Generation and ILP**.
 
 In many problems, we can reformulate a compact ILP into a pattern-based, path-based, schedule-based, or configuration-based master problem. Such reformulations may contain an enormous number of variables, but their LP relaxations can be substantially tighter than the LP relaxation of the original compact formulation.
 
-This second role of Column Generation will be discussed in detail near the end of this note.
+**This second role of Column Generation will be discussed in detail near the end of this note.**
 
 ---
 
 ## 2. Basic Idea of Column Generation⭐
+
+**Column Generation** is a highly efficient method for solving large-scale linear optimization problems. Its theoretical foundation can be traced back to the decomposition principle proposed by Dantzig and Wolfe in 1960.
+
+In essence, Column Generation is closely related to the simplex method and is fundamentally designed to solve linear programming problems.
+
+Column Generation has been widely applied to many well-known large-scale combinatorial optimization problems, including:
+
+- Crew Assignment Problems;
+- Cutting Stock Problems;
+- Vehicle Routing Problems;
+- Single-Facility Location Problems.
+
+Many of these problems are NP-hard in their integer forms. Column Generation is typically used to solve their large-scale LP relaxations or the LP master problems arising from suitable reformulations.
 
 ### 2.1 Large-Scale Linear Programs with Many Columns
 
@@ -124,27 +137,25 @@ The difficulty is that we may not even be able to explicitly list every column o
 
 Recall the simplex method.
 
-At any basic feasible solution, the number of basic variables is closely related to the number of constraints.
+At any basic feasible solution, only a limited number of variables are basic, even if the LP contains an enormous number of variables.
 
-Even if the full LP contains an enormous number of variables, only a relatively small number of variables are basic at a given simplex iteration.
+This suggests a natural idea:
 
-This gives an important intuition:
+> Why explicitly construct all columns if only a small subset is needed during the solution process?
 
-> Why should we explicitly construct millions of columns if only a small subset of them will actively participate in the current solution?
+Column Generation follows this idea.
 
-Column Generation uses exactly this idea.
+We first select a small subset of columns and solve the resulting **Restricted Master Problem (RMP)**. Since many columns are omitted, the RMP optimum is not necessarily optimal for the full **Master Problem (MP)**.
 
-Instead of solving the full LP with all columns, we:
+The next task is therefore to determine whether an omitted column can improve the current solution.
 
-1. start with a small subset of columns;
-2. solve the resulting restricted LP;
-3. search for an omitted column with an improving reduced cost;
-4. add that column;
-5. repeat.
+For a minimization problem, this means searching for a column with negative reduced cost.
 
-The key difference from a naive search is that we do not inspect every omitted variable one by one.
+Instead of checking omitted variables one by one, Column Generation solves a **Pricing Problem (PP)**, also called a **Subproblem (SP)**, to search the feasible column space and generate an improving column directly.
 
-Instead, we formulate and solve a **pricing problem** to search the entire column space.
+If a negative reduced-cost column is found, it is added to the RMP and the RMP is solved again.
+
+This process is repeated until no improving column exists.
 
 ### 2.3 Basic Column Generation Procedure
 
@@ -189,7 +200,7 @@ The most important concepts in Column Generation are:
 
 Let us introduce them carefully.
 
-### 3.1 Master Problem
+### 3.1 Master Problem (MP)
 
 Consider the LP
 
@@ -209,7 +220,7 @@ y_j \ge 0,
 \quad j=1,\ldots,n.
 $$
 
-The full problem containing all possible columns is called the **Master Problem**.
+The full problem containing all possible columns is called the **Master Problem (MP)**.
 
 In matrix form:
 
@@ -229,7 +240,7 @@ $$
 
 The difficulty is that $A$ may contain an extremely large number of columns.
 
-### 3.2 Restricted Master Problem
+### 3.2 Restricted Master Problem (RMP)
 
 Let
 
@@ -239,7 +250,7 @@ $$
 
 be a small subset of columns.
 
-The Restricted Master Problem is
+The **Restricted Master Problem (RMP)** is
 
 $$
 \min \quad \sum_{j\in P} c_j y_j
@@ -272,7 +283,7 @@ Possible ways to obtain initial columns include:
 
 This is similar in spirit to the need for an initial feasible basis in the simplex method.
 
-### 3.3 Pricing Problem / Subproblem⭐
+### 3.3 Pricing Problem (PP) / Subproblem (SP)⭐
 
 After solving the RMP, we need to answer the following question:
 
@@ -288,10 +299,10 @@ $$
 \overline{c}_j = c_j-\pi^T a_j.
 $$
 
-Therefore, the pricing problem searches for
+Therefore, the **Pricing Problem (PP)** (also called **Subroblem (SP)**) searches for a column with the minimum reduced cost:
 
 $$
-\min_j \left\{c_j-\pi^T a_j\right\}.
+\min_j \quad c_j-\pi^T a_j.
 $$
 
 If
@@ -314,19 +325,37 @@ This is the core of Column Generation.
 
 > **The pricing problem does not enumerate all columns. It searches the column space through an optimization model.**
 
-### 3.4 Why Dual Variables Are Usually Used
+### 3.4 Two Ways to Obtain Reduced Costs⭐
 
-In principle, reduced costs can be computed directly from the simplex basis.
+After solving the RMP, the Pricing Problem needs the reduced cost of a candidate column.
 
-For a candidate column $a_j$,
+There are two equivalent ways to obtain this reduced cost.
+
+#### Method 1: Compute Reduced Costs from the Simplex Basis
+
+Recall the matrix form of the simplex method.
+
+For a candidate column $a_j$, let $r_j$ denote its reduced cost. Then
 
 $$
-\overline{c}_j
-=
-c_j-c_B^T B^{-1}a_j.
+r_j=c_j-c_B^T B^{-1}a_j.
 $$
 
-Recall that
+More generally, for the nonbasic variables, the reduced-cost row is
+
+$$
+c_N^T-c_B^T B^{-1}N.
+$$
+
+Therefore, if the current simplex basis is known, the reduced cost of a candidate column can be computed directly from the basis matrix $B$.
+
+This is the most direct interpretation from the simplex method.
+
+#### Method 2: Use the Dual Variables of the RMP
+
+The second method uses the relationship between the simplex multipliers and a basic solution of the dual problem.
+
+Let $\pi$ denote the dual variables associated with the RMP constraints. At an optimal simplex basis,
 
 $$
 \pi^T=c_B^T B^{-1}.
@@ -335,21 +364,39 @@ $$
 Therefore,
 
 $$
-\overline{c}_j
-=
-c_j-\pi^T a_j.
+r_j=c_j-\pi^T a_j.
 $$
 
-The two expressions are equivalent.
+Thus, instead of explicitly working with $B^{-1}$, we can solve the RMP and directly obtain the dual variables $\pi$.
 
-In practice, Column Generation is usually described using dual variables because:
+The Pricing Problem then uses these dual values to evaluate, or generate, candidate columns.
 
-1. explicitly computing $B^{-1}$ is unnecessary;
-2. LP solvers directly provide dual values;
-3. the pricing objective becomes easier to interpret;
-4. the notation is much cleaner in papers and implementations.
+#### Why Is the Dual-Based Method Usually Preferred?
 
-This is why dual variables appear almost everywhere in Column Generation.
+In practice, Column Generation is almost always described using dual variables.
+
+There are several reasons:
+
+1. explicitly computing or maintaining $B^{-1}$ is unnecessary;
+2. LP solvers directly provide the dual values of the RMP constraints;
+3. the Pricing Problem can be written naturally using the dual variables;
+4. the notation is much simpler in papers and implementations.
+
+Therefore, although the two methods are mathematically equivalent, the dual-based form
+
+$$
+r_j=c_j-\pi^T a_j
+$$
+
+is usually used in Column Generation.
+
+This also explains why dual variables appear almost everywhere in Column Generation.
+
+If the relationship among the simplex basis, reduced costs, and dual variables is not clear, it may be helpful to review the previous note:
+
+- [Simplex Method and Linear Programming Duality](01-simplex-method-and-lp-duality.md)
+
+That note explains the matrix form of the simplex method, reduced costs, and their relationship with LP duality in more detail.
 
 ### 3.5 Column Generation Rules
 
@@ -400,7 +447,7 @@ However, there is one important distinction:
 
 Therefore, an exact Column Generation algorithm usually needs an exact pricing step, or another valid certificate, before declaring convergence.
 
-A common strategy is:
+**A common strategy is:**
 
 1. run fast heuristic pricing first;
 2. add good columns if found;
