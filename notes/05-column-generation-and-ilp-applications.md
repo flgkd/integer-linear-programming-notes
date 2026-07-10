@@ -487,7 +487,7 @@ ColumnGeneration:
 
 ---
 <p align="center">
-  <img src="../figures/chapter-05/chapter-05-fig1.png" alt="The basic Column Generation algorithm for a minimization LP." width="400">
+  <img src="../figures/chapter-05/chapter-05-fig1.png" alt="The basic Column Generation algorithm for a minimization LP." width="300">
 </p>
 
 <p align="center">
