@@ -361,7 +361,7 @@ $$
 \pi^T=c_B^T B^{-1}.
 $$
 
-The vector $\pi$ is the dual solution induced by the current basis.
+The vector $\pi$ is the simplex multiplier vector induced by the current basis.
 
 Therefore,
 
@@ -1582,7 +1582,7 @@ $$
 Since each stock roll has length 16, any integer solution needs at least
 
 $$
-\left\lceil \frac{321}{16} \right\rceil = 21
+\lceil \frac{321}{16} \rceil = 21
 $$
 
 stock rolls.
@@ -1690,7 +1690,7 @@ At the integer level, the reformulated MP should represent the original problem 
 
 ##### Step 2: Select Initial Columns
 
-Select a small set of feasible columns.
+Select a small set of feasible columns such that the initial LP RMP is feasible.
 
 These columns define a restricted integer master problem. After relaxing the integrality restrictions, they also define the initial LP RMP used by Column Generation.
 
@@ -1750,7 +1750,7 @@ There are two possible outcomes:
 
 Therefore, feasibility of the LP RMP does not guarantee feasibility of the final integer RMP.
 
-The complete workflow is therefore:
+The final decision process is therefore:
 
 ```text
 Final LP solution integer?
@@ -2076,7 +2076,7 @@ A broader practical discussion of these design issues can be found in [3].
 7. A Pricing Problem may itself be an ILP because the rules defining a valid column can be discrete.
 8. The Cutting Stock Problem is an ILP. Column Generation solves the LP relaxation of its pattern-based Master Problem, not the original ILP directly.
 9. Modeling matters. A pattern-, route-, schedule-, path-, or configuration-based formulation may be much more suitable for Column Generation than an intuitive compact formulation.
-10. Dantzig-Wolfe Decomposition provides a systematic reformulation framework for suitable decomposable models, especially those with block-angular structure. A continuous Dantzig-Wolfe reformulation is equivalent to the original LP; tighter ILP relaxations arise when discrete feasible substructures are embedded in the columns.
+10. Dantzig-Wolfe Decomposition provides a systematic reformulation framework for suitable decomposable models, especially those with block-angular structure. A continuous Dantzig-Wolfe reformulation is equivalent to the original LP; tighter ILP relaxations may arise when discrete feasible substructures are embedded in the columns.
 11. Branch and Price embeds Column Generation into Branch and Bound and can prove integer optimality when implemented correctly.
 12. Solving a final integer RMP after root-level Column Generation is generally a heuristic. It may miss the full ILP optimum, and the generated column pool may even fail to admit an integer feasible solution.
 13. If exact Column Generation converges and the final LP solution is already integer, that solution is also optimal for the integer Master Problem.
