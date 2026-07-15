@@ -48,13 +48,11 @@ $$
 subject to
 
 $$
-g_i(x)\le 0,
-\quad i=1,\ldots,m
+g_i(x)\le 0, \quad i=1,\ldots,m
 $$
 
 $$
-h_j(x)=0,
-\quad j=1,\ldots,p
+h_j(x)=0, \quad j=1,\ldots,p
 $$
 
 $$
@@ -90,22 +88,20 @@ $$
 
 is relatively easy.
 
-The basic idea of Lagrangian Relaxation is to move the difficult constraints into the objective function.
+The basic idea of Lagrangian Relaxation is to **move the difficult constraints into the objective function**.
 
 ### 2.2 The Lagrangian Function
 
 Introduce multipliers
 
 $$
-\lambda_i\ge0,
-\quad i=1,\ldots,m
+\lambda_i \ge 0,\quad i=1,\ldots,m
 $$
 
-for the inequality constraints and unrestricted multipliers
+for the inequality constraints, and unrestricted multipliers
 
 $$
-\nu_j\in\mathbf{R},
-\quad j=1,\ldots,p
+\nu_j \in \mathbb{R},\quad j=1,\ldots,p
 $$
 
 for the equality constraints.
@@ -113,30 +109,16 @@ for the equality constraints.
 The **Lagrangian function** is
 
 $$
-L(x,\lambda,\nu)
-=
-f_0(x)
-+
-\sum_{i=1}^{m}\lambda_i g_i(x)
-+
-\sum_{j=1}^{p}\nu_j h_j(x).
+L(x,\lambda,\nu)=f_0(x)+\sum_{i=1}^{m}\lambda_i g_i(x)+\sum_{j=1}^{p}\nu_j h_j(x).
 $$
 
 For fixed multipliers $(\lambda,\nu)$, the Lagrangian relaxation is
 
 $$
-q(\lambda,\nu)
-=
-\inf_{x\in X} L(x,\lambda,\nu).
+q(\lambda,\nu)=\inf_{x\in X}L(x,\lambda,\nu).
 $$
 
-The function
-
-$$
-q(\lambda,\nu)
-$$
-
-is called the **Lagrangian dual function**.
+The function $q(\lambda,\nu)$ is called the **Lagrangian dual function**.
 
 The difficult constraints no longer appear as explicit constraints.
 
@@ -185,11 +167,7 @@ $$
 Since the dual function minimizes the Lagrangian over all $x\in X$,
 
 $$
-q(\lambda,\nu)
-\le
-L(x,\lambda,\nu)
-\le
-f_0(x).
+q(\lambda,\nu) \le L(x,\lambda,\nu) \le f_0(x).
 $$
 
 This holds for every feasible solution $x$.
@@ -209,8 +187,7 @@ Thus every valid multiplier vector produces a lower bound.
 Since every feasible multiplier vector provides a lower bound, the best Lagrangian lower bound is obtained by maximizing the dual function:
 
 $$
-\max_{\lambda,\nu}
-\quad q(\lambda,\nu)
+\max_{\lambda,\nu} \quad q(\lambda,\nu)
 $$
 
 subject to
@@ -252,9 +229,7 @@ is affine in $(\lambda,\nu)$.
 The dual function is the pointwise infimum of these affine functions:
 
 $$
-q(\lambda,\nu)
-=
-\inf_{x\in X} L(x,\lambda,\nu).
+q(\lambda,\nu) = \inf_{x\in X} L(x,\lambda,\nu).
 $$
 
 A pointwise infimum of affine functions is concave.
@@ -302,9 +277,7 @@ This viewpoint is central to duality.
 Consider the integer linear program
 
 $$
-v(IP)
-=
-\min \quad c^T x
+v(IP) = \min \quad c^T x
 $$
 
 subject to
@@ -322,8 +295,7 @@ where $X$ is an integer set that is assumed to be easier to optimize over.
 For example,
 
 $$
-X=
-\{x\in\mathbf{Z}^n:Ax\le b\}.
+X= \{x\in\mathbb{Z}^n:Ax\le b\}.
 $$
 
 The constraints
@@ -367,12 +339,7 @@ $$
 For fixed $u$, define
 
 $$
-z(u)
-=
-\min_{x\in X}
-\{
-c^T x+u^T(Dx-d)
-\}.
+z(u) = \min_{x\in X} \{ c^T x+u^T(Dx-d) \}.
 $$
 
 This is the **Lagrangian relaxation** of the integer program.
@@ -412,21 +379,13 @@ the value $z(u)$ is a valid lower bound on the optimal integer objective value.
 The best lower bound from this family is
 
 $$
-v(LD)
-=
-\max_{u\ge0} z(u).
+v(LD) = \max_{u\ge0} z(u).
 $$
 
 Equivalently,
 
 $$
-v(LD)
-=
-\max_{u\ge0}
-\min_{x\in X}
-\{
-c^T x+u^T(Dx-d)
-\}.
+v(LD) = \max_{u\ge0} \min_{x\in X} \{ c^T x+u^T(Dx-d) \}.
 $$
 
 This is the Lagrangian dual problem associated with the relaxed constraints.
@@ -440,7 +399,7 @@ $$
 then the corresponding multipliers are unrestricted:
 
 $$
-u\in\mathbf{R}^m.
+u\in\mathbb{R}^m.
 $$
 
 ### 4.4 Weak Duality⭐
@@ -470,13 +429,7 @@ $$
 Therefore,
 
 $$
-z(u)
-=
-\min_{x\in X}
-\{
-c^T x+u^T(Dx-d)
-\}
-\le c^T x.
+z(u) = \min_{x\in X} \{ c^T x+u^T(Dx-d) \} \le c^T x.
 $$
 
 Taking the minimum over all feasible primal solutions gives
@@ -512,12 +465,7 @@ However, suppose there exist $u^*\ge0$ and $x^*\in X$ such that:
 1. $x^*$ is optimal for the Lagrangian relaxation at $u^*$:
 
 $$
-x^*
-\in
-\arg\min_{x\in X}
-\{
-c^T x+{u^*}^T(Dx-d)
-\};
+x^* \in \arg\min_{x\in X} \{ c^T x+{u^*}^T(Dx-d) \};
 $$
 
 2. $x^*$ is feasible for the original integer program:
@@ -529,21 +477,13 @@ $$
 3. complementary slackness holds:
 
 $$
-u_i^*
-(
-D_i x^*-d_i
-)
-=
-0,
-\quad i=1,\ldots,m.
+u_i^* ( D_i x^*-d_i ) = 0, \quad i=1,\ldots,m.
 $$
 
 Then
 
 $$
-z(u^*)
-=
-c^T x^*.
+z(u^*) = c^T x^*.
 $$
 
 By weak duality,
@@ -636,9 +576,7 @@ Good candidates for relaxation are often:
 An LP relaxation usually removes integrality restrictions:
 
 $$
-x\in\mathbf{Z}^n
-\quad\longrightarrow\quad
-x\in\mathbf{R}^n.
+x\in\mathbb{Z}^n \quad\longrightarrow\quad x\in\mathbb{R}^n.
 $$
 
 Lagrangian Relaxation instead removes selected constraints and moves them into the objective.
@@ -656,15 +594,7 @@ Assume $X$ is finite.
 Since a linear function has the same minimum over $X$ and its convex hull,
 
 $$
-\min_{x\in X}
-\{
-c^T x+u^T(Dx-d)
-\}
-=
-\min_{x\in\operatorname{conv}(X)}
-\{
-c^T x+u^T(Dx-d)
-\}.
+\min_{x\in X} \{ c^T x+u^T(Dx-d) \} = \min_{x\in\mathrm{conv}(X)} \{ c^T x+u^T(Dx-d) \}.
 $$
 
 Under standard LP duality assumptions, the Lagrangian dual bound corresponds to the LP
@@ -680,12 +610,12 @@ Dx\le d
 $$
 
 $$
-x\in\operatorname{conv}(X).
+x\in\mathrm{conv}(X).
 $$
 
 This explains why the choice of $X$ matters.
 
-If $\operatorname{conv}(X)$ captures strong local integer structure, the Lagrangian bound can be strong.
+If $\mathrm{conv}(X)$ captures strong local integer structure, the Lagrangian bound can be strong.
 
 This convexification viewpoint is also closely connected to Dantzig-Wolfe Decomposition, which will be introduced in the next note.
 
@@ -702,12 +632,7 @@ A classical approach is the **subgradient method**.
 For a given multiplier vector $u^k$, solve the Lagrangian relaxation and obtain
 
 $$
-x^k
-\in
-\arg\min_{x\in X}
-\{
-c^T x+{u^k}^T(Dx-d)
-\}.
+x^k \in \arg\min_{x\in X} \{ c^T x+{u^k}^T(Dx-d) \}.
 $$
 
 A supergradient of the concave dual function at $u^k$ is
@@ -719,13 +644,7 @@ $$
 The multiplier update is
 
 $$
-u^{k+1}
-=
-\max
-\{
-0,
-u^k+\alpha_k s^k
-\},
+u^{k+1} = \max \{ 0, u^k+\alpha_k s^k \},
 $$
 
 where the maximum is applied componentwise and $\alpha_k>0$ is a step size.
@@ -739,11 +658,7 @@ The interpretation is intuitive:
 A common Polyak-type step size is
 
 $$
-\alpha_k
-=
-\theta_k
-\frac{UB-z(u^k)}
-{\|s^k\|^2},
+\alpha_k = \theta_k \frac{UB-z(u^k)} {\|s^k\|^2},
 $$
 
 where:
@@ -820,67 +735,31 @@ $$
 The Lagrangian relaxation is
 
 $$
-z(u)
-=
-\min_{x\in\{0,1\}^n}
-\{
-c^T x+u^T(Ax-b)
-\}.
+z(u) = \min_{x\in\{0,1\}^n} \{ c^T x+u^T(Ax-b) \}.
 $$
 
 Rearranging,
 
 $$
-z(u)
-=
--u^T b
-+
-\min_{x\in\{0,1\}^n}
-\{
-(c+A^T u)^T x
-\}.
+z(u) = -u^T b + \min_{x\in\{0,1\}^n} \{ (c+A^T u)^T x \}.
 $$
 
 Because the binary variables are now separable,
 
 $$
-z(u)
-=
--u^T b
-+
-\sum_{j=1}^{n}
-\min_{x_j\in\{0,1\}}
-\{
-(
-c_j+(A^T u)_j
-)x_j
-\}.
+z(u) = -u^T b + \sum_{j=1}^{n} \min_{x_j\in\{0,1\}} \{ ( c_j+(A^T u)_j )x_j \}.
 $$
 
 Therefore,
 
 $$
-z(u)
-=
--u^T b
-+
-\sum_{j=1}^{n}
-\min
-\{
-0,
-c_j+(A^T u)_j
-\}.
+z(u) = -u^T b + \sum_{j=1}^{n} \min \{ 0, c_j+(A^T u)_j \}.
 $$
 
 An optimal variable value is
 
 $$
-x_j(u)
-=
-\begin{cases}
-1, & c_j+(A^T u)_j<0,\\
-0, & c_j+(A^T u)_j>0.
-\end{cases}
+x_j(u) = \begin{cases} 1, & c_j+(A^T u)_j<0,\\ 0, & c_j+(A^T u)_j>0. \end{cases}
 $$
 
 When the coefficient is zero, either value is optimal.
@@ -909,28 +788,21 @@ Let:
 A formulation is
 
 $$
-\max
-\quad
-\sum_{i\in M}\sum_{j\in N}c_{ij}x_{ij}
--
-\sum_{j\in N}f_j y_j
+\max \quad \sum_{i\in M}\sum_{j\in N}c_{ij}x_{ij} - \sum_{j\in N}f_j y_j
 $$
 
 subject to
 
 $$
-\sum_{j\in N}x_{ij}=1,
-\quad i\in M
+\sum_{j\in N}x_{ij}=1, \quad i\in M
 $$
 
 $$
-0\le x_{ij}\le y_j,
-\quad i\in M,\ j\in N
+0\le x_{ij}\le y_j, \quad i\in M,\ j\in N
 $$
 
 $$
-y_j\in\{0,1\},
-\quad j\in N.
+y_j\in\{0,1\}, \quad j\in N.
 $$
 
 The customer-assignment constraints couple all facilities.
@@ -938,26 +810,13 @@ The customer-assignment constraints couple all facilities.
 Relax them using unrestricted multipliers
 
 $$
-u_i\in\mathbf{R},
-\quad i\in M.
+u_i\in\mathbb{R}, \quad i\in M.
 $$
 
 Since this is a maximization problem, define
 
 $$
-z(u)
-=
-\max
-\{
-\sum_{i\in M}\sum_{j\in N}c_{ij}x_{ij}
--
-\sum_{j\in N}f_j y_j
-+
-\sum_{i\in M}u_i
-(
-1-\sum_{j\in N}x_{ij}
-)
-\}
+z(u) = \max \{ \sum_{i\in M}\sum_{j\in N}c_{ij}x_{ij} - \sum_{j\in N}f_j y_j + \sum_{i\in M}u_i ( 1-\sum_{j\in N}x_{ij} ) \}
 $$
 
 subject to
@@ -975,32 +834,19 @@ $$
 Rearranging,
 
 $$
-z(u)
-=
-\sum_{i\in M}u_i
-+
-\sum_{j\in N}z_j(u),
+z(u) = \sum_{i\in M}u_i + \sum_{j\in N}z_j(u),
 $$
 
 where
 
 $$
-z_j(u)
-=
-\max
-\{
-\sum_{i\in M}
-(c_{ij}-u_i)x_{ij}
--
-f_j y_j
-\}
+z_j(u) = \max \{ \sum_{i\in M} (c_{ij}-u_i)x_{ij} - f_j y_j \}
 $$
 
 subject to
 
 $$
-0\le x_{ij}\le y_j,
-\quad i\in M
+0\le x_{ij}\le y_j, \quad i\in M
 $$
 
 $$
@@ -1017,19 +863,7 @@ For a fixed facility $j$:
 Therefore,
 
 $$
-z_j(u)
-=
-\max
-\{
-0,
-\sum_{i\in M}
-\max
-\{
-c_{ij}-u_i,
-0
-\}
--f_j
-\}.
+z_j(u) = \max \{ 0, \sum_{i\in M} \max \{ c_{ij}-u_i, 0 \} -f_j \}.
 $$
 
 Thus the Lagrangian relaxation is easy to evaluate.
@@ -1037,7 +871,7 @@ Thus the Lagrangian relaxation is easy to evaluate.
 Because the original problem is a maximization problem, $z(u)$ is an upper bound, and the Lagrangian dual minimizes this upper bound:
 
 $$
-\min_{u\in\mathbf{R}^m} z(u).
+\min_{u\in\mathbb{R}^m} z(u).
 $$
 
 The important structural effect is:
@@ -1066,28 +900,21 @@ Let:
 The Generalized Assignment Problem is
 
 $$
-\min
-\quad
-\sum_{i=1}^{m}
-\sum_{j=1}^{n}
-c_{ij}x_{ij}
+\min \quad \sum_{i=1}^{m} \sum_{j=1}^{n} c_{ij}x_{ij}
 $$
 
 subject to
 
 $$
-\sum_{i=1}^{m}x_{ij}=1,
-\quad j=1,\ldots,n
+\sum_{i=1}^{m}x_{ij}=1, \quad j=1,\ldots,n
 $$
 
 $$
-\sum_{j=1}^{n}a_{ij}x_{ij}\le b_i,
-\quad i=1,\ldots,m
+\sum_{j=1}^{n}a_{ij}x_{ij}\le b_i, \quad i=1,\ldots,m
 $$
 
 $$
-x_{ij}\in\{0,1\},
-\quad i=1,\ldots,m,\ j=1,\ldots,n.
+x_{ij}\in\{0,1\}, \quad i=1,\ldots,m,\ j=1,\ldots,n.
 $$
 
 There are at least two natural Lagrangian relaxations.
@@ -1103,30 +930,19 @@ $$
 using unrestricted multipliers
 
 $$
-u_j\in\mathbf{R}.
+u_j\in\mathbb{R}.
 $$
 
 The relaxation is
 
 $$
-z_1(u)
-=
-\min
-\{
-\sum_{i=1}^{m}\sum_{j=1}^{n}c_{ij}x_{ij}
-+
-\sum_{j=1}^{n}u_j
-(
-1-\sum_{i=1}^{m}x_{ij}
-)
-\}
+z_1(u) = \min \{ \sum_{i=1}^{m}\sum_{j=1}^{n}c_{ij}x_{ij} + \sum_{j=1}^{n}u_j ( 1-\sum_{i=1}^{m}x_{ij} ) \}
 $$
 
 subject to
 
 $$
-\sum_{j=1}^{n}a_{ij}x_{ij}\le b_i,
-\quad i=1,\ldots,m
+\sum_{j=1}^{n}a_{ij}x_{ij}\le b_i, \quad i=1,\ldots,m
 $$
 
 $$
@@ -1136,22 +952,13 @@ $$
 Rearranging,
 
 $$
-z_1(u)
-=
-\sum_{j=1}^{n}u_j
-+
-\sum_{i=1}^{m}z_i(u),
+z_1(u) = \sum_{j=1}^{n}u_j + \sum_{i=1}^{m}z_i(u),
 $$
 
 where
 
 $$
-z_i(u)
-=
-\min
-\quad
-\sum_{j=1}^{n}
-(c_{ij}-u_j)x_{ij}
+z_i(u) = \min \quad \sum_{j=1}^{n} (c_{ij}-u_j)x_{ij}
 $$
 
 subject to
@@ -1161,8 +968,7 @@ $$
 $$
 
 $$
-x_{ij}\in\{0,1\},
-\quad j=1,\ldots,n.
+x_{ij}\in\{0,1\}, \quad j=1,\ldots,n.
 $$
 
 Thus, evaluating $z_1(u)$ requires solving $m$ independent binary knapsack problems.
@@ -1176,10 +982,7 @@ $$
 The total complexity is therefore
 
 $$
-O
-(
-n\sum_{i=1}^{m}b_i
-).
+O ( n\sum_{i=1}^{m}b_i ).
 $$
 
 If
@@ -1211,24 +1014,13 @@ $$
 The relaxation is
 
 $$
-z_2(v)
-=
-\min
-\{
-\sum_{i=1}^{m}\sum_{j=1}^{n}c_{ij}x_{ij}
-+
-\sum_{i=1}^{m}v_i
-(
-\sum_{j=1}^{n}a_{ij}x_{ij}-b_i
-)
-\}
+z_2(v) = \min \{ \sum_{i=1}^{m}\sum_{j=1}^{n}c_{ij}x_{ij} + \sum_{i=1}^{m}v_i ( \sum_{j=1}^{n}a_{ij}x_{ij}-b_i ) \}
 $$
 
 subject to
 
 $$
-\sum_{i=1}^{m}x_{ij}=1,
-\quad j=1,\ldots,n
+\sum_{i=1}^{m}x_{ij}=1, \quad j=1,\ldots,n
 $$
 
 $$
@@ -1238,14 +1030,7 @@ $$
 Rearranging,
 
 $$
-z_2(v)
-=
--\sum_{i=1}^{m}v_i b_i
-+
-\min
-\sum_{j=1}^{n}
-\sum_{i=1}^{m}
-(c_{ij}+v_i a_{ij})x_{ij}.
+z_2(v) = -\sum_{i=1}^{m}v_i b_i + \min \sum_{j=1}^{n} \sum_{i=1}^{m} (c_{ij}+v_i a_{ij})x_{ij}.
 $$
 
 The problem decomposes by job.
@@ -1253,24 +1038,13 @@ The problem decomposes by job.
 For each job $j$, choose the machine with minimum adjusted cost:
 
 $$
-\min_{i=1,\ldots,m}
-\{
-c_{ij}+v_i a_{ij}
-\}.
+\min_{i=1,\ldots,m} \{ c_{ij}+v_i a_{ij} \}.
 $$
 
 Therefore,
 
 $$
-z_2(v)
-=
--\sum_{i=1}^{m}v_i b_i
-+
-\sum_{j=1}^{n}
-\min_{i=1,\ldots,m}
-\{
-c_{ij}+v_i a_{ij}
-\}.
+z_2(v) = -\sum_{i=1}^{m}v_i b_i + \sum_{j=1}^{n} \min_{i=1,\ldots,m} \{ c_{ij}+v_i a_{ij} \}.
 $$
 
 This value can be computed in
