@@ -1154,6 +1154,8 @@ The main difficulty is often coordination through the multipliers.
 
 2. Fisher, M. L. “The Lagrangian Relaxation Method for Solving Integer Programming Problems.” *Management Science*, 27(1), 1981, pp. 1–18. DOI: `10.1287/mnsc.27.1.1`.
 
+3. Sun, Xiaoling, and Duan Li. *Integer Programming*. Beijing: Science Press, 2010. ISBN: 978-7-03-029380-0.（孙小玲、李端：《整数规划》，北京：科学出版社，2010年，ISBN：978-7-03-029380-0）
+
 ## Suggested Follow-up Reading
 
 The most relevant next topics are:
