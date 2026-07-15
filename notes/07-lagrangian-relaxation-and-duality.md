@@ -14,7 +14,7 @@ The central idea is simple:
 
 This produces a relaxation that may be much easier to solve.
 
-By optimizing the multipliers, we obtain the best bound available from this family of Lagrangian relaxations.
+**By optimizing the multipliers, we obtain the best bound available from this family of Lagrangian relaxations.**
 
 Lagrangian duality is a broad topic. A systematic treatment can be found in Chapter 5 of *Convex Optimization* by Boyd and Vandenberghe [1].
 
@@ -130,7 +130,7 @@ Therefore:
 
 The word “penalty” is useful for intuition, but these are not arbitrary penalty coefficients. The multipliers are decision variables of the dual problem and are optimized systematically.
 
-### 2.3 Why Does the Dual Function Provide a Lower Bound?
+### 2.3 Why Does the Dual Function Provide a Lower Bound?⭐
 
 Let $x$ be feasible for the original minimization problem.
 
@@ -254,7 +254,7 @@ It also does not mean that the Lagrangian dual always has the same optimal value
 
 A positive duality gap may remain.
 
-### 3.1 Minimum, Infimum, and Bounds
+### Minimum, Infimum, and Bounds
 
 A useful preliminary fact is:
 
@@ -444,7 +444,7 @@ $$
 v(LD)\le v(IP).
 $$
 
-Therefore, the Lagrangian dual provides a lower bound for a minimization integer program.
+**Therefore, the Lagrangian dual provides a lower bound for a minimization integer program**.
 
 This bound can be used in:
 
@@ -460,48 +460,60 @@ The classical role of Lagrangian Relaxation in integer programming is surveyed b
 
 Integer programs do not generally satisfy strong Lagrangian duality.
 
-However, suppose there exist $u^*\ge0$ and $x^*\in X$ such that:
+However, suppose there exist $u^{\ast}\ge 0$ and $x^{\ast}\in X$ such that:
 
-1. $x^*$ is optimal for the Lagrangian relaxation at $u^*$:
-
-$$
-x^* \in \arg\min_{x\in X} \{ c^T x+{u^*}^T(Dx-d) \};
-$$
-
-2. $x^*$ is feasible for the original integer program:
+1. $x^{\ast}$ is optimal for the Lagrangian relaxation at $u^{\ast}$:
 
 $$
-Dx^*\le d;
+z(u^{\ast})=c^T x^{\ast}+(u^{\ast})^T(Dx^{\ast}-d)=\min_{x\in X}\{c^T x+(u^{\ast})^T(Dx-d)\}.
 $$
 
-3. complementary slackness holds:
+2. $x^{\ast}$ is feasible for the original integer program:
 
 $$
-u_i^* ( D_i x^*-d_i ) = 0, \quad i=1,\ldots,m.
+Dx^{\ast}\le d.
 $$
 
-Then
+3. Complementary slackness holds:
 
 $$
-z(u^*) = c^T x^*.
+u_i^{\ast}(D_i x^{\ast}-d_i)=0,\quad i=1,\ldots,m.
 $$
 
-By weak duality,
+Since $x^{\ast}$ is feasible and $u^{\ast}\ge 0$,
 
 $$
-z(u^*)\le v(IP)\le c^T x^*.
+(u^{\ast})^T(Dx^{\ast}-d)\le 0.
+$$
+
+By complementary slackness,
+
+$$
+(u^{\ast})^T(Dx^{\ast}-d)=0.
 $$
 
 Therefore,
 
 $$
-z(u^*)=v(IP)=c^T x^*.
+z(u^{\ast})=c^T x^{\ast}.
+$$
+
+By weak duality,
+
+$$
+z(u^{\ast})\le v(IP)\le c^T x^{\ast}.
+$$
+
+Hence,
+
+$$
+z(u^{\ast})=v(IP)=c^T x^{\ast}.
 $$
 
 Thus:
 
-- $x^*$ is an optimal solution of the integer program;
-- $u^*$ is an optimal solution of the Lagrangian dual;
+- $x^{\ast}$ is an optimal solution of the integer program;
+- $u^{\ast}$ is an optimal solution of the Lagrangian dual;
 - the Lagrangian duality gap is zero.
 
 This is a sufficient optimality condition.
@@ -671,7 +683,7 @@ The exact convergence conditions depend on the step-size rule.
 
 In practice, multiplier optimization is often one of the most difficult parts of Lagrangian Relaxation.
 
-### 6.1 Lagrangian Solutions May Be Primal-Infeasible
+### Lagrangian Solutions May Be Primal-Infeasible
 
 The solution $x^k$ of a Lagrangian relaxation need not satisfy the relaxed constraints.
 
