@@ -485,7 +485,6 @@ ColumnGeneration:
     return the optimal RMP solution
 ```
 
----
 <p align="center">
   <img src="../figures/chapter-05/chapter-05-fig1.png" alt="The basic Column Generation algorithm for a minimization LP." width="300">
 </p>
@@ -493,6 +492,8 @@ ColumnGeneration:
 <p align="center">
   The basic Column Generation algorithm for a minimization LP.
 </p>
+
+---
 
 ## 4. Cutting Stock Problem: Two Formulations and Column Generation⭐
 
