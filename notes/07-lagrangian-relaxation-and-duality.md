@@ -16,7 +16,7 @@ This produces a relaxation that may be much easier to solve.
 
 **By optimizing the multipliers, we obtain the best bound available from this family of Lagrangian relaxations.**
 
-Lagrangian duality is a broad topic. A systematic treatment can be found in Chapter 5 of *Convex Optimization* by Boyd and Vandenberghe [1].
+Lagrangian duality is a broad topic. A systematic treatment can be found in Chapter 5 of *Convex Optimization* by Boyd and Vandenberghe [1]. The integer-programming presentation in this note also follows the treatment of Sun and Li [2].
 
 **This note focuses on the following questions:**
 
@@ -248,13 +248,13 @@ Under the standard convention of convex optimization, maximizing a concave funct
 
 This does **not** mean that the dual function is necessarily smooth.
 
-In integer programming, it is often piecewise linear and nondifferentiable.
+For a linear integer program with a finite feasible set $X$, the dual function is concave and piecewise linear, and it is generally nondifferentiable.
 
 It also does not mean that the Lagrangian dual always has the same optimal value as the primal problem.
 
 A positive duality gap may remain.
 
-### Minimum, Infimum, and Bounds
+### 3.1 Minimum, Infimum, and Bounds
 
 A useful preliminary fact is:
 
@@ -271,6 +271,8 @@ This viewpoint is central to duality.
 ---
 
 ## 4. Lagrangian Duality for Integer Linear Programming⭐⭐
+
+Throughout Sections 4–9, we assume that the displayed minima and maxima are attained. Otherwise, `min` and `max` should be replaced by `inf` and `sup`, respectively.
 
 ### 4.1 Original Integer Linear Program
 
@@ -454,7 +456,7 @@ This bound can be used in:
 - heuristic algorithms;
 - optimality-gap estimation.
 
-The classical role of Lagrangian Relaxation in integer programming is surveyed by Fisher [2].
+The classical role of Lagrangian Relaxation in integer programming is surveyed by Fisher [3].
 
 ### 4.5 A Sufficient Condition for Zero Duality Gap⭐
 
@@ -633,13 +635,13 @@ This convexification viewpoint is also closely connected to Dantzig-Wolfe Decomp
 
 ---
 
-## 6. Solving the Lagrangian Dual: Subgradient Ascent⭐
+## 6. Solving the Lagrangian Dual: Projected Supergradient Ascent⭐
 
 The dual function is concave but often nondifferentiable.
 
 Therefore, ordinary smooth gradient methods may not apply.
 
-A classical approach is the **subgradient method**.
+A classical approach is **projected supergradient ascent**. In the Lagrangian Relaxation literature, this procedure is also commonly referred to as the **subgradient method**.
 
 For a given multiplier vector $u^k$, solve the Lagrangian relaxation and obtain
 
@@ -667,7 +669,7 @@ The interpretation is intuitive:
 - if it has large slack, its multiplier may decrease;
 - the projection ensures $u^{k+1}\ge0$.
 
-A common Polyak-type step size is
+When $\|s^k\|>0$, a common Polyak-type step size is
 
 $$
 \alpha_k = \theta_k \frac{UB-z(u^k)} {\|s^k\|^2},
@@ -683,7 +685,7 @@ The exact convergence conditions depend on the step-size rule.
 
 In practice, multiplier optimization is often one of the most difficult parts of Lagrangian Relaxation.
 
-### Lagrangian Solutions May Be Primal-Infeasible
+### 6.1 Lagrangian Solutions May Be Primal-Infeasible
 
 The solution $x^k$ of a Lagrangian relaxation need not satisfy the relaxed constraints.
 
@@ -816,6 +818,8 @@ $$
 $$
 y_j\in\{0,1\}, \quad j\in N.
 $$
+
+Although $x_{ij}$ is written as a continuous assignment variable, for any fixed facility-opening decision $y$, an optimal customer assignment can be chosen integral. Therefore, this formulation has the same optimal value as the standard binary-assignment formulation.
 
 The customer-assignment constraints couple all facilities.
 
@@ -1140,7 +1144,7 @@ The main difficulty is often coordination through the multipliers.
 3. The Lagrangian dual maximizes the dual function to obtain the best bound in the chosen family of relaxations.
 4. The dual function is concave even when the primal problem is nonconvex or integer, so the Lagrangian dual is a convex optimization problem.
 5. Weak duality always holds, but a positive duality gap may remain for integer programs.
-6. If a Lagrangian minimizer is primal-feasible and satisfies complementary slackness with optimal multipliers, zero duality gap and primal optimality follow.
+6. If a Lagrangian minimizer is primal-feasible and satisfies complementary slackness with its multiplier vector, zero duality gap and primal-dual optimality follow.
 7. Lagrangian Relaxation is different from LP relaxation because it can retain integrality and combinatorial structure inside the remaining set $X$.
 8. The choice of relaxed constraints determines both the difficulty of the subproblem and the strength of the bound.
 9. The dual function is usually nondifferentiable, so subgradient or bundle-type methods are commonly used to optimize the multipliers.
@@ -1152,9 +1156,9 @@ The main difficulty is often coordination through the multipliers.
 
 1. Boyd, S. P., and Vandenberghe, L. *Convex Optimization*. Cambridge University Press, 2004. Chapter 5.
 
-2. Fisher, M. L. “The Lagrangian Relaxation Method for Solving Integer Programming Problems.” *Management Science*, 27(1), 1981, pp. 1–18. DOI: `10.1287/mnsc.27.1.1`.
+2. Sun, X., and Li, D. *整数规划* [*Integer Programming*]. Beijing: Science Press, 2010. ISBN: `978-7-03-029380-0`.
 
-3. Sun, Xiaoling, and Duan Li. *Integer Programming*. Beijing: Science Press, 2010. ISBN: 978-7-03-029380-0.（孙小玲、李端：《整数规划》，北京：科学出版社，2010年，ISBN：978-7-03-029380-0）
+3. Fisher, M. L. “The Lagrangian Relaxation Method for Solving Integer Programming Problems.” *Management Science*, 27(1), 1981, pp. 1–18. DOI: `10.1287/mnsc.27.1.1`.
 
 ## Suggested Follow-up Reading
 
