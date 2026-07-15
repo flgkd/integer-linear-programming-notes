@@ -12,9 +12,13 @@ The simplex method is a general-purpose algorithm for solving linear programs. I
 
 **Column generation**, which appears later in this note series, is also deeply connected to the simplex method: the pricing subproblem can be understood as the search for a nonbasic variable with a favorable reduced cost.
 
+---
+
 ## 2. The Simplex Method
 
 The simplex method contains many details. **This note does not aim to provide a complete step-by-step tutorial**. Instead, it summarizes several key concepts that are important for understanding LP, simplex, LP duality, and later ILP algorithms.
+
+---
 
 ## 3. Key Concepts in Linear Programming
 
@@ -87,6 +91,8 @@ The relationship among these concepts can be illustrated as follows.
 The feasible region of a linear program is a convex set. For a standard LP, each basic feasible solution corresponds to a vertex, or extreme point, of the feasible region.
 
 The simplex method moves from one vertex to an adjacent vertex, trying to improve the objective value at each step.
+
+---
 
 ## 4. Key Concepts in the Simplex Method
 
@@ -333,6 +339,8 @@ $$
 
 This relationship becomes especially important when studying LP duality and sensitivity analysis.
 
+---
+
 ## 5. Dual Simplex Method
 
 ### 5.1 Principle
@@ -362,6 +370,8 @@ The dual simplex method has several advantages:
 5. It is efficient for re-optimization after adding new constraints.
 
 Its limitation is that finding an initial dual feasible basis is not always easy for a general LP.
+
+---
 
 ## 6. Linear Programming Duality
 
@@ -524,6 +534,8 @@ y_i^\ast = \frac{\partial z^\ast}{\partial b_i}.
 $$
 
 For example, if $b_i$ represents the capacity of a resource, then $y_i^\ast$ measures the marginal value of increasing that resource capacity by one unit.
+
+---
 
 ## 7. Key Takeaways
 
