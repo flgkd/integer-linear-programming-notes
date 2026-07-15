@@ -46,6 +46,7 @@ However, this idea is beautiful in theory but difficult in practice. **Directly 
 
 > Gradually remove redundant parts of the LP relaxation feasible region by adding linear inequalities, called cutting planes, until the relaxation becomes close to the convex hull of the integer feasible points.
 
+---
 
 ## 2. Basic Idea of Cutting Plane⭐
 
@@ -128,6 +129,8 @@ The cut must satisfy two requirements:
 2. it must not remove any integer feasible solution.
 
 This is the core logic of cutting planes.
+
+---
 
 ## 3. Valid Inequalities⭐
 
@@ -446,6 +449,8 @@ This result shows the theoretical power of the C-G method.
 
 However, it does not mean that the method is always efficient in practice. In computation, the key challenge is not only to generate valid cuts, but to generate strong and useful cuts.
 
+---
+
 ## 4. Gomory Cutting Plane Method⭐
 
 ### 4.1 Basic Idea
@@ -760,6 +765,8 @@ This cut has two important properties:
 1. it cuts off the current fractional LP optimum;
 2. it does not cut off any integer feasible solution.
 
+---
+
 ## 5. Mixed-Integer Cuts⭐
 
 ### 5.1 General Representation of a Mixed-Integer Linear Feasible Set
@@ -941,6 +948,8 @@ This is why the Gomory mixed-integer cut is important in mixed-integer linear pr
 
 In practice, GMI cuts are widely used in modern MILP solvers.
 
+---
+
 ## 6. Cutting Plane vs Branch and Bound
 
 Both cutting planes and Branch and Bound solve ILP problems through LP relaxations, but they improve the relaxation in different ways.
@@ -956,6 +965,8 @@ Branch and Bound is easier to understand as a search-tree method.
 Cutting Plane is more polyhedral: it tries to describe the convex hull more accurately by adding inequalities.
 
 Modern MILP solvers usually combine both ideas, leading to **Branch and Cut**.
+
+---
 
 ## 7. Key Takeaways
 
