@@ -18,7 +18,7 @@ By optimizing the multipliers, we obtain the best bound available from this fami
 
 Lagrangian duality is a broad topic. A systematic treatment can be found in Chapter 5 of *Convex Optimization* by Boyd and Vandenberghe [1].
 
-This note focuses on the following questions:
+**This note focuses on the following questions:**
 
 1. What is Lagrangian Relaxation?
 2. Why does it provide a valid bound?
