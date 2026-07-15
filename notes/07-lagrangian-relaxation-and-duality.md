@@ -1156,7 +1156,7 @@ The main difficulty is often coordination through the multipliers.
 
 1. Boyd, S. P., and Vandenberghe, L. *Convex Optimization*. Cambridge University Press, 2004. Chapter 5.
 
-2. Sun, X., and Li, D. *整数规划* [*Integer Programming*]. Beijing: Science Press, 2010. ISBN: `978-7-03-029380-0`.
+2. Sun, Xiaoling, and Duan Li. *Integer Programming*. Beijing: Science Press, 2010. ISBN: 978-7-03-029380-0.（孙小玲、李端：《整数规划》，北京：科学出版社，2010年，ISBN：978-7-03-029380-0）
 
 3. Fisher, M. L. “The Lagrangian Relaxation Method for Solving Integer Programming Problems.” *Management Science*, 27(1), 1981, pp. 1–18. DOI: `10.1287/mnsc.27.1.1`.
 
