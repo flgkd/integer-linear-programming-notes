@@ -18,6 +18,8 @@ Unless the LP relaxation happens to return an integer solution, **simple roundin
 
 This note introduces **Branch and Bound**, one of the most fundamental methods for solving integer programming problems. The basic idea is not mysterious: it is a smarter form of enumeration.
 
+---
+
 ## 2. Why Simple Rounding Is Naive⭐
 
 A very natural first thought when learning integer linear programming is:
@@ -179,6 +181,8 @@ comes from the indivisibility of the decision variables.
 
 This is exactly why integer programming is harder than linear programming.
 
+---
+
 ## 3. Why Integer Programming Is Hard⭐
 
 When we studied calculus, a common way to find an optimum was to take derivatives and set them equal to zero.
@@ -196,6 +200,8 @@ So the powerful derivative-based tools are no longer directly available. We have
 This is one of the intuitive reasons why integer programming is difficult.
 
 In fact, many classical NP-hard problems can be formulated as integer programming problems.
+
+---
 
 ## 4. Basic Idea of Branch and Bound⭐
 
@@ -226,6 +232,8 @@ This is why Branch and Bound is also called **implicit enumeration**.
 It is not magic. It is just a much smarter way to enumerate.
 
 Branch and Bound can be used for both pure integer programming and mixed-integer programming. It is also one of the core ideas behind commercial solvers such as CPLEX and Gurobi.
+
+---
 
 ## 5. Two Core Ideas of Branch and Bound⭐
 
@@ -274,6 +282,8 @@ The goal is to gradually:
 - discard subproblems that cannot contain a better integer solution.
 
 When no remaining branch can improve the incumbent, the current incumbent is optimal.
+
+---
 
 ## 6. Example: Solving an ILP by Branch and Bound
 
@@ -531,6 +541,8 @@ $$
 (x_1,x_2)=(4,2), \quad z=340.
 $$
 
+---
+
 ## 7. General Steps of Branch and Bound for Maximization⭐
 
 Let the original integer programming problem be problem $A$.
@@ -613,6 +625,8 @@ Repeat branching, bounding, and pruning until no active branches remain.
 
 At that point, the incumbent solution is the optimal integer solution.
 
+---
+
 ## 8. Epsilon-Optimality⭐
 
 Branch and Bound works by continuously narrowing the gap between the upper bound and the lower bound.
@@ -647,6 +661,8 @@ This idea is very practical.
 When the problem is large and exact optimality is too expensive, we can set an acceptable optimality gap and allow the solver to stop once the gap is small enough.
 
 This is why commercial solvers often provide parameters such as an absolute gap or a relative MIP gap.
+
+---
 
 ## 9. Key Takeaways
 
