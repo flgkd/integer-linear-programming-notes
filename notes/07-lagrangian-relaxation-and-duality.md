@@ -254,7 +254,7 @@ It also does not mean that the Lagrangian dual always has the same optimal value
 
 A positive duality gap may remain.
 
-### 3.1 Minimum, Infimum, and Bounds
+### Minimum, Infimum, and Bounds
 
 A useful preliminary fact is:
 
@@ -685,7 +685,7 @@ The exact convergence conditions depend on the step-size rule.
 
 In practice, multiplier optimization is often one of the most difficult parts of Lagrangian Relaxation.
 
-### 6.1 Lagrangian Solutions May Be Primal-Infeasible
+### Lagrangian Solutions May Be Primal-Infeasible
 
 The solution $x^k$ of a Lagrangian relaxation need not satisfy the relaxed constraints.
 
