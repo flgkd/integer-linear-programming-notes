@@ -218,55 +218,268 @@ For a maximization primal problem, the corresponding construction produces upper
 
 ## 3. Why Is the Lagrangian Dual a Convex Optimization Problem?⭐
 
-For every fixed $x\in X$, the function
+Recall that the Lagrangian dual function is
 
 $$
-L(x,\lambda,\nu)
+q(\lambda,\nu)=\inf_{x\in X}L(x,\lambda,\nu),
 $$
 
-is affine in $(\lambda,\nu)$.
-
-The dual function is the pointwise infimum of these affine functions:
+where
 
 $$
-q(\lambda,\nu) = \inf_{x\in X} L(x,\lambda,\nu).
+L(x,\lambda,\nu)=f_0(x)+\sum_{i=1}^{m}\lambda_i g_i(x)+\sum_{j=1}^{p}\nu_j h_j(x).
 $$
 
-A pointwise infimum of affine functions is concave.
+For every fixed $x\in X$, the Lagrangian function is affine in the multiplier vector $(\lambda,\nu)$.
+
+We now prove that the dual function $q(\lambda,\nu)$ is concave.
+
+### 3.1 Direct Proof of Concavity
+
+Consider two multiplier vectors
+
+$$
+(\lambda^1,\nu^1)
+$$
+
+and
+
+$$
+(\lambda^2,\nu^2),
+$$
+
+and let
+
+$$
+0\le\theta\le1.
+$$
+
+Define their convex combination as
+
+$$
+\lambda^\theta=\theta\lambda^1+(1-\theta)\lambda^2
+$$
+
+and
+
+$$
+\nu^\theta=\theta\nu^1+(1-\theta)\nu^2.
+$$
+
+Since the Lagrangian function is affine in the multipliers, for every fixed $x\in X$,
+
+$$
+L(x,\lambda^\theta,\nu^\theta)=\theta L(x,\lambda^1,\nu^1)+(1-\theta)L(x,\lambda^2,\nu^2).
+$$
+
+Therefore,
+
+$$
+q(\lambda^\theta,\nu^\theta)=\inf_{x\in X}\{\theta L(x,\lambda^1,\nu^1)+(1-\theta)L(x,\lambda^2,\nu^2)\}.
+$$
+
+By the definition of the dual function, for every $x\in X$,
+
+$$
+L(x,\lambda^1,\nu^1)\ge q(\lambda^1,\nu^1)
+$$
+
+and
+
+$$
+L(x,\lambda^2,\nu^2)\ge q(\lambda^2,\nu^2).
+$$
+
+Multiplying these inequalities by $\theta$ and $1-\theta$, respectively, gives
+
+$$
+\theta L(x,\lambda^1,\nu^1)+(1-\theta)L(x,\lambda^2,\nu^2)\ge\theta q(\lambda^1,\nu^1)+(1-\theta)q(\lambda^2,\nu^2).
+$$
+
+This inequality holds for every $x\in X$.
+
+Taking the infimum over $x\in X$ therefore gives
+
+$$
+q(\lambda^\theta,\nu^\theta)\ge\theta q(\lambda^1,\nu^1)+(1-\theta)q(\lambda^2,\nu^2).
+$$
+
+This is exactly the definition of a concave function.
 
 Therefore:
 
 > **The Lagrangian dual function is concave, even when the original primal problem is nonconvex or contains integer variables.**
 
-The dual problem maximizes this concave function over the convex set
+The proof does not require the primal problem to be convex.
+
+It only uses the fact that, for every fixed $x$, the Lagrangian function is affine in the multiplier variables.
+
+### 3.2 An Equivalent Pointwise-Supremum View
+
+The same conclusion can also be understood from another viewpoint.
+
+Since
 
 $$
-\lambda\ge0.
+q(\lambda,\nu)=\inf_{x\in X}L(x,\lambda,\nu),
 $$
 
-Under the standard convention of convex optimization, maximizing a concave function over a convex feasible set is a convex optimization problem [1].
+we can equivalently write
 
-This does **not** mean that the dual function is necessarily smooth.
+$$
+q(\lambda,\nu)=-\sup_{x\in X}\{-L(x,\lambda,\nu)\}.
+$$
 
-For a linear integer program with a finite feasible set $X$, the dual function is concave and piecewise linear, and it is generally nondifferentiable.
+For every fixed $x$, the function
 
-It also does not mean that the Lagrangian dual always has the same optimal value as the primal problem.
+$$
+-L(x,\lambda,\nu)
+$$
 
-A positive duality gap may remain.
+is affine in $(\lambda,\nu)$.
 
-### Minimum, Infimum, and Bounds
+The pointwise supremum of a family of affine functions is convex.
 
-A useful preliminary fact is:
+Therefore,
 
-> **The infimum of a set is its greatest lower bound, and the supremum is its least upper bound.**
+$$
+\sup_{x\in X}\{-L(x,\lambda,\nu)\}
+$$
 
-If the infimum is attained, it is the minimum.
+is convex in $(\lambda,\nu)$.
 
-If the supremum is attained, it is the maximum.
+Its negative is consequently concave, which again proves that
 
-Therefore, solving a minimization problem can be viewed as finding the greatest attainable lower bound together with a point that attains it.
+$$
+q(\lambda,\nu)
+$$
 
-This viewpoint is central to duality.
+is concave.
+
+This is the argument commonly used to explain the convexity of the Lagrangian dual problem [1].
+
+### 3.3 Why Is the Dual Problem a Convex Optimization Problem?
+
+The Lagrangian dual problem is
+
+$$
+\max_{\lambda,\nu}\quad q(\lambda,\nu)
+$$
+
+subject to
+
+$$
+\lambda\ge0
+$$
+
+and
+
+$$
+\nu\in\mathbb{R}^p.
+$$
+
+The multiplier feasible set
+
+$$
+\{(\lambda,\nu):\lambda\ge0,\ \nu\in\mathbb{R}^p\}
+$$
+
+is convex.
+
+Since the objective function $q(\lambda,\nu)$ is concave, the dual problem maximizes a concave function over a convex feasible set.
+
+Under the standard convention of convex optimization, this is a convex optimization problem.
+
+> **The Lagrangian dual problem is convex even when the original primal problem is nonconvex or integer.**
+
+However, this does not mean that the dual problem is necessarily easy to solve.
+
+The dual function may be:
+
+- nondifferentiable;
+- piecewise linear;
+- unbounded below at some multiplier values;
+- expensive to evaluate if the Lagrangian relaxation remains difficult.
+
+For a linear integer program with a finite feasible set $X$, the dual function is the pointwise minimum of finitely many affine functions.
+
+Therefore, it is concave and piecewise linear, but generally nondifferentiable.
+
+### 3.4 Convexity Does Not Imply Zero Duality Gap
+
+The fact that the Lagrangian dual problem is convex does not imply that its optimal value equals the optimal value of the primal problem.
+
+Weak duality guarantees only that, for a minimization problem,
+
+$$
+q(\lambda,\nu)\le p^*
+$$
+
+for every feasible multiplier vector.
+
+Consequently,
+
+$$
+v(LD)\le p^*.
+$$
+
+If
+
+$$
+v(LD)<p^*,
+$$
+
+the difference is a positive Lagrangian duality gap.
+
+Thus, two different facts must be distinguished:
+
+1. the Lagrangian dual problem is always a convex optimization problem;
+2. strong duality does not always hold, especially for nonconvex and integer problems.
+
+### 3.5 Minimum, Infimum, and Bounds
+
+The **infimum** of a set is its greatest lower bound.
+
+If the infimum is attained by an element of the set, it is also the minimum.
+
+Similarly, the **supremum** is the least upper bound, and it becomes the maximum when it is attained.
+
+For a minimization problem, the optimal value can therefore be written as
+
+$$
+p^*=\inf\{f_0(x):x\text{ is feasible}\}.
+$$
+
+Lagrangian duality constructs a family of lower bounds
+
+$$
+q(\lambda,\nu)
+$$
+
+and then searches for the largest one:
+
+$$
+v(LD)=\sup_{\lambda\ge0,\ \nu\in\mathbb{R}^p}q(\lambda,\nu).
+$$
+
+When the supremum is attained, it can be written as a maximum.
+
+This viewpoint explains the central role of bounds in duality:
+
+```text
+primal minimization problem
+        ↓
+unknown optimal value
+
+each multiplier vector
+        ↓
+one valid lower bound
+
+maximize the lower bounds
+        ↓
+best Lagrangian dual bound
+
+```
 
 ---
 
