@@ -17,6 +17,8 @@ Therefore, before studying Branch and Cut, it is helpful to understand the follo
 
 A more detailed reference on this topic is Mitchell's classic survey-style chapter *Branch-and-Cut Algorithms for Combinatorial Optimization Problems*.
 
+---
+
 ## 2. Overall Description⭐
 
 As mentioned above, Branch and Cut is closely related to Branch and Bound. In fact, it can be viewed as **Branch and Bound strengthened by cutting planes**.
@@ -77,6 +79,8 @@ This is **the main advantage of Branch and Cut** compared with plain Branch and 
 In this note, we will not discuss in detail how to generate cuts. That topic belongs to the previous note on cutting planes.
 
 - [Cutting Plane](03-cutting-plane.md)
+
+---
 
 ## 3. A Simple Example
 
@@ -259,6 +263,8 @@ The key lesson is:
 
 This is the core idea of Branch and Cut.
 
+---
+
 ## 4. Algorithm Process⭐
 
 The overall process of Branch and Cut can be summarized as follows.
@@ -370,6 +376,8 @@ if cuts are not empty:
 
 This means that Branch and Cut first tries to strengthen the current LP relaxation. Only when no useful cut is found does it branch.
 
+---
+
 ## 5. Branch and Bound vs Branch and Cut
 
 The relationship between Branch and Bound and Branch and Cut can be summarized as follows.
@@ -385,6 +393,8 @@ Branch and Cut is not a completely separate method from Branch and Bound.
 Rather, it is Branch and Bound strengthened by cutting planes.
 
 In modern MILP solvers, Branch and Cut is often the standard framework. Solvers usually do not simply branch blindly. Instead, they also use cuts, presolve, primal heuristics, node selection strategies, branching rules, and many other techniques.
+
+---
 
 ## 6. Key Takeaways
 
