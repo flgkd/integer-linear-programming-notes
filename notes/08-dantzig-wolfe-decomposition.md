@@ -148,7 +148,7 @@ The type of $X_k$ determines how the Dantzig-Wolfe reformulation is written.
 
 ## 3. Minkowski-Weyl Theorem and the Representation of a Block⭐⭐
 
-The mathematical foundation of Dantzig-Wolfe Decomposition is the Minkowski-Weyl theorem.
+The mathematical foundation of Dantzig-Wolfe Decomposition is the Minkowski-Weyl theorem [2].
 
 ### 3.1 General Polyhedral Representation
 
@@ -543,7 +543,7 @@ negative reduced-cost column exists?
     └── No  → full LP Master Problem solved
 ```
 
-This is the standard connection between Dantzig-Wolfe Decomposition and Column Generation [2].
+This is the standard connection between Dantzig-Wolfe Decomposition and Column Generation [3].
 
 ### 5.5 Relation Between the RMP and the Full Master Problem
 
@@ -689,47 +689,127 @@ It is an LP-relaxation solution.
 
 The important point is that the combination occurs among **complete feasible local configurations**.
 
-### 6.4 Does Dantzig-Wolfe Always Produce a Stronger LP Relaxation?⭐
+### 6.4 An Important Benefit: A Stronger LP Relaxation⭐
 
-No.
+One of the most important benefits of Dantzig-Wolfe Decomposition in integer programming is that it can provide a **stronger LP relaxation** when the problem has a suitable block-angular structure and each block is represented by its integer-feasible configurations [4].
 
-This distinction is essential.
+This stronger relaxation can be extremely valuable in exact algorithms.
 
-#### Continuous LP case
+A stronger LP bound may:
 
-If the original problem is already a continuous LP and Dantzig-Wolfe merely represents each polyhedral block by its extreme points and rays, then the reformulated LP is an equivalent extended formulation of the original LP.
+- reduce the optimality gap at the root node;
+- improve lower bounds in Branch and Bound for minimization problems;
+- reduce the number of nodes that must be explored;
+- and therefore potentially accelerate the overall solution process.
 
-Therefore,
+This is one of the main reasons Dantzig-Wolfe reformulation and Branch and Price are so effective for many large-scale structured integer programs [3,4].
 
-> **Dantzig-Wolfe reformulation does not automatically improve the LP bound of a continuous LP.**
+#### Why Can the Relaxation Be Stronger?
 
-The formulation changes, but the optimal LP value remains the same.
-
-#### Integer-programming case
-
-Suppose instead that
-
-$$
-X_k
-$$
-
-is the set of integer-feasible solutions of block $k$.
-
-The LP Master Problem works with
+Suppose block $k$ has the integer-feasible set
 
 $$
-\mathrm{conv}(X_k),
+X_k^I=\{x_k\in\mathbb{Z}^{n_k}:D_kx_k\le d_k\}.
 $$
 
-the convex hull of these integer-feasible local configurations.
+A naive compact LP relaxation removes the integrality restriction and uses
 
-This can be substantially stronger than a naive compact LP relaxation in which the integrality restrictions inside each block are simply dropped.
+$$
+P_k=\{x_k\in\mathbb{R}^{n_k}:D_kx_k\le d_k\}.
+$$
 
-Therefore:
+In general,
 
-> **The strengthening effect comes from convexifying discrete local feasible sets, not from the Dantzig-Wolfe iteration itself.**
+$$
+\mathrm{conv}(X_k^I)\subseteq P_k.
+$$
 
-This is the precise version of the intuitive statement that the master LP mixes complete feasible configurations rather than arbitrary fragments.
+A Dantzig-Wolfe Master Problem whose columns represent integer-feasible points of $X_k^I$ works, at the LP level, over
+
+$$
+\mathrm{conv}(X_k^I).
+$$
+
+Therefore, the Dantzig-Wolfe LP relaxation preserves the convex hull of the local integer-feasible configurations rather than simply replacing the integer variables by continuous variables.
+
+For a minimization problem, this implies that the Dantzig-Wolfe LP bound is at least as strong as the corresponding naive compact LP bound:
+
+$$
+v(DW\text{-}LP)\ge v(Compact\text{-}LP).
+$$
+
+For a maximization problem, the inequality is reversed:
+
+$$
+v(DW\text{-}LP)\le v(Compact\text{-}LP).
+$$
+
+The intuition is:
+
+```text
+naive compact LP relaxation
+→ relax integrality inside each block
+→ may allow locally unrealistic fractional points
+
+Dantzig-Wolfe LP relaxation
+→ convex combinations of integer-feasible block configurations
+→ local integer structure is preserved through conv(X_k^I)
+```
+
+This is the precise mathematical basis for saying that Dantzig-Wolfe reformulation can produce a stronger relaxation in integer programming.
+
+Vanderbeck [4] explicitly describes Dantzig-Wolfe decomposition for integer programming as a reformulation aimed at obtaining a tighter LP relaxation bound.
+
+#### Important Qualification: Stronger Does Not Mean Strictly Stronger in Every Case
+
+The previous conclusion must be interpreted carefully.
+
+Dantzig-Wolfe Decomposition does **not** guarantee a strictly better LP bound for every model.
+
+If
+
+$$
+\mathrm{conv}(X_k^I)=P_k,
+$$
+
+for every block, then the Dantzig-Wolfe LP relaxation and the compact LP relaxation may have the same bound.
+
+More generally, even if
+
+$$
+\mathrm{conv}(X_k^I)\subsetneq P_k,
+$$
+
+the optimal objective values can still coincide for a particular instance.
+
+Therefore, the rigorous statement is:
+
+> **For an integer program with an appropriate Dantzig-Wolfe block decomposition, convexifying the integer-feasible block sets produces an LP relaxation that is no weaker than the corresponding naive compact LP relaxation, and it can be strictly stronger.**
+
+There is also an important continuous-LP special case.
+
+If the original problem is already a continuous LP and Dantzig-Wolfe merely rewrites each polyhedral block using its extreme points and rays, then the reformulation is an equivalent extended formulation of the same LP.
+
+In that case,
+
+$$
+v(DW\text{-}LP)=v(Original\text{-}LP),
+$$
+
+so there is no strengthening of the LP bound.
+
+Finally, a stronger relaxation does not automatically guarantee shorter running time.
+
+The stronger bound must be balanced against the additional computational cost of:
+
+- solving the Restricted Master Problem;
+- solving Pricing Problems repeatedly;
+- handling degeneracy and stabilization;
+- and, in an exact integer algorithm, performing Branch and Price.
+
+Thus:
+
+> **A stronger Dantzig-Wolfe relaxation can substantially accelerate exact optimization, but the overall computational benefit depends on both bound strength and decomposition cost.**
 
 ---
 
@@ -789,7 +869,7 @@ Dantzig-Wolfe / Column Generation
 → independent block Pricing Problems
 ```
 
-Under the usual polyhedral assumptions, the Lagrangian dual bound associated with the linking constraints is closely related to the LP bound of the Dantzig-Wolfe convexified Master Problem [2].
+Under the usual polyhedral assumptions, the Lagrangian dual bound associated with the linking constraints is closely related to the LP bound of the Dantzig-Wolfe convexified Master Problem [3].
 
 This is one reason Column Generation, Dantzig-Wolfe Decomposition, and Lagrangian Relaxation repeatedly appear together in large-scale optimization.
 
@@ -842,7 +922,7 @@ one complete feasible local deployment
 for one flow
 ```
 
-This interpretation is closely related to the VNF orchestration application studied by Jia et al. at IEEE ICC 2020, where Dantzig-Wolfe Decomposition, Column Generation, and Branch and Bound are combined for a large-scale ILP [3]. A related VNF service-provision model for software-defined LEO satellite networks appears in [4].
+This interpretation is closely related to the VNF orchestration application studied by Jia et al. at IEEE ICC 2020, where Dantzig-Wolfe Decomposition, Column Generation, and Branch and Bound are combined for a large-scale ILP [5]. A related VNF service-provision model for software-defined LEO satellite networks appears in [6].
 
 The purpose of these examples is not that every network problem should use Dantzig-Wolfe Decomposition.
 
@@ -916,7 +996,7 @@ how to systematically create the column-based formulation
 5. Column Generation solves the LP Master Problem without explicitly enumerating all columns.
 6. The Pricing Problem for block $k$ searches the entire feasible set $X_k$ for a new complete configuration with negative reduced cost.
 7. Dantzig-Wolfe reformulation and Column Generation are not the same thing: Dantzig-Wolfe creates the reformulation, while Column Generation solves it.
-8. A continuous Dantzig-Wolfe reformulation is LP-equivalent to the original continuous LP; stronger bounds arise when discrete local feasible sets are convexified.
+8. In integer programming, Dantzig-Wolfe convexification of integer-feasible block sets yields an LP relaxation that is no weaker than the corresponding naive compact LP relaxation and can be strictly stronger; for a purely continuous LP, the reformulation is LP-equivalent.
 9. Lagrangian Relaxation of the linking constraints and Dantzig-Wolfe pricing lead to closely related block subproblems.
 10. For an integer Master Problem, exact integer optimality generally requires an integer method such as Branch and Price.
 
@@ -924,11 +1004,15 @@ how to systematically create the column-based formulation
 
 1. Dantzig, G. B., and Wolfe, P. “Decomposition Principle for Linear Programs.” *Operations Research*, 8(1), 1960, pp. 101–111. DOI: `10.1287/opre.8.1.101`.
 
-2. Lübbecke, M. E., and Desrosiers, J. “Selected Topics in Column Generation.” *Operations Research*, 53(6), 2005, pp. 1007–1023. DOI: `10.1287/opre.1050.0234`.
+2. Schrijver, A. *Theory of Linear and Integer Programming*. Wiley, 1986.
 
-3. Jia, Z., Sheng, M., Li, J., Zhu, Y., Bai, W., and Han, Z. “Virtual Network Functions Orchestration in Software Defined LEO Small Satellite Networks.” *2020 IEEE International Conference on Communications (ICC)*, 2020. DOI: `10.1109/ICC40277.2020.9148906`.
+3. Lübbecke, M. E., and Desrosiers, J. “Selected Topics in Column Generation.” *Operations Research*, 53(6), 2005, pp. 1007–1023. DOI: `10.1287/opre.1050.0234`.
 
-4. Jia, Z., Sheng, M., Li, J., Zhou, D., and Han, Z. “VNF-Based Service Provision in Software Defined LEO Satellite Networks.” *IEEE Transactions on Wireless Communications*, 20(9), 2021, pp. 6139–6153. DOI: `10.1109/TWC.2021.3072155`.
+4. Vanderbeck, F. “On Dantzig-Wolfe Decomposition in Integer Programming and Ways to Perform Branching in a Branch-and-Price Algorithm.” *Operations Research*, 48(1), 2000, pp. 111–128. DOI: `10.1287/opre.48.1.111.12453`.
+
+5. Jia, Z., Sheng, M., Li, J., Zhu, Y., Bai, W., and Han, Z. “Virtual Network Functions Orchestration in Software Defined LEO Small Satellite Networks.” *2020 IEEE International Conference on Communications (ICC)*, 2020. DOI: `10.1109/ICC40277.2020.9148906`.
+
+6. Jia, Z., Sheng, M., Li, J., Zhou, D., and Han, Z. “VNF-Based Service Provision in Software Defined LEO Satellite Networks.” *IEEE Transactions on Wireless Communications*, 20(9), 2021, pp. 6139–6153. DOI: `10.1109/TWC.2021.3072155`.
 
 ## Suggested Follow-up Reading
 
