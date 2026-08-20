@@ -15,7 +15,7 @@ A structured study series on Integer Linear Programming, from linear programming
 | 05 | [Column Generation and Its Applications in Integer Linear Programming](notes/05-column-generation-and-ilp-applications.md) | Completed |
 | 06 | [Branch and Price](notes/06-branch-and-price.md) | Completed |
 | 07 | [Lagrangian Relaxation and Duality](notes/07-lagrangian-relaxation-and-duality.md) | Completed |
-| 08 | Dantzig-Wolfe Decomposition | Planned |
+| 08 | [Dantzig-Wolfe Decomposition](notes/08-dantzig-wolfe-decomposition.md) | Completed |
 | 09 | Benders Decomposition | Planned |
 | 10 | Computational Complexity Theory | Planned |
 | 11 | Dynamic Programming | Planned |
