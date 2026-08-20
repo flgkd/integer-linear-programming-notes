@@ -152,7 +152,7 @@ The mathematical foundation of Dantzig-Wolfe Decomposition is the Minkowski-Weyl
 
 ### 3.1 General Polyhedral Representation
 
-A polyhedron can be represented using a finite collection of points and rays.
+Let $X$ be a nonempty pointed polyhedron. By the Minkowski-Weyl theorem, $X$ can be represented using its extreme points and extreme rays [2].
 
 Let the extreme points of a polyhedron $X$ be
 
@@ -268,6 +268,8 @@ This distinction between the integer Master Problem and its LP relaxation is imp
 ## 4. Constructing the Dantzig-Wolfe Master Problem⭐⭐⭐
 
 ### 4.1 Substitute the Block Representation
+
+For simplicity, the following derivation focuses on the case in which each block $X_k$ is bounded or consists of a finite set of feasible configurations. If a continuous block is unbounded, the full Dantzig-Wolfe reformulation must also include variables associated with its extreme rays.
 
 Consider first the case in which each $X_k$ is represented by a finite collection of feasible points
 
@@ -869,7 +871,7 @@ Dantzig-Wolfe / Column Generation
 → independent block Pricing Problems
 ```
 
-Under the usual polyhedral assumptions, the Lagrangian dual bound associated with the linking constraints is closely related to the LP bound of the Dantzig-Wolfe convexified Master Problem [3].
+Under the standard polyhedral assumptions and strong LP duality, the Lagrangian dual obtained by dualizing the linking constraints has the same optimal bound as the LP relaxation of the corresponding Dantzig-Wolfe Master Problem [3].
 
 This is one reason Column Generation, Dantzig-Wolfe Decomposition, and Lagrangian Relaxation repeatedly appear together in large-scale optimization.
 
@@ -948,7 +950,7 @@ Solves the huge LP Master Problem without enumerating all columns.
 
 ### Branch and Price
 
-Embeds Column Generation inside Branch and Bound to enforce master-variable integrality and prove integer optimality.
+Embeds Column Generation inside Branch and Bound to enforce the required integrality conditions and prove integer optimality.
 
 Therefore,
 
