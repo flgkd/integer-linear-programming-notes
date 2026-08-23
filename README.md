@@ -6,21 +6,21 @@ A structured study series on Integer Linear Programming, from linear programming
 
 ## Notes
 
-| No. | Title | Status |
-|---|---|---|
-| 01 | [Simplex Method and Linear Programming Duality](notes/01-simplex-method-and-lp-duality.md) | Completed |
-| 02 | [Branch and Bound](notes/02-branch-and-bound.md) | Completed |
-| 03 | [Cutting Plane](notes/03-cutting-plane.md) | Completed |
-| 04 | [Branch and Cut](notes/04-branch-and-cut.md) | Completed |
-| 05 | [Column Generation and Its Applications in Integer Linear Programming](notes/05-column-generation-and-ilp-applications.md) | Completed |
-| 06 | [Branch and Price](notes/06-branch-and-price.md) | Completed |
-| 07 | [Lagrangian Relaxation and Duality](notes/07-lagrangian-relaxation-and-duality.md) | Completed |
-| 08 | [Dantzig-Wolfe Decomposition](notes/08-dantzig-wolfe-decomposition.md) | Completed |
-| 09 | Benders Decomposition | Planned |
-| 10 | Computational Complexity Theory | Planned |
-| 11 | Dynamic Programming | Planned |
-| 12 | Knapsack Problem | Planned |
-| 13 | Assignment Problem | Planned |
+| No. | Title                                                                                                                      | Status    |
+| --- | -------------------------------------------------------------------------------------------------------------------------- | --------- |
+| 01  | [Simplex Method and Linear Programming Duality](notes/01-simplex-method-and-lp-duality.md)                                 | Completed |
+| 02  | [Branch and Bound](notes/02-branch-and-bound.md)                                                                           | Completed |
+| 03  | [Cutting Plane](notes/03-cutting-plane.md)                                                                                 | Completed |
+| 04  | [Branch and Cut](notes/04-branch-and-cut.md)                                                                               | Completed |
+| 05  | [Column Generation and Its Applications in Integer Linear Programming](notes/05-column-generation-and-ilp-applications.md) | Completed |
+| 06  | [Branch and Price](notes/06-branch-and-price.md)                                                                           | Completed |
+| 07  | [Lagrangian Relaxation and Duality](notes/07-lagrangian-relaxation-and-duality.md)                                         | Completed |
+| 08  | [Dantzig-Wolfe Decomposition](notes/08-dantzig-wolfe-decomposition.md)                                                     | Completed |
+| 09  | [Benders Decomposition](notes/09-benders-decomposition.md)                                                                 | Completed |
+| 10  | Computational Complexity Theory                                                                                            | Planned   |
+| 11  | Dynamic Programming                                                                                                        | Planned   |
+| 12  | Knapsack Problem                                                                                                           | Planned   |
+| 13  | Assignment Problem                                                                                                         | Planned   |
 
 ## License
 
