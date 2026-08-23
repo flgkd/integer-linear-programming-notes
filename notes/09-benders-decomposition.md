@@ -552,6 +552,12 @@ Finite theoretical convergence does not mean fast computational convergence.
 
 This point is worth separating from the formulas.
 
+At this stage, the connection with the earlier **Cutting Plane** note becomes very direct. If the ideas of valid inequalities, cutting planes, and iterative cut generation are no longer fresh, it may be useful to review:
+
+- [Cutting Plane](03-cutting-plane.md)
+
+The key difference here is that Benders cuts are generated from the Subproblem and are added in the Master-variable space.
+
 Benders Decomposition is not simply:
 
 ```text
