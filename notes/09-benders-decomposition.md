@@ -122,7 +122,7 @@ Here:
 - $A$ and $B$ are matrices of appropriate dimensions;
 - $b$, $c$, and $f$ are vectors of appropriate dimensions.
 
-In a typical MILP application, $y$ contains some or all of the integer variables.
+In the classical MILP setting considered here, $y$ typically contains the integer variables, while $x$ contains the continuous variables.
 
 The important assumption is not simply that $y$ is integer.
 
@@ -142,7 +142,13 @@ $$
 
 The function $q(y)$ is the optimal value of the Subproblem for the given $y$.
 
-The original problem can therefore be written as
+If the Subproblem is infeasible for a given $y$, we define
+
+$$
+q(y)=+\infty.
+$$
+
+With this convention, the original problem can be written exactly as
 
 $$
 \min_{y\in Y}\quad f^T y+q(y).
@@ -208,6 +214,8 @@ $$
 
 whenever the primal and dual Subproblems are feasible and have finite optimal values.
 
+The extreme-point and extreme-ray arguments used below follow standard LP and polyhedral theory [4].
+
 For the geometric derivation below, assume that $U$ is nonempty and pointed. If $U$ contains a lineality space, the same idea requires the corresponding lineality directions to be handled explicitly.
 
 ---
@@ -238,7 +246,7 @@ extreme points
 → determine the optimal value of a feasible Subproblem
 ```
 
-This is the origin of the two families of Benders cuts [1,4].
+This is the origin of the two families of Benders cuts [1,3].
 
 ### 4.1 Feasibility Cuts
 
@@ -444,9 +452,13 @@ The algorithm does not merely alternate between two models. It progressively clo
 
 ### 5.3 One Benders Iteration
 
-After solving the Relaxed Master Problem, fix $y=y^k$ and solve the Subproblem.
+After solving the Relaxed Master Problem, first check whether it is feasible.
 
-There are two main cases.
+If the Relaxed Master Problem is infeasible, then no value of $y$ satisfies the accumulated valid Benders cuts, and the original problem is infeasible.
+
+Otherwise, let its solution be $y=y^k$ and solve the Subproblem.
+
+There are two main Subproblem cases.
 
 #### Case 1: The Subproblem Is Infeasible
 
@@ -509,7 +521,10 @@ initialize LB and UB
 repeat:
 
     solve Relaxed Master Problem
-        ↓
+
+    if Master Problem is infeasible:
+        terminate: the original problem is infeasible
+
     obtain y^k and theta^k
         ↓
     update LB
@@ -655,6 +670,8 @@ $$
 M_{ij}=\min\{s_i,d_j\}.
 $$
 
+Because demand at destination $j$ is enforced exactly and all flows are nonnegative, no single arc can carry more than $d_j$; similarly, no arc leaving source $i$ can carry more than $s_i$. Therefore, this is a valid and relatively tight upper bound for $x_{ij}$.
+
 The MILP is
 
 $$
@@ -668,7 +685,7 @@ $$
 $$
 
 $$
-\sum_{i\in I}x_{ij}\ge d_j,\quad j\in J
+\sum_{i\in I}x_{ij}=d_j,\quad j\in J
 $$
 
 $$
@@ -702,7 +719,7 @@ $$
 $$
 
 $$
-\sum_{i\in I}x_{ij}\ge d_j,\quad j\in J
+\sum_{i\in I}x_{ij}=d_j,\quad j\in J
 $$
 
 $$
@@ -716,7 +733,7 @@ $$
 Let:
 
 - $u_i\le0$ be the dual variable of the supply constraint;
-- $v_j\ge0$ be the dual variable of the demand constraint;
+- $v_j\in\mathbb{R}$ be the unrestricted dual variable of the demand equality;
 - $w_{ij}\le0$ be the dual variable of the activated-capacity constraint.
 
 The dual Subproblem is
@@ -732,7 +749,7 @@ u_i+v_j+w_{ij}\le c_{ij},\quad i\in I,\ j\in J
 $$
 
 $$
-u_i\le0,\quad v_j\ge0,\quad w_{ij}\le0.
+u_i\le0,\quad v_j\in\mathbb{R},\quad w_{ij}\le0.
 $$
 
 The dual feasible region does not depend on $\bar y$.
@@ -764,8 +781,6 @@ A classic large-scale distribution-system application of Benders Decomposition w
 ---
 
 ## 8. Application in Space-Air-Ground Integrated Networks
-
-The original Chinese note also used a communication-network example.
 
 Jia et al. studied data collection and transmission in a 6G space-air-ground integrated network with cooperative HAP and LEO satellite schemes [6].
 
