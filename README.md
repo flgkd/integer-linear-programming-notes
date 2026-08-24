@@ -24,6 +24,10 @@ A structured study series on Integer Linear Programming, from linear programming
 
 ## License
 
-This repository is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+Beginning with the current version of this repository, original material created by Hang Li is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
 
-You are free to share and adapt the material, provided that appropriate credit is given.
+Earlier versions released before the license change, including [v1.0-cc-by-4.0](../../releases/tag/v1.0-cc-by-4.0), remain available under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+
+Third-party materials, quotations, adapted figures, and referenced content are not covered by this license and remain subject to the rights of their respective copyright holders.
+
+See the [LICENSE](LICENSE) file for details.
