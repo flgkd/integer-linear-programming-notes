@@ -1,14 +1,31 @@
-Creative Commons Attribution 4.0 International License
+Creative Commons Attribution-NonCommercial 4.0 International License
 
 Copyright (c) 2026 Hang Li
 
-This work is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+Except where otherwise noted, the original text, explanations, examples,
+diagrams, and organization created by Hang Li in this repository are licensed
+under the Creative Commons Attribution-NonCommercial 4.0 International License
+(CC BY-NC 4.0).
 
-You are free to share and adapt the material in this repository for any purpose, provided that appropriate credit is given to the original author.
+You are free to share and adapt the licensed material for non-commercial
+purposes, provided that appropriate credit is given to the original author.
 
-Attribution should include the author's name, GitHub username, repository name, and a link to the original repository when possible.
+Commercial use of the licensed material, including commercial publication,
+redistribution for profit, or incorporation into commercial products, requires
+separate permission from the copyright holder.
+
+Third-party materials, quotations, adapted figures, referenced content, and
+other materials not owned by Hang Li are not covered by this license and remain
+subject to the copyright and license terms of their respective owners.
+
+Earlier versions of this repository that were released under the Creative
+Commons Attribution 4.0 International License (CC BY 4.0) remain available
+under the terms applicable to those versions.
+
+Attribution should include the author's name, GitHub username, repository name,
+and a link to the original repository when possible.
 
 Author: Hang Li
 GitHub: flgkd
 Repository: integer-linear-programming-notes
-License: CC BY 4.0
+License: CC BY-NC 4.0
