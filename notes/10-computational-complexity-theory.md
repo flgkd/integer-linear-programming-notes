@@ -971,25 +971,172 @@ It is also NP-hard through standard reductions from NP-complete Boolean problems
 
 Therefore, the decision version is NP-complete, and the corresponding 0-1 optimization problem is NP-hard [2].
 
-### 10.2 General Integer Linear Programming
+### 10.2 General Integer Linear Programming⭐⭐⭐
 
-Now consider the more general decision problem:
+The 0-1 integer program above is already NP-hard, but it is only a special case of general integer linear programming.
+
+Now replace the binary restriction
 
 $$
-\text{Does there exist }x\in\mathbb{Z}^n\text{ such that }Ax\le b\text{ and }c^Tx\ge K?
+x\in\{0,1\}^n
 $$
 
-General integer linear programming is NP-hard, and the standard decision formulations are NP-complete under binary encoding [6].
+by the more general integer restriction
 
-This is one of the theoretical reasons why integer programming is fundamentally more difficult than linear programming.
+$$
+x\in\mathbb{Z}^n.
+$$
 
-However, one must be very careful with the interpretation.
+Consider the decision problem
 
-> **"General ILP is NP-hard" does not mean that every optimization problem written with integer variables is NP-hard.**
+$$
+GIP(K):\quad \text{Does there exist }x\in\mathbb{Z}^n\text{ such that }Ax\le b\text{ and }c^Tx\ge K?
+$$
 
-For example, the one-to-one assignment problem can be written as a binary linear program, but it is polynomial-time solvable.
+Under the standard binary encoding of the integer data, this decision problem is NP-complete, and the corresponding optimization problem is NP-hard [6].
 
-The structure of the constraint matrix matters.
+It is useful not to accept this statement only as a conclusion. The reduction from 0-1 integer programming is actually very simple and makes the relationship much clearer.
+
+#### Reduction from 0-1 Integer Programming
+
+Recall the 0-1 decision problem from Section 10.1:
+
+$$
+\text{Does there exist }x\in\{0,1\}^n\text{ such that }Ax\le b\text{ and }c^Tx\ge K?
+$$
+
+We want to transform it into an instance of general integer programming.
+
+Let
+
+$$
+e=(1,\ldots,1)^T.
+$$
+
+Instead of explicitly requiring
+
+$$
+x\in\{0,1\}^n,
+$$
+
+require
+
+$$
+x\in\mathbb{Z}^n
+$$
+
+together with
+
+$$
+x\le e
+$$
+
+and
+
+$$
+-x\le0.
+$$
+
+The last two inequalities are equivalent to
+
+$$
+0\le x\le e.
+$$
+
+Because $x$ is integer, this implies
+
+$$
+x\in\{0,1\}^n.
+$$
+
+Therefore, the original 0-1 decision problem is equivalent to
+
+$$
+\text{Does there exist }x\in\mathbb{Z}^n\text{ such that }Ax\le b,\ x\le e,\ -x\le0,\text{ and }c^Tx\ge K?
+$$
+
+If we want to write the transformed inequalities in one compact matrix form, define
+
+$$
+\widetilde A=[A^T\ I\ -I]^T
+$$
+
+and
+
+$$
+\widetilde b=[b^T\ e^T\ 0^T]^T.
+$$
+
+Then the transformed problem becomes
+
+$$
+\text{Does there exist }x\in\mathbb{Z}^n\text{ such that }\widetilde A x\le\widetilde b\text{ and }c^Tx\ge K?
+$$
+
+The transformation only adds the upper- and lower-bound constraints for the $n$ variables, so it can clearly be carried out in polynomial time.
+
+Hence,
+
+$$
+0\text{-}1\ ILP\le_p General\ ILP.
+$$
+
+Since the 0-1 integer programming decision problem is NP-complete, this reduction proves that the general integer programming decision problem is NP-hard.
+
+To conclude NP-completeness, we also need membership in $NP$. Under binary encoding, integer linear programming feasibility has polynomial-size certificates whenever it is feasible, so the corresponding decision formulation belongs to $NP$ [6].
+
+Therefore:
+
+> **The general integer linear programming decision problem is NP-complete, and the corresponding exact optimization problem is NP-hard.**
+
+#### What Does "General ILP Is NP-Hard" Actually Mean?⭐
+
+This conclusion is very important, but it is also easy to overinterpret.
+
+It means that, unless
+
+$$
+P=NP,
+$$
+
+there is no polynomial-time exact algorithm that solves **every instance of general integer linear programming**.
+
+However:
+
+> **"General ILP is NP-hard" does not mean that every special problem that can be written as an ILP is itself NP-hard.**
+
+For example, the one-to-one assignment problem can be formulated using binary variables:
+
+$$
+x_{ij}\in\{0,1\}.
+$$
+
+Nevertheless, it has polynomial-time algorithms, such as the Hungarian algorithm.
+
+So the presence of integer or binary variables alone does not determine the complexity of a problem.
+
+The structure of the feasible set and constraint matrix matters.
+
+This distinction is especially important when reading optimization papers. If a paper formulates a problem as a MILP, that alone is **not** a proof that the particular problem is NP-hard.
+
+To prove that a specific structured problem $B$ is NP-hard, the usual strategy is to start from a known NP-hard or NP-complete problem $A$ and prove
+
+$$
+A\le_p B.
+$$
+
+That is:
+
+```text
+known NP-hard problem
+        ↓ polynomial reduction
+the new structured problem
+
+therefore:
+the new problem is NP-hard
+```
+
+Notice the direction carefully. Reducing the new problem **to** an already known NP-hard problem would not prove that the new problem is NP-hard.
 
 ### 10.3 A Very Important Special Case: Fixed Dimension
 
