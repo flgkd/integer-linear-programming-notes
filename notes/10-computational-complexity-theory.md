@@ -1236,7 +1236,7 @@ After all of the definitions above, these are the points I think are worth remem
 
 ## References
 
-1. Sun, X., and Li, D. *整数规划* [*Integer Programming*]. Beijing: Science Press, 2010. ISBN: `978-7-03-029380-0`.
+1. Sun, Xiaoling, and Duan Li. *Integer Programming*. Beijing: Science Press, 2010. ISBN: 978-7-03-029380-0.（孙小玲、李端：《整数规划》，北京：科学出版社，2010年，ISBN：978-7-03-029380-0）
 
 2. Garey, M. R., and Johnson, D. S. *Computers and Intractability: A Guide to the Theory of NP-Completeness*. W. H. Freeman, 1979. ISBN: `0-7167-1045-5`.
 
