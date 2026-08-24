@@ -159,10 +159,16 @@ $$
 DEC(K):\quad \text{Does there exist }x\in\{0,1\}^n\text{ such that }Ax\le b\text{ and }c^Tx\ge K?
 $$
 
-Suppose integer bounds $L$ and $U$ are known such that
+Suppose integer bounds $L_0$ and $U_0$ are known such that
 
 $$
-L\le z^{\ast}\le U.
+L_0\le z^{\ast}\le U_0.
+$$
+
+Initialize
+
+$$
+L=L_0,\quad U=U_0.
 $$
 
 Then the optimal value can be found by binary search.
@@ -194,7 +200,7 @@ $$
 The number of decision queries is at most
 
 $$
-\lceil\log_2(U-L+1)\rceil.
+\lceil\log_2(U_0-L_0+1)\rceil.
 $$
 
 So for many discrete optimization problems, exact optimization and the corresponding decision problem are polynomially related.
@@ -380,7 +386,7 @@ strongly polynomial time
 
 Shortest-path, assignment, and several network-flow problems have strongly polynomial algorithms.
 
-General linear programming is polynomial-time solvable, although the simplex method itself is not a polynomial-time algorithm in the worst case. Polynomial-time LP algorithms include the ellipsoid method and interior-point methods.
+General linear programming is polynomial-time solvable, although the simplex method itself is not a polynomial-time algorithm in the worst case. Polynomial-time LP algorithms include the ellipsoid method and interior-point methods. Whether general linear programming admits a strongly polynomial-time algorithm remains open.
 
 For a review of LP and simplex, see:
 
@@ -434,16 +440,16 @@ We will return to this point in the later notes on Dynamic Programming and Knaps
 
 ### 5.4 Exponential and Superpolynomial Time
 
-An algorithm such as
+A running time that grows on the order of
 
 $$
-O(2^L)
+\Theta(2^L)
 $$
 
-or
+or, more generally,
 
 $$
-O(c^L),\quad c>1,
+\Theta(c^L),\quad c>1,
 $$
 
 is exponential in the input length.
@@ -494,7 +500,7 @@ It means **nondeterministic polynomial time**.
 
 A modern and very useful equivalent definition is based on certificates.
 
-A decision problem belongs to $NP$ if, for every YES instance, there exists a certificate of polynomial length whose correctness can be verified in polynomial time.
+A decision problem belongs to $NP$ if, for every YES instance, there exists a certificate whose length is polynomial in the input length and whose correctness can be verified in polynomial time.
 
 Informally:
 
@@ -827,14 +833,14 @@ $$
 
 So one should **not** casually claim that NP-complete problems are known to lie in co-NP.
 
-The following figure should therefore be read as a schematic picture, not as a complete characterization of the unknown boundary.
+The following figure should therefore be read only as a schematic picture. In particular, the drawing should **not** be interpreted as proving that $NP\ne co\text{-}NP$ or that $NP\cap co\text{-}NP$ strictly contains $P$; these relationships are not known.
 
 <p align="center">
   <img src="../figures/chapter-10/chapter-10-fig2.png" alt="Relationship among P, NP, and co-NP problems" width="500">
 </p>
 
 <p align="center">
-  Schematic relationship among P, NP, and co-NP.
+  Schematic relationship among P, NP, and co-NP; the exact boundaries are unknown.
 </p>
 
 ---
@@ -845,28 +851,30 @@ The following figure should therefore be read as a schematic picture, not as a c
 
 NP-hard is more general than NP-complete.
 
-A problem $H$ is NP-hard if every problem in $NP$ can be reduced to $H$ in polynomial time.
+For a **decision problem** $H$, we call $H$ NP-hard if every problem $A\in NP$ can be polynomial-time reduced to $H$:
 
-Unlike NP-complete problems:
+$$
+A\le_p H,\quad \forall A\in NP.
+$$
 
-- an NP-hard problem does not have to belong to $NP$;
-- an NP-hard problem does not even have to be a decision problem.
+Unlike NP-complete problems, an NP-hard problem is not required to belong to $NP$.
 
-This is why optimization problems are commonly described as NP-hard.
-
-For an optimization problem, a standard sufficient route is:
+The term is also commonly used for optimization and search problems. In that setting, the precise reduction model must be stated, but a standard sufficient route in optimization is:
 
 ```text
-its associated decision problem is NP-complete
+associated decision problem is NP-complete
+        ↓
+a polynomial-time exact optimization algorithm
+would solve that decision problem
         ↓
 the exact optimization problem is NP-hard
 ```
 
-So the statement from optimization papers,
+Therefore, saying
 
-> "This optimization problem is NP-hard,"
+> "This optimization problem is NP-hard"
 
-is perfectly meaningful even though $NP$ itself is a class of decision problems.
+is meaningful even though $NP$ itself is a class of decision problems. The statement means that a polynomial-time exact solver for the optimization problem would imply a polynomial-time solver for an NP-hard decision problem.
 
 ### 9.2 NP-Hard vs. NP-Complete
 
@@ -995,7 +1003,7 @@ $$
 -\sum_{j\in P_i}x_j+\sum_{j\in N_i}x_j\le |N_i|-1.
 $$
 
-Therefore, a SAT instance can be transformed in polynomial time into a 0-1 linear feasibility problem.
+Therefore, a SAT instance can be transformed in polynomial time into a 0-1 linear feasibility problem. To place this directly in the threshold form $BIP(K)$ above, simply choose $c=0$ and $K=0$.
 
 Equivalently,
 
@@ -1228,7 +1236,13 @@ $$
 s_i\ge0.
 $$
 
-Because $x$ is binary, every feasible slack variable has a computable finite upper bound whose binary encoding length is polynomial in the original input length.
+Because $x$ is binary, every feasible slack variable has a computable finite upper bound. One valid bound is
+
+$$
+0\le s_i\le \max\{0,b_i-\sum_{j:a_{ij}<0}a_{ij}\}.
+$$
+
+Its binary encoding length is polynomial in the original input length.
 
 Similarly,
 
@@ -1242,7 +1256,11 @@ $$
 c^Tx-t=K
 $$
 
-with a bounded nonnegative integer variable $t$.
+with
+
+$$
+0\le t\le \max\{0,\sum_{j:c_j>0}c_j-K\}.
+$$
 
 Thus a 0-1 ILP decision instance can be transformed in polynomial time into a bounded integer linear-equation system.
 
@@ -1266,7 +1284,7 @@ At first sight, restricting every integer variable to 0 or 1 may appear to make 
 
 It does not.
 
-A bounded integer variable can be represented in binary. If
+A bounded integer variable can be represented in binary. Variables with $u_j=0$ are fixed at zero and can be removed. For $u_j\ge1$, if
 
 $$
 0\le x_j\le u_j,
@@ -1298,6 +1316,8 @@ $$
 
 The slack variable $t_j$ can itself be binary-expanded using only polynomially many additional bits.
 
+The number of introduced bits is logarithmic in the numerical upper bounds, and the powers of two used as coefficients also have polynomial encoding length. Therefore, this transformation has polynomial size and can be carried out in polynomial time.
+
 After applying this construction to all bounded integer variables, the bounded integer equation system is transformed into a linear equation system containing only binary variables.
 
 Hence,
@@ -1310,29 +1330,17 @@ Since $BILP\text{-}EQ$ is NP-complete and $BIN\text{-}EQ\in NP$, the binary line
 
 This is the same basic reason binary encoding is so important in complexity theory: a potentially large bounded integer value can be represented using only logarithmically many bits.
 
-#### 10.4.3 A Single Binary Linear Equation: Subset Sum⭐
+#### 10.4.3 A Single Binary Linear Equation and Subset Sum⭐
 
 We can restrict the problem even further.
 
-Consider
-
-$$
-a^Tx=\beta
-$$
-
-with
-
-$$
-x\in\{0,1\}^n.
-$$
-
-The decision problem
+First consider the general single-equation 0-1 feasibility problem
 
 $$
 ONE\text{-}EQ:\quad \text{Does there exist }x\in\{0,1\}^n\text{ such that }a^Tx=\beta?
 $$
 
-is the familiar **Subset Sum** form and is NP-complete [2].
+where $a\in\mathbb{Z}^n$ and $\beta\in\mathbb{Z}$.
 
 The important point from the original derivation is that even a system of binary linear equations can be packed into a **single** binary linear equation.
 
@@ -1414,13 +1422,19 @@ $$
 \sum_{i=1}^{m}M^{i-1}r_i=0.
 $$
 
-Since every residual has magnitude strictly smaller than $M/2$, the balanced base-$M$ representation is unique. Therefore,
+Suppose some residual is nonzero, and let $k$ be the largest index with $r_k\ne0$. Then the magnitude of the highest-order term is at least $M^{k-1}$, while the sum of the magnitudes of all lower-order terms is strictly smaller than
+
+$$
+\frac{M}{2}\frac{M^{k-1}-1}{M-1}<M^{k-1}.
+$$
+
+The lower-order terms therefore cannot cancel the highest-order term, which is a contradiction. Hence
 
 $$
 r_i=0,\quad i=1,\ldots,m,
 $$
 
-which implies
+and therefore
 
 $$
 Ax=b.
@@ -1431,6 +1445,28 @@ Thus
 $$
 BIN\text{-}EQ\le_p ONE\text{-}EQ.
 $$
+
+This is genuinely a polynomial reduction. Since
+
+$$
+\log M=O(\log n+\log T),
+$$
+
+the binary encoding length of every constructed coefficient $\widehat a_j$ and of $\widehat b$ is polynomial in the encoding length of the original system.
+
+Because $BIN\text{-}EQ$ is NP-complete and $ONE\text{-}EQ$ clearly belongs to $NP$, $ONE\text{-}EQ$ is NP-complete.
+
+Now consider the further restriction in which
+
+$$
+a_i\ge0,\quad \beta\ge0.
+$$
+
+This is the standard **Subset Sum** decision problem:
+
+> Given nonnegative integers $a_1,\ldots,a_n$ and a target $\beta$, is there a subset whose sum is exactly $\beta$?
+
+Subset Sum is also NP-complete [2].
 
 So even a single linear equation with binary variables can define an NP-complete decision problem.
 
@@ -1456,6 +1492,8 @@ There is no contradiction once input length is treated correctly.
 
 ### 11.1 0-1 Linear Knapsack
 
+Assume the weights, profits, capacity, and threshold are nonnegative integers.
+
 The 0-1 knapsack optimization problem is
 
 $$
@@ -1480,9 +1518,9 @@ $$
 
 It belongs to $NP$ because a proposed vector $x$ can be checked in polynomial time.
 
-To prove NP-hardness, use the single-equation binary problem from Section 10.4.3.
+To prove NP-hardness, use the standard Subset Sum problem from Section 10.4.3.
 
-Start from
+Start from a Subset Sum instance with nonnegative integers $a_1,\ldots,a_n$ and target $b$:
 
 $$
 a^Tx=b,\quad x\in\{0,1\}^n.
@@ -1523,10 +1561,10 @@ $$
 Therefore,
 
 $$
-ONE\text{-}EQ\le_p KP_{01}.
+Subset\ Sum\le_p KP_{01}.
 $$
 
-Since the single-equation problem is NP-complete, 0-1 knapsack decision is NP-hard. Since it is also in $NP$, it is NP-complete.
+Since Subset Sum is NP-complete, 0-1 knapsack decision is NP-hard. Since it is also in $NP$, it is NP-complete.
 
 Therefore:
 
@@ -1534,7 +1572,7 @@ Therefore:
 
 ### 11.2 General Bounded Integer Knapsack
 
-Now allow each item to be selected more than once, but impose an integer upper bound.
+Now allow each item to be selected more than once, but impose an integer upper bound. As in the standard knapsack setting, assume the weights, profits, capacity, and upper bounds are nonnegative integers.
 
 Consider
 
@@ -1693,29 +1731,19 @@ This one line catches many incorrect complexity arguments.
 After all of the definitions above, these are the points I think are worth remembering.
 
 1. $P$, $NP$, co-NP, and NP-complete are classical complexity classes of **decision problems**.
-2. Optimization problems can often be connected to decision problems through an objective threshold.
-3. For many discrete optimization problems with integer objective values, a polynomial number of decision queries can recover the optimal objective value.
-4. Complexity is measured as a function of **encoded input length**, not only the number of variables and constraints.
-5. An integer of magnitude $B$ requires only $O(\log(B+1))$ bits to encode.
-6. Polynomial time means polynomial in the input length.
-7. A pseudo-polynomial algorithm may be polynomial in a numerical value such as $B$ but exponential in the bit length of $B$.
-8. $NP$ does **not** mean non-polynomial. It means nondeterministic polynomial time and can be understood through polynomial-time verification of YES certificates.
-9. $P\subseteq NP$ is known; whether $P=NP$ is still open.
-10. A polynomial reduction $A\le_p B$ means that $A$ is no harder than $B$.
-11. To prove a new problem $B$ is NP-hard, reduce a known hard problem **to** it: $A\le_p B$.
-12. An NP-complete problem is both in $NP$ and NP-hard.
-13. If any NP-complete problem has a polynomial-time algorithm, then $P=NP$.
-14. NP-hard is broader than NP-complete: an NP-hard problem does not have to be a decision problem or belong to $NP$.
-15. General integer linear programming is NP-hard, but this does not mean every special ILP structure is NP-hard.
-16. A 0-1 linear integer program can encode SAT, so its decision version is NP-complete.
-17. Bounded integer linear-equation feasibility remains NP-complete.
-18. Even the binary equation system $Ax=b$ can be NP-complete.
-19. Even a **single** binary linear equation $a^Tx=b$ can be NP-complete; this is the Subset Sum form.
-20. The one-to-one assignment problem is polynomial-time solvable, and fixed-dimensional ILP is also polynomial-time solvable.
-21. Both 0-1 knapsack and bounded integer knapsack are NP-hard in their optimization forms.
-22. The usual $O(nB)$ dynamic-programming algorithm for 0-1 knapsack is pseudo-polynomial, not polynomial in the binary input length.
-23. 0-1 knapsack is weakly NP-hard, which is compatible with the existence of a pseudo-polynomial algorithm.
-24. NP-hardness is a worst-case statement about a problem family. It does not mean every practical instance is difficult.
+2. Optimization problems can often be connected to corresponding decision problems through an objective threshold.
+3. Complexity is measured with respect to the **encoded input length**, not simply the number of variables or the numerical magnitude of the data.
+4. Polynomial time means polynomial in the input length; an algorithm polynomial in a numerical value such as $B$ may only be **pseudo-polynomial**.
+5. $NP$ does **not** mean non-polynomial. An $NP$ problem is a decision problem whose YES certificates can be verified in polynomial time.
+6. We know that $P\subseteq NP$, but whether $P=NP$ remains open.
+7. A polynomial reduction $A\le_p B$ means that $A$ is no harder than $B$. To prove a new problem $B$ is NP-hard, reduce a known hard problem **to** it.
+8. An NP-complete problem is both in $NP$ and NP-hard. If any NP-complete problem has a polynomial-time algorithm, then $P=NP$.
+9. NP-hard is more general than NP-complete: an NP-hard problem does not have to be a decision problem or belong to $NP$.
+10. General integer linear programming is NP-hard, but this does **not** mean every problem formulated with integer variables is NP-hard.
+11. Even highly restricted integer problems can remain hard: 0-1 ILP, binary linear-equation feasibility, and even a single binary equation such as Subset Sum can be NP-complete.
+12. On the other hand, special structure can make integer problems polynomial-time solvable; examples include the assignment problem and fixed-dimensional ILP.
+13. 0-1 knapsack is NP-hard, but its classical $O(nB)$ dynamic-programming algorithm is pseudo-polynomial rather than polynomial in the binary input length.
+14. NP-hardness is a **worst-case statement about a problem family**. It does not mean that every practical instance is difficult.
 
 ## References
 
