@@ -941,6 +941,12 @@ This is why commercial MILP solvers can solve many large practical instances eve
 
 ## 10. Complexity of Integer Linear Programming⭐⭐⭐
 
+Throughout this section, assume that the coefficients and right-hand sides are integers encoded in binary.
+
+The purpose of this section is not only to state that integer programming is hard. I want to keep the sequence of increasingly restricted problems, because it shows something more interesting:
+
+> **Even after imposing very strong structural restrictions, some integer-programming decision problems remain NP-complete.**
+
 ### 10.1 0-1 Linear Integer Programming
 
 Consider the 0-1 optimization problem
@@ -962,50 +968,80 @@ $$
 Its threshold decision version is
 
 $$
-\text{Does there exist }x\in\{0,1\}^n\text{ such that }Ax\le b\text{ and }c^Tx\ge K?
+BIP(K):\quad \text{Does there exist }x\in\{0,1\}^n\text{ such that }Ax\le b\text{ and }c^Tx\ge K?
 $$
 
-This problem belongs to $NP$ because a candidate binary vector $x$ can be checked in polynomial time.
+This decision problem belongs to $NP$ because, given a candidate binary vector $x$, we can verify all constraints and the objective threshold in polynomial time.
 
-It is also NP-hard through standard reductions from NP-complete Boolean problems.
+The original route for understanding its hardness is through Boolean satisfiability.
 
-Therefore, the decision version is NP-complete, and the corresponding 0-1 optimization problem is NP-hard [2].
+A SAT instance can be encoded as a 0-1 linear feasibility problem. Associate one binary variable
+
+$$
+x_j\in\{0,1\}
+$$
+
+with each Boolean variable.
+
+For a clause $C_i$, let $P_i$ be the set of variables that appear positively and $N_i$ the set that appear negated. The clause is satisfied if and only if
+
+$$
+\sum_{j\in P_i}x_j+\sum_{j\in N_i}(1-x_j)\ge1.
+$$
+
+This is a linear inequality. It can also be rewritten in standard less-than-or-equal form as
+
+$$
+-\sum_{j\in P_i}x_j+\sum_{j\in N_i}x_j\le |N_i|-1.
+$$
+
+Therefore, a SAT instance can be transformed in polynomial time into a 0-1 linear feasibility problem.
+
+Equivalently,
+
+$$
+SAT\le_p 0\text{-}1\ ILP.
+$$
+
+Since SAT is NP-complete and 0-1 ILP decision belongs to $NP$, the 0-1 integer programming decision problem is NP-complete. The corresponding exact optimization problem is NP-hard [2,3].
+
+This makes an important point:
+
+> **A general 0-1 linear integer program is already sufficient to represent NP-complete decision problems.**
 
 ### 10.2 General Integer Linear Programming⭐⭐⭐
 
-The 0-1 integer program above is already NP-hard, but it is only a special case of general integer linear programming.
+The 0-1 integer program above is only a special case of general integer linear programming.
 
-Now replace the binary restriction
+Now replace
 
 $$
 x\in\{0,1\}^n
 $$
 
-by the more general integer restriction
+by
 
 $$
 x\in\mathbb{Z}^n.
 $$
 
-Consider the decision problem
+Consider
 
 $$
 GIP(K):\quad \text{Does there exist }x\in\mathbb{Z}^n\text{ such that }Ax\le b\text{ and }c^Tx\ge K?
 $$
 
-Under the standard binary encoding of the integer data, this decision problem is NP-complete, and the corresponding optimization problem is NP-hard [6].
+Under standard binary encoding, this decision problem is NP-complete, and the corresponding optimization problem is NP-hard [6].
 
-It is useful not to accept this statement only as a conclusion. The reduction from 0-1 integer programming is actually very simple and makes the relationship much clearer.
+It is useful not to accept this only as a conclusion. The reduction from 0-1 integer programming is simple.
 
 #### Reduction from 0-1 Integer Programming
 
-Recall the 0-1 decision problem from Section 10.1:
+Recall
 
 $$
-\text{Does there exist }x\in\{0,1\}^n\text{ such that }Ax\le b\text{ and }c^Tx\ge K?
+BIP(K):\quad \text{Does there exist }x\in\{0,1\}^n\text{ such that }Ax\le b\text{ and }c^Tx\ge K?
 $$
-
-We want to transform it into an instance of general integer programming.
 
 Let
 
@@ -1013,49 +1049,41 @@ $$
 e=(1,\ldots,1)^T.
 $$
 
-Instead of explicitly requiring
-
-$$
-x\in\{0,1\}^n,
-$$
-
-require
+Replace the binary restriction by
 
 $$
 x\in\mathbb{Z}^n
 $$
 
-together with
+and add
 
 $$
 x\le e
 $$
 
-and
-
 $$
 -x\le0.
 $$
 
-The last two inequalities are equivalent to
+Together,
 
 $$
 0\le x\le e.
 $$
 
-Because $x$ is integer, this implies
+Since $x$ is integer,
 
 $$
 x\in\{0,1\}^n.
 $$
 
-Therefore, the original 0-1 decision problem is equivalent to
+Thus the original problem is equivalent to
 
 $$
 \text{Does there exist }x\in\mathbb{Z}^n\text{ such that }Ax\le b,\ x\le e,\ -x\le0,\text{ and }c^Tx\ge K?
 $$
 
-If we want to write the transformed inequalities in one compact matrix form, define
+Define
 
 $$
 \widetilde A=[A^T\ I\ -I]^T
@@ -1067,13 +1095,13 @@ $$
 \widetilde b=[b^T\ e^T\ 0^T]^T.
 $$
 
-Then the transformed problem becomes
+Then the transformed constraints are simply
 
 $$
-\text{Does there exist }x\in\mathbb{Z}^n\text{ such that }\widetilde A x\le\widetilde b\text{ and }c^Tx\ge K?
+\widetilde A x\le\widetilde b.
 $$
 
-The transformation only adds the upper- and lower-bound constraints for the $n$ variables, so it can clearly be carried out in polynomial time.
+Only $2n$ bound constraints are added, so the transformation is polynomial.
 
 Hence,
 
@@ -1081,9 +1109,7 @@ $$
 0\text{-}1\ ILP\le_p General\ ILP.
 $$
 
-Since the 0-1 integer programming decision problem is NP-complete, this reduction proves that the general integer programming decision problem is NP-hard.
-
-To conclude NP-completeness, we also need membership in $NP$. Under binary encoding, integer linear programming feasibility has polynomial-size certificates whenever it is feasible, so the corresponding decision formulation belongs to $NP$ [6].
+Since 0-1 ILP decision is NP-complete, general ILP decision is NP-hard. Membership in $NP$ under binary encoding is a classical result for integer programming [6].
 
 Therefore:
 
@@ -1091,33 +1117,33 @@ Therefore:
 
 #### What Does "General ILP Is NP-Hard" Actually Mean?⭐
 
-This conclusion is very important, but it is also easy to overinterpret.
+This conclusion is important, but it is easy to overinterpret.
 
-It means that, unless
+Unless
 
 $$
 P=NP,
 $$
 
-there is no polynomial-time exact algorithm that solves **every instance of general integer linear programming**.
+there is no polynomial-time exact algorithm that solves every instance of general integer linear programming.
 
 However:
 
-> **"General ILP is NP-hard" does not mean that every special problem that can be written as an ILP is itself NP-hard.**
+> **"General ILP is NP-hard" does not mean that every special problem that can be formulated as an ILP is NP-hard.**
 
-For example, the one-to-one assignment problem can be formulated using binary variables:
+For example, the one-to-one assignment problem can be formulated with binary variables
 
 $$
-x_{ij}\in\{0,1\}.
+x_{ij}\in\{0,1\},
 $$
 
-Nevertheless, it has polynomial-time algorithms, such as the Hungarian algorithm.
+but it has polynomial-time algorithms such as the Hungarian algorithm.
 
-So the presence of integer or binary variables alone does not determine the complexity of a problem.
+So the presence of integer or binary variables alone does not determine complexity. The structure of the feasible set and the constraint matrix matters.
 
-The structure of the feasible set and constraint matrix matters.
+This distinction is especially important when reading optimization papers:
 
-This distinction is especially important when reading optimization papers. If a paper formulates a problem as a MILP, that alone is **not** a proof that the particular problem is NP-hard.
+> **Writing a problem as a MILP is not, by itself, a proof that the particular problem is NP-hard.**
 
 To prove that a specific structured problem $B$ is NP-hard, the usual strategy is to start from a known NP-hard or NP-complete problem $A$ and prove
 
@@ -1130,13 +1156,19 @@ That is:
 ```text
 known NP-hard problem
         ↓ polynomial reduction
-the new structured problem
+new structured problem
 
 therefore:
 the new problem is NP-hard
 ```
 
-Notice the direction carefully. Reducing the new problem **to** an already known NP-hard problem would not prove that the new problem is NP-hard.
+The direction is important. Proving
+
+$$
+B\le_p A
+$$
+
+would only show that $B$ is no harder than the already known hard problem $A$.
 
 ### 10.3 A Very Important Special Case: Fixed Dimension
 
@@ -1156,14 +1188,136 @@ ILP with fixed dimension
 
 This is a good example of why complexity statements must always specify exactly which family of problems is being discussed.
 
-### 10.4 Binary Linear Equations and Subset Sum
+### 10.4 Integer Solutions of Linear Equation Systems⭐⭐⭐
 
-Even very restricted-looking integer problems can still be hard.
+The original progression through linear equation systems is worth keeping because it gives a surprisingly strong result:
+
+> **Even integer problems consisting only of linear equations can remain NP-complete.**
+
+We consider several increasingly restricted forms.
+
+#### 10.4.1 Bounded Integer Solutions of Linear Equations
+
+Consider the decision problem
+
+$$
+BILP\text{-}EQ:\quad \text{Does there exist }x\in\mathbb{Z}^n\text{ such that }Ax=b\text{ and }0\le x\le u?
+$$
+
+This problem belongs to $NP$: a candidate $x$ has an explicitly bounded encoding length and can be checked directly.
+
+It is also NP-hard.
+
+To see the connection with 0-1 ILP, each inequality in a 0-1 ILP can be converted into an equality using a nonnegative integer slack variable.
+
+For example,
+
+$$
+a_i^Tx\le b_i
+$$
+
+can be written as
+
+$$
+a_i^Tx+s_i=b_i
+$$
+
+with
+
+$$
+s_i\ge0.
+$$
+
+Because $x$ is binary, every feasible slack variable has a computable finite upper bound whose binary encoding length is polynomial in the original input length.
+
+Similarly,
+
+$$
+c^Tx\ge K
+$$
+
+can be written as
+
+$$
+c^Tx-t=K
+$$
+
+with a bounded nonnegative integer variable $t$.
+
+Thus a 0-1 ILP decision instance can be transformed in polynomial time into a bounded integer linear-equation system.
+
+Therefore,
+
+$$
+0\text{-}1\ ILP\le_p BILP\text{-}EQ,
+$$
+
+so $BILP\text{-}EQ$ is NP-hard. Since it also belongs to $NP$, it is NP-complete.
+
+#### 10.4.2 Binary Solutions of Linear Equation Systems
+
+Now consider the special case
+
+$$
+BIN\text{-}EQ:\quad \text{Does there exist }x\in\{0,1\}^n\text{ such that }Ax=b?
+$$
+
+At first sight, restricting every integer variable to 0 or 1 may appear to make the problem much easier.
+
+It does not.
+
+A bounded integer variable can be represented in binary. If
+
+$$
+0\le x_j\le u_j,
+$$
+
+choose
+
+$$
+q_j=\lceil\log_2(u_j+1)\rceil
+$$
+
+and introduce binary variables
+
+$$
+y_{j0},\ldots,y_{j,q_j-1}\in\{0,1\}.
+$$
+
+Represent
+
+$$
+x_j=\sum_{\ell=0}^{q_j-1}2^{\ell}y_{j\ell}.
+$$
+
+Because this direct expansion may allow values larger than $u_j$ when $u_j$ is not of the form $2^{q_j}-1$, retain the upper bound by introducing a nonnegative slack variable and writing
+
+$$
+x_j+t_j=u_j.
+$$
+
+The slack variable $t_j$ can itself be binary-expanded using only polynomially many additional bits.
+
+After applying this construction to all bounded integer variables, the bounded integer equation system is transformed into a linear equation system containing only binary variables.
+
+Hence,
+
+$$
+BILP\text{-}EQ\le_p BIN\text{-}EQ.
+$$
+
+Since $BILP\text{-}EQ$ is NP-complete and $BIN\text{-}EQ\in NP$, the binary linear-equation feasibility problem is also NP-complete.
+
+This is the same basic reason binary encoding is so important in complexity theory: a potentially large bounded integer value can be represented using only logarithmically many bits.
+
+#### 10.4.3 A Single Binary Linear Equation: Subset Sum⭐
+
+We can restrict the problem even further.
 
 Consider
 
 $$
-a^Tx=b
+a^Tx=\beta
 $$
 
 with
@@ -1172,27 +1326,135 @@ $$
 x\in\{0,1\}^n.
 $$
 
-The decision question
+The decision problem
 
 $$
-\text{Does there exist }x\in\{0,1\}^n\text{ such that }a^Tx=b?
+ONE\text{-}EQ:\quad \text{Does there exist }x\in\{0,1\}^n\text{ such that }a^Tx=\beta?
 $$
 
-is the classic **Subset Sum** form.
+is the familiar **Subset Sum** form and is NP-complete [2].
 
-It is NP-complete.
+The important point from the original derivation is that even a system of binary linear equations can be packed into a **single** binary linear equation.
 
-This gives a useful lesson:
+Suppose
 
-> A model can have only one linear equation and still define an NP-complete decision problem.
+$$
+Ax=b,
+$$
 
-The number of constraints alone is therefore not a reliable measure of computational difficulty.
+where
+
+$$
+A\in\mathbb{Z}^{m\times n}
+$$
+
+and
+
+$$
+x\in\{0,1\}^n.
+$$
+
+Choose
+
+$$
+T=\max\{1,\max_{i,j}|a_{ij}|,\max_i|b_i|\}.
+$$
+
+Choose a base
+
+$$
+M=2(n+1)T+1.
+$$
+
+For every variable $j$, define
+
+$$
+\widehat a_j=\sum_{i=1}^{m}M^{i-1}a_{ij},
+$$
+
+and define
+
+$$
+\widehat b=\sum_{i=1}^{m}M^{i-1}b_i.
+$$
+
+If
+
+$$
+Ax=b,
+$$
+
+then clearly
+
+$$
+\widehat a^Tx=\widehat b.
+$$
+
+For the converse, define the row residuals
+
+$$
+r_i=\sum_{j=1}^{n}a_{ij}x_j-b_i.
+$$
+
+Because $x_j\in\{0,1\}$,
+
+$$
+|r_i|\le(n+1)T<M/2.
+$$
+
+The equation
+
+$$
+\widehat a^Tx=\widehat b
+$$
+
+is equivalent to
+
+$$
+\sum_{i=1}^{m}M^{i-1}r_i=0.
+$$
+
+Since every residual has magnitude strictly smaller than $M/2$, the balanced base-$M$ representation is unique. Therefore,
+
+$$
+r_i=0,\quad i=1,\ldots,m,
+$$
+
+which implies
+
+$$
+Ax=b.
+$$
+
+Thus
+
+$$
+BIN\text{-}EQ\le_p ONE\text{-}EQ.
+$$
+
+So even a single linear equation with binary variables can define an NP-complete decision problem.
+
+This is an important lesson:
+
+> **The number of constraints alone is not a reliable measure of computational difficulty.**
 
 ---
 
-## 11. Complexity of the Knapsack Problem⭐⭐
+## 11. Complexity of the Knapsack Problem⭐⭐⭐
 
-### 11.1 0-1 Knapsack
+The knapsack problem is especially useful in complexity theory because it connects three ideas that can initially seem contradictory:
+
+```text
+NP-hardness
+        +
+dynamic programming
+        +
+pseudo-polynomial time
+```
+
+There is no contradiction once input length is treated correctly.
+
+### 11.1 0-1 Linear Knapsack
 
 The 0-1 knapsack optimization problem is
 
@@ -1213,12 +1475,14 @@ $$
 Its decision version is
 
 $$
-\text{Does there exist }x\in\{0,1\}^n\text{ such that }a^Tx\le B\text{ and }c^Tx\ge K?
+KP_{01}(K):\quad \text{Does there exist }x\in\{0,1\}^n\text{ such that }a^Tx\le B\text{ and }c^Tx\ge K?
 $$
 
-It belongs to $NP$ because a proposed $x$ can be checked efficiently.
+It belongs to $NP$ because a proposed vector $x$ can be checked in polynomial time.
 
-To see why it is NP-hard, start from Subset Sum:
+To prove NP-hardness, use the single-equation binary problem from Section 10.4.3.
+
+Start from
 
 $$
 a^Tx=b,\quad x\in\{0,1\}^n.
@@ -1227,20 +1491,18 @@ $$
 Construct a knapsack instance with
 
 $$
-c=a,
+c=a
 $$
 
 $$
-B=b,
+B=b
 $$
-
-and
 
 $$
 K=b.
 $$
 
-Then the two knapsack inequalities become
+Then the knapsack requirements are
 
 $$
 a^Tx\le b
@@ -1252,58 +1514,126 @@ $$
 a^Tx\ge b.
 $$
 
-Together they imply
+Together,
 
 $$
 a^Tx=b.
 $$
 
-Thus Subset Sum reduces to 0-1 Knapsack.
-
-Therefore, the knapsack decision problem is NP-complete and the optimization problem is NP-hard [2].
-
-### 11.2 Why Dynamic Programming Does Not Contradict NP-Hardness
-
-The classical dynamic programming algorithm for 0-1 knapsack runs in approximately
+Therefore,
 
 $$
-O(nB).
+ONE\text{-}EQ\le_p KP_{01}.
 $$
 
-At first sight this may look polynomial.
+Since the single-equation problem is NP-complete, 0-1 knapsack decision is NP-hard. Since it is also in $NP$, it is NP-complete.
 
-But $B$ is a numerical value.
+Therefore:
 
-Its binary input length is only
+> **The 0-1 knapsack decision problem is NP-complete, and the corresponding optimization problem is NP-hard.**
+
+### 11.2 General Bounded Integer Knapsack
+
+Now allow each item to be selected more than once, but impose an integer upper bound.
+
+Consider
 
 $$
-O(\log(B+1)).
+\max \quad c^T x
+$$
+
+subject to
+
+$$
+a^Tx\le B
+$$
+
+$$
+0\le x\le u
+$$
+
+$$
+x\in\mathbb{Z}^n.
+$$
+
+Its decision version is
+
+$$
+KP_B(K):\quad \text{Does there exist }x\in\mathbb{Z}^n\text{ such that }a^Tx\le B,\ 0\le x\le u,\text{ and }c^Tx\ge K?
+$$
+
+The 0-1 knapsack problem is obtained by choosing
+
+$$
+u=e.
 $$
 
 Therefore,
 
 $$
+KP_{01}\le_p KP_B.
+$$
+
+Since 0-1 knapsack is NP-hard, the general bounded integer knapsack problem is also NP-hard.
+
+Its decision version belongs to $NP$ because a bounded integer vector $x$ can be encoded and verified in polynomial time.
+
+Hence the bounded integer knapsack decision problem is NP-complete.
+
+This preserves an important point from the original note:
+
+> **Moving from binary knapsack to the more general bounded integer knapsack does not remove the hardness.**
+
+### 11.3 Why Dynamic Programming Does Not Contradict NP-Hardness⭐
+
+For 0-1 knapsack, the classical dynamic programming algorithm has running time
+
+$$
+O(nB),
+$$
+
+where $B$ is the capacity.
+
+If $B$ is fixed or numerically small, this can be very efficient. For fixed $B$, the expression is linear in $n$.
+
+But complexity must be measured against the **encoded input length**.
+
+The binary representation of $B$ has length only
+
+$$
+O(\log(B+1)).
+$$
+
+Therefore, the numerical value $B$ can be exponentially large relative to the number of bits needed to store it.
+
+Consequently,
+
+$$
 O(nB)
 $$
 
-can be exponential in the number of bits required to encode $B$.
+is not polynomial in the standard bit-length of the input.
 
-This is why the dynamic programming algorithm is **pseudo-polynomial** rather than polynomial-time.
+It is **pseudo-polynomial**.
 
-There is no contradiction with NP-hardness.
+Bounded integer knapsack also admits pseudo-polynomial dynamic-programming algorithms. The exact running-time expression depends on the chosen implementation and treatment of the upper bounds $u_i$, but the same key issue remains: the running time depends polynomially on numerical quantities such as $B$, rather than only on their encoding lengths.
 
-### 11.3 Weak NP-Hardness
+Therefore:
 
-This also leads to another useful term.
+> **Having a dynamic-programming algorithm does not contradict NP-hardness. What matters is whether the algorithm is polynomial in the encoded input length.**
+
+### 11.4 Weak NP-Hardness
+
+This leads to another useful term.
 
 0-1 knapsack is a classic example of a **weakly NP-hard** optimization problem.
 
 Very roughly:
 
 - weakly NP-hard problems may admit pseudo-polynomial algorithms;
-- strongly NP-hard problems remain hard even when the numerical values are suitably bounded.
+- strongly NP-hard problems remain hard even when the relevant numerical values are polynomially bounded.
 
-Do not confuse:
+Do not confuse
 
 ```text
 strongly polynomial algorithm
@@ -1315,7 +1645,7 @@ with
 strongly NP-hard problem
 ```
 
-They are different concepts.
+They are completely different concepts.
 
 ---
 
@@ -1377,9 +1707,15 @@ After all of the definitions above, these are the points I think are worth remem
 13. If any NP-complete problem has a polynomial-time algorithm, then $P=NP$.
 14. NP-hard is broader than NP-complete: an NP-hard problem does not have to be a decision problem or belong to $NP$.
 15. General integer linear programming is NP-hard, but this does not mean every special ILP structure is NP-hard.
-16. Binary assignment is polynomial-time solvable, and fixed-dimensional ILP is also polynomial-time solvable.
-17. 0-1 knapsack is NP-hard even though it has an $O(nB)$ dynamic programming algorithm, because that algorithm is pseudo-polynomial.
-18. NP-hardness is a worst-case statement about a problem family. It does not mean every practical instance is difficult.
+16. A 0-1 linear integer program can encode SAT, so its decision version is NP-complete.
+17. Bounded integer linear-equation feasibility remains NP-complete.
+18. Even the binary equation system $Ax=b$ can be NP-complete.
+19. Even a **single** binary linear equation $a^Tx=b$ can be NP-complete; this is the Subset Sum form.
+20. The one-to-one assignment problem is polynomial-time solvable, and fixed-dimensional ILP is also polynomial-time solvable.
+21. Both 0-1 knapsack and bounded integer knapsack are NP-hard in their optimization forms.
+22. The usual $O(nB)$ dynamic-programming algorithm for 0-1 knapsack is pseudo-polynomial, not polynomial in the binary input length.
+23. 0-1 knapsack is weakly NP-hard, which is compatible with the existence of a pseudo-polynomial algorithm.
+24. NP-hardness is a worst-case statement about a problem family. It does not mean every practical instance is difficult.
 
 ## References
 
