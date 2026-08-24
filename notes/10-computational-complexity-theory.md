@@ -780,7 +780,7 @@ $$
 we have the schematic relationship shown below.
 
 <p align="center">
-  <img src="../figures/chapter-10/chapter-10-fig1.png" alt="Relationship among P, NP-complete, and NP problems" width="700">
+  <img src="../figures/chapter-10/chapter-10-fig1.png" alt="Relationship among P, NP-complete, and NP problems" width="500">
 </p>
 
 <p align="center">
@@ -830,7 +830,7 @@ So one should **not** casually claim that NP-complete problems are known to lie 
 The following figure should therefore be read as a schematic picture, not as a complete characterization of the unknown boundary.
 
 <p align="center">
-  <img src="../figures/chapter-10/chapter-10-fig2.png" alt="Relationship among P, NP, and co-NP problems" width="700">
+  <img src="../figures/chapter-10/chapter-10-fig2.png" alt="Relationship among P, NP, and co-NP problems" width="500">
 </p>
 
 <p align="center">
