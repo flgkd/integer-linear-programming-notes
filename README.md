@@ -17,7 +17,7 @@ A structured study series on Integer Linear Programming, from linear programming
 | 07  | [Lagrangian Relaxation and Duality](notes/07-lagrangian-relaxation-and-duality.md)                                         | Completed |
 | 08  | [Dantzig-Wolfe Decomposition](notes/08-dantzig-wolfe-decomposition.md)                                                     | Completed |
 | 09  | [Benders Decomposition](notes/09-benders-decomposition.md)                                                                 | Completed |
-| 10  | Computational Complexity Theory                                                                                            | Planned   |
+| 10  | [Computational Complexity Theory](notes/10-computational-complexity-theory.md)                                             | Completed |
 | 11  | Dynamic Programming                                                                                                        | Planned   |
 | 12  | Knapsack Problem                                                                                                           | Planned   |
 | 13  | Assignment Problem                                                                                                         | Planned   |
