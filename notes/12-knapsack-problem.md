@@ -51,14 +51,20 @@ In its most intuitive form, the knapsack problem asks:
 
 This is a **maximization problem under a capacity constraint**.
 
-A standard 0-1 formulation is:
+A standard 0-1 formulation is
 
 $$
-\begin{aligned}
-\max \quad & \sum_{j=1}^{n} c_j x_j \\
-\text{s.t.} \quad & \sum_{j=1}^{n} a_j x_j \le B, \\
-& x_j \in \{0,1\}, \quad j=1,\dots,n.
-\end{aligned}
+\max \quad \sum_{j=1}^{n}c_jx_j
+$$
+
+subject to
+
+$$
+\sum_{j=1}^{n}a_jx_j\le B
+$$
+
+$$
+x_j\in\{0,1\},\quad j=1,\ldots,n.
 $$
 
 Here:
@@ -129,7 +135,7 @@ denote the maximum total value obtainable by choosing from the **first $i$ items
 Then the state transition is
 
 $$
-f(i,j)=\max\bigl(f(i-1,j),\; f(i-1,j-v_i)+w_i\bigr), \qquad j\ge v_i.
+f(i,j)=\max\{f(i-1,j),f(i-1,j-v_i)+w_i\}, \qquad j\ge v_i.
 $$
 
 If $j<v_i$, then item $i$ cannot be taken, so
@@ -138,20 +144,46 @@ $$
 f(i,j)=f(i-1,j).
 $$
 
-This recurrence has a very simple interpretation:
+A useful way to understand the state $f(i,j)$ is to separate its **set** and **property**.
 
-- **do not take item $i$**: value $f(i-1,j)$;
-- **take item $i$**: value $f(i-1,j-v_i)+w_i$.
+The set represented by $f(i,j)$ contains all feasible selections satisfying two conditions:
 
-So every state splits naturally into two cases: **take it** or **do not take it**.
+1. items are chosen only from the first $i$ items;
+2. the total volume does not exceed $j$.
 
-<p align="center">
-  <img src="../figures/chapter-12/chapter-12-fig1.png" alt="0-1 knapsack DP state interpretation" width="700">
-</p>
+The property stored for this set is the **maximum total value**. In other dynamic-programming problems, the stored property could instead be a minimum value, a count, or another quantity.
 
-<p align="center">
-  A state-based interpretation of the 0-1 knapsack recurrence.
-</p>
+To derive the state transition, partition the feasible selections into two disjoint cases according to whether item $i$ is selected.
+
+If item $i$ is **not selected**, the best value is
+
+$$
+f(i-1,j).
+$$
+
+If item $i$ **is selected**, then $j\ge v_i$, and after reserving volume $v_i$ for item $i$, the remaining problem uses only the first $i-1$ items. The best value is therefore
+
+$$
+f(i-1,j-v_i)+w_i.
+$$
+
+Taking the better of these two cases gives
+
+$$
+f(i,j)=\max\{f(i-1,j),f(i-1,j-v_i)+w_i\},\quad j\ge v_i.
+$$
+
+So every state is obtained by a simple **set partition**:
+
+```text
+all feasible selections represented by f(i,j)
+        ↓
+exclude item i        include item i
+        ↓                    ↓
+f(i-1,j)       f(i-1,j-v_i) + w_i
+```
+
+This “define the state set → identify the stored property → partition the set” viewpoint is a useful general method for constructing dynamic-programming recurrences.
 
 ### 3.3 Naive Dynamic-Programming Algorithm
 
@@ -218,7 +250,7 @@ be the best value for capacity $j$ after processing some prefix of items.
 Then the 1D transition is
 
 $$
-f(j)=\max\bigl(f(j),\; f(j-v_i)+w_i\bigr).
+f(j)=\max\{f(j),f(j-v_i)+w_i\}.
 $$
 
 However, the **order of the capacity loop is crucial**.
@@ -300,7 +332,7 @@ denote the maximum value obtainable by using the first $i$ item types with total
 Then the most direct recurrence is
 
 $$
-f(i,j)=\max_{0\le k\le \lfloor j/v_i\rfloor}\Bigl(f(i-1,j-kv_i)+kw_i\Bigr).
+f(i,j)=\max_{0\le k\le\lfloor j/v_i\rfloor}\{f(i-1,j-kv_i)+kw_i\}.
 $$
 
 This means that for item type $i$, we may choose:
@@ -352,7 +384,7 @@ if __name__ == "__main__":
 The time complexity is
 
 $$
-O\!\left(NV\cdot \max_i \frac{V}{v_i}\right),
+O(NV\max_i\{V/v_i\}),
 $$
 
 which is often written more simply as a three-loop dynamic program.
@@ -364,12 +396,7 @@ The naive recurrence can be rewritten more efficiently.
 Expand the formula:
 
 $$
-\begin{aligned}
-f(i,j)=\max\{&f(i-1,j), \\
-&f(i-1,j-v_i)+w_i, \\
-&f(i-1,j-2v_i)+2w_i, \\
-&\dots\}.
-\end{aligned}
+f(i,j)=\max\{f(i-1,j),f(i-1,j-v_i)+w_i,f(i-1,j-2v_i)+2w_i,\ldots\}.
 $$
 
 Now consider
@@ -381,13 +408,13 @@ $$
 Using the definition of $f(i,j-v_i)$, this becomes
 
 $$
-\max\{f(i-1,j-v_i)+w_i,\; f(i-1,j-2v_i)+2w_i,\; \dots\}.
+\max\{f(i-1,j-v_i)+w_i,f(i-1,j-2v_i)+2w_i,\ldots\}.
 $$
 
 Therefore we obtain the important simplified recurrence:
 
 $$
-f(i,j)=\max\bigl(f(i-1,j),\; f(i,j-v_i)+w_i\bigr), \qquad j\ge v_i.
+f(i,j)=\max\{f(i-1,j),f(i,j-v_i)+w_i\}, \qquad j\ge v_i.
 $$
 
 This is the key difference from 0-1 knapsack.
@@ -523,7 +550,7 @@ denote the maximum value obtainable by using the first $i$ item types with total
 Then the direct recurrence is
 
 $$
-f(i,j)=\max_{0\le k\le \min(s_i,\lfloor j/v_i\rfloor)}\Bigl(f(i-1,j-kv_i)+kw_i\Bigr).
+f(i,j)=\max_{0\le k\le\min(s_i,\lfloor j/v_i\rfloor)}\{f(i-1,j-kv_i)+kw_i\}.
 $$
 
 This is almost the same as the complete knapsack recurrence, except that now the number of copies is limited by $s_i$.
@@ -572,7 +599,7 @@ if __name__ == "__main__":
 At first glance, the multiple knapsack problem looks very similar to the complete knapsack problem, so one may try to reuse the recurrence
 
 $$
-f(i,j)=\max\bigl(f(i-1,j),\; f(i,j-v_i)+w_i\bigr).
+f(i,j)=\max\{f(i-1,j),f(i,j-v_i)+w_i\}.
 $$
 
 But this is generally **not valid**.
@@ -621,7 +648,7 @@ $$
 to roughly
 
 $$
-O\!\left(V\sum_{i=1}^N \log s_i\right)
+O(V\sum_{i=1}^{N}\log s_i)
 $$
 
 after splitting.
@@ -695,7 +722,7 @@ denote the maximum value obtainable from the first $i$ groups with total volume 
 Then the recurrence is
 
 $$
-f(i,j)=\max\left\{f(i-1,j),\; \max_{1\le k\le s_i,\; v_{ik}\le j}\bigl(f(i-1,j-v_{ik})+w_{ik}\bigr)\right\},
+f(i,j)=\max\{f(i-1,j),\max_{1\le k\le s_i,\;v_{ik}\le j}\{f(i-1,j-v_{ik})+w_{ik}\}\},
 $$
 
 where $s_i$ is the number of items in group $i$.
@@ -874,7 +901,7 @@ The most relevant next topics are:
 
 ## References
 
-1. Sun, Xiaoling, and Duan Li. *Integer Programming*. Beijing: Science Press, 2010. ISBN: 978-7-03-029380-0.
+1. Sun, Xiaoling, and Duan Li. *Integer Programming*. Beijing: Science Press, 2010. ISBN: 978-7-03-029380-0.（孙小玲、李端：《整数规划》，北京：科学出版社，2010年，ISBN：978-7-03-029380-0）
 2. Martello, Silvano, and Paolo Toth. *Knapsack Problems: Algorithms and Computer Implementations*. Chichester: John Wiley & Sons, 1990. ISBN: 978-0-471-92420-3.
 3. Kellerer, Hans, Ulrich Pferschy, and David Pisinger. *Knapsack Problems*. Berlin: Springer, 2004. DOI: 10.1007/978-3-540-24777-7.
 4. Bellman, Richard. *Dynamic Programming*. Princeton, NJ: Princeton University Press, 1957.
