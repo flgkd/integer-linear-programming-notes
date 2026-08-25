@@ -1030,6 +1030,15 @@ That is one of the main reasons the knapsack problem is used so often in algorit
 
 ---
 
+## References
+
+1. Sun, Xiaoling, and Duan Li. *Integer Programming*. Beijing: Science Press, 2010. ISBN: 978-7-03-029380-0.（孙小玲、李端：《整数规划》，北京：科学出版社，2010年，ISBN：978-7-03-029380-0）
+2. Martello, Silvano, and Paolo Toth. *Knapsack Problems: Algorithms and Computer Implementations*. Chichester: John Wiley & Sons, 1990. ISBN: 978-0-471-92420-3.
+3. Kellerer, Hans, Ulrich Pferschy, and David Pisinger. *Knapsack Problems*. Berlin: Springer, 2004. DOI: 10.1007/978-3-540-24777-7.
+4. Bellman, Richard. *Dynamic Programming*. Princeton, NJ: Princeton University Press, 1957.
+
+---
+
 ## Suggested Follow-up Reading
 
 The most relevant next topics are:
@@ -1045,12 +1054,4 @@ The most relevant next topics are:
 
 4. **Column Generation and Decomposition Methods**  
    Helpful for seeing how very different large-scale optimization techniques compare with dynamic programming on special structures.
-
----
-
-## References
-
-1. Sun, Xiaoling, and Duan Li. *Integer Programming*. Beijing: Science Press, 2010. ISBN: 978-7-03-029380-0.（孙小玲、李端：《整数规划》，北京：科学出版社，2010年，ISBN：978-7-03-029380-0）
-2. Martello, Silvano, and Paolo Toth. *Knapsack Problems: Algorithms and Computer Implementations*. Chichester: John Wiley & Sons, 1990. ISBN: 978-0-471-92420-3.
-3. Kellerer, Hans, Ulrich Pferschy, and David Pisinger. *Knapsack Problems*. Berlin: Springer, 2004. DOI: 10.1007/978-3-540-24777-7.
-4. Bellman, Richard. *Dynamic Programming*. Princeton, NJ: Princeton University Press, 1957.
+   
