@@ -126,15 +126,13 @@ Examples of state information include:
 - candidate columns;
 - constraint and variable features.
 
-A learned policy chooses an action
+A learned policy assigns scores or probabilities to candidate actions using parameters $\theta$. If the policy is stochastic, one may write
 
 $$
-a_t\sim\pi_\theta(\cdot\mid s_t),
+a_t\sim\pi_\theta(\cdot\mid s_t).
 $$
 
-where $\theta$ contains the learned parameters.
-
-The action may be:
+A deterministic policy can instead choose the highest-scoring action. The action may be:
 
 ```text
 choose branching variable j
@@ -198,7 +196,7 @@ That shift is one of the foundations of modern learning-augmented optimization [
 
 Before looking at individual methods, it is important to separate three situations.
 
-### 3.1 Learning That Changes Search Order but Not Correctness
+### 3.1 Learning That Guides an Exact Solver Without Removing Valid Solutions
 
 Suppose AI chooses which fractional variable to branch on.
 
@@ -216,7 +214,7 @@ $$
 
 The learned policy changes the shape of the search tree, but it does not remove feasible integer solutions.
 
-If the solver continues to use valid bounds, valid cuts, and complete search logic, the final exactness guarantee can remain intact.
+More generally, a learned component can guide an exact solver without changing the feasible region or invalidating its bounds. If the solver still uses valid branching disjunctions, valid cuts, valid bounds, and complete search logic, the exactness guarantee can remain intact.
 
 Typical examples include:
 
@@ -244,7 +242,7 @@ Large Neighborhood Search is another example: it deliberately restricts the sear
 
 ### 3.3 Learning That Must Be Verified
 
-Some learned decisions can be used aggressively as long as a mathematical verification step remains.
+Some learned decisions are best treated as proposals or priorities, followed by a mathematical verification step.
 
 Examples include:
 
@@ -253,13 +251,13 @@ AI ranks columns
 → exact pricing verifies termination
 
 AI prioritizes Benders subproblems
-→ exact final subproblem check verifies the candidate
+→ required exact subproblem checks verify the candidate
 
 AI proposes a warm start
 → solver checks feasibility
 
-AI proposes a cut
-→ cut validity is verified before addition
+AI ranks or proposes a cut
+→ the solver adds it only if validity is known or certified
 ```
 
 This leads to a useful principle:
@@ -349,9 +347,7 @@ $$
 
 Gupta et al. showed that inference overhead matters in practice: a powerful GNN running on a GPU can lose its advantage when embedded in a CPU-oriented MILP solver. Their hybrid GNN/MLP architecture was designed specifically to reduce this cost [5].
 
-This is an important lesson for the whole field:
-
-> **prediction quality is not the final metric; end-to-end solver performance is.**
+> **Prediction quality is not the final metric; end-to-end solver performance is.**
 
 Recent work is also expanding both the policy and representation sides. In 2026, Wang et al. explored generative branching policies [6], while Huang et al. proposed a dual-attention backbone for MILP representations and evaluated it across multiple solver-related downstream tasks at ICML 2026 [7].
 
@@ -489,10 +485,10 @@ Tang, Agrawal, and Faenza formulated adaptive cut selection as a reinforcement-l
 
 Deza and Khalil later surveyed the growing literature on machine learning for cut selection and emphasized that choosing effective subsets of cuts remains a substantial solver-design problem [9].
 
-A generic RL formulation is
+A generic RL objective is
 
 $$
-J(\theta)=\mathbb{E}_{\pi_\theta}[\sum_{t=0}^{T}\gamma^tr_t].
+\max_\theta\quad\mathbb{E}_{\pi_\theta}[\sum_{t=0}^{T}\gamma^tr_t].
 $$
 
 The reward may be designed around:
@@ -504,13 +500,11 @@ The reward may be designed around:
 
 ### 6.3 Exactness
 
-If AI only selects among cuts already known to be valid, the solver does not lose correctness merely because the selection policy is learned.
+If AI only selects among cuts already known to be valid, using a learned selection rule does not by itself invalidate an otherwise complete exact search.
 
-However:
+A different issue arises if a model generates a new inequality. That inequality cannot be treated as a valid cut merely because the model predicts that it is useful. Its validity still needs an independent mathematical argument or certificate.
 
-> **a neural network should not be allowed to invent an inequality and have it treated as a valid cut without mathematical verification.**
-
-Cut prediction and cut validity are different problems.
+Cut usefulness and cut validity are different questions.
 
 ### 6.4 Best Use Cases
 
@@ -538,10 +532,10 @@ $$
 a learned model may estimate
 
 $$
-p_j=P(x_j=1\mid P),
+p_j=\Pr(x_j=1\mid\mathcal{P}),
 $$
 
-where $P$ denotes the MILP instance and possibly the solver state.
+where $\mathcal{P}$ denotes the MILP instance and, when relevant, the current solver state.
 
 Ding et al. used graph-based solution prediction to estimate binary-variable values and then guide primal solution search [10].
 
@@ -565,13 +559,15 @@ A warm start does not need to be optimal to be useful.
 
 ### 7.3 Local Branching View
 
-For a predicted binary solution $\hat{x}$, a Hamming-style neighborhood can be written as
+The classical Local Branching idea [12] provides a convenient way to search near a predicted binary solution $\hat{x}$.
+
+Let $\mathcal{B}$ denote the set of binary-variable indices. A Hamming-distance neighborhood can be written as
 
 $$
-\sum_{j:\hat{x}_j=0}x_j+\sum_{j:\hat{x}_j=1}(1-x_j)\le k.
+\sum_{j\in\mathcal{B}:\hat{x}_j=0}x_j+\sum_{j\in\mathcal{B}:\hat{x}_j=1}(1-x_j)\le k.
 $$
 
-This restricts the solver to solutions differing from $\hat{x}$ in at most $k$ binary positions.
+For binary $x_j$ and $\hat{x}_j$, the left-hand side counts the number of positions on which $x$ differs from $\hat{x}$. Thus the constraint restricts the search to solutions that differ from $\hat{x}$ in at most $k$ binary positions.
 
 The smaller $k$ is, the more local the search becomes.
 
@@ -590,21 +586,17 @@ current feasible solution
 
 The difficult part is deciding which variables should be relaxed.
 
-Song et al. developed a general learning-based LNS framework for ILPs in which the neighborhood selector is learned and a standard solver performs the repair optimization [12].
+Song et al. developed a general learning-based LNS framework for ILPs in which the neighborhood selector is learned and a standard solver performs the repair optimization [13].
 
-Wu et al. later trained an RL policy as the destroy operator, selecting variables to relax while an IP solver acts as the repair operator [13].
+Wu et al. later trained an RL policy as the destroy operator, selecting variables to relax while an IP solver acts as the repair operator [14].
 
 ### 7.5 Strengths and Weaknesses
 
-The advantage is clear:
+> The neural model does not need to construct a full feasible MILP solution by itself.
 
-> the neural model does not need to construct a full feasible MILP solution by itself.
+It only needs to identify a promising neighborhood, while the solver handles the hard feasibility constraints.
 
-It only needs to identify a promising neighborhood.
-
-The solver then handles the hard feasibility constraints.
-
-The limitation is equally important:
+At the same time:
 
 > LNS is fundamentally a primal heuristic unless it is embedded inside a separate exact framework.
 
@@ -650,15 +642,15 @@ the restricted master becomes too large
 
 Learning can help rank or filter candidate columns before adding them to the restricted master.
 
-Morabit, Desaulniers, and Lodi proposed machine-learning-based column selection: a learned model selects promising generated columns so that the restricted master does not have to absorb every candidate immediately [14].
+Morabit, Desaulniers, and Lodi proposed machine-learning-based column selection: a learned model selects promising generated columns so that the restricted master does not have to absorb every candidate immediately [15].
 
-Their experiments included vehicle and crew scheduling and vehicle routing with time windows, with reported computing-time gains of up to 30% in their tested settings [14].
+Their experiments included vehicle and crew scheduling and vehicle routing with time windows, with reported computing-time gains of up to 30% in their tested settings [15].
 
 ### 8.3 A Safe Exactness Pattern
 
 For exact Column Generation, the termination condition still matters.
 
-For minimization, exact LP optimality requires proving that no improving column remains:
+For a minimization master problem, once the restricted master problem has been solved optimally, exact Column Generation termination requires pricing over the full admissible column set and proving that no negative-reduced-cost column remains:
 
 $$
 \min_j\bar{c}_j\ge0.
@@ -718,7 +710,7 @@ $$
 
 representing recourse cost.
 
-A Benders optimality cut has the generic form
+For a minimization formulation, a Benders optimality cut often has the generic form
 
 $$
 \eta\ge\alpha_k+\beta_k^Ty.
@@ -750,9 +742,9 @@ Which master candidate is promising?
 Can a recourse value be approximated cheaply?
 ```
 
-Mitrai and Daoutidis used machine-learning surrogate models to approximate Benders information in mixed-integer model predictive control. Their chemical-process case studies reported large time reductions, with small errors relative to standard and accelerated Generalized Benders Decomposition in the tested problems [15].
+Mitrai and Daoutidis used machine-learning surrogate models to approximate Benders information in mixed-integer model predictive control. Their chemical-process case studies reported large time reductions, with small errors relative to standard and accelerated Generalized Benders Decomposition in the tested problems [16].
 
-A more recent 2026 study by Donkiewicz considered adaptive subproblem selection for a survivable network-design problem. The method uses online-trained scoring to prioritize subproblems that are more likely to generate useful cuts [16].
+A more recent 2026 study by Donkiewicz considered adaptive subproblem selection for a survivable network-design problem. The method uses online-trained scoring to prioritize subproblems that are more likely to generate useful cuts [17].
 
 ### 9.3 Exactness Again Depends on Verification
 
@@ -760,7 +752,7 @@ A learned Benders heuristic may skip unpromising subproblems early.
 
 That can be useful.
 
-But if exactness is required, a candidate master solution normally has to survive the required exact subproblem checks before certification.
+If exactness is required, any subproblem checks needed to certify a candidate master solution must still be carried out exactly before that candidate is accepted as globally valid.
 
 A natural pattern is:
 
@@ -805,16 +797,16 @@ Modern MILP solvers contain many interacting parameters:
 - restart behavior;
 - numerical tolerances.
 
-The ML4CO competition explicitly included solver configuration as one of its learning tasks, alongside primal and dual/search tasks [17].
+The ML4CO competition included three tasks: finding strong primal solutions, producing tight dual/optimality certificates, and solver configuration [18].
 
 This is a natural application when the same instance family is solved repeatedly.
 
 ### 10.3 Lagrangian Relaxation
 
-Recall from [Lagrangian Relaxation and Duality](07-lagrangian-relaxation-and-duality.md):
+Recall from [Lagrangian Relaxation and Duality](07-lagrangian-relaxation-and-duality.md). For a minimization problem in which constraints $g(x)\le0$ are relaxed, a standard Lagrangian is
 
 $$
-L(x,\lambda)=c^Tx+\lambda^Tg(x).
+L(x,\lambda)=c^Tx+\lambda^Tg(x),\quad\lambda\ge0.
 $$
 
 Learning could assist with:
@@ -844,7 +836,7 @@ promising states
 
 while an exact dominance rule and exact fallback preserve pricing correctness.
 
-This is particularly interesting when the DP state space is huge but the same structural subproblem is solved thousands of times.
+This is particularly interesting when the DP state space is huge but the same structural subproblem is solved thousands of times. Compared with learned branching or LNS, however, this use of learning inside exact DP-based pricing is still more naturally viewed as a research direction than as a standardized solver component.
 
 ### 10.5 Mixed-Norm Screening
 
@@ -871,7 +863,7 @@ The field has progressed beyond isolated proof-of-concept studies, but it is sti
 
 ### 11.1 Repeated-Instance Benchmarks
 
-The ML4CO competition was built around the idea that optimization instances often come from recurring distributions rather than being completely unrelated. It studied learned components for primal solutions, search/dual performance, and solver configuration on realistic repeated-instance datasets [17].
+The ML4CO competition was built around the idea that optimization instances often come from recurring distributions rather than being completely unrelated. Its three tasks concerned primal solutions, dual/optimality certificates, and solver configuration on realistic repeated-instance datasets [18].
 
 This is close to the setting where learning is most plausible:
 
@@ -889,7 +881,7 @@ Machine-learning-based column selection has been tested on:
 - vehicle and crew scheduling;
 - vehicle routing with time windows.
 
-The reported benefit in the Morabit et al. study was a computing-time gain of up to 30% for the tested instances [14].
+The reported benefit in the Morabit et al. study was a computing-time gain of up to 30% for the tested instances [15].
 
 ### 11.3 Supply-Chain-Oriented MIP
 
@@ -899,19 +891,17 @@ This is evidence for the repeated-instance idea, but it should not be interprete
 
 ### 11.4 Process Control
 
-The Benders work of Mitrai and Daoutidis applies learning to mixed-integer economic model predictive control for chemical processes. Their case studies reported reductions in solution time of up to 97%, or roughly 50 times, with error on the order of 1% relative to the compared Benders approaches [15].
+The Benders work of Mitrai and Daoutidis applies learning to mixed-integer economic model predictive control for chemical processes. Their case studies reported reductions in solution time of up to 97%, or roughly 50 times, with error on the order of 1% relative to the compared Benders approaches [16].
 
 This is a strong application-specific result, but the method intentionally uses approximation and should not be confused with a universal exact-MILP speedup.
 
 ### 11.5 Network Design
 
-Adaptive Benders subproblem selection has been tested on survivable network design. The 2026 study found substantial redundancy among solved subproblems and showed that informed selection could improve runtime-related metrics on its test set [16].
+Adaptive Benders subproblem selection has also been tested on survivable network design. On 135 test instances, Donkiewicz reported that 52.1% of the subproblems solved by the baseline procedure were unnecessary under the paper's classification. The best runtime-oriented configuration achieved a 9.9% speedup over standard Benders, while another configuration reduced the primal-dual integral by 14.6% [17].
 
 ### 11.6 Current Maturity
 
-A fair summary is:
-
-> **learning-augmented MILP is now a substantial research area with repeated empirical successes, especially for branching, primal heuristics, LNS, cut selection, and solver configuration; however, generalization, deployment cost, and reliability still prevent learned components from being universal drop-in replacements for classical solver logic.**
+> **Learning-augmented MILP now has a substantial body of work, especially around branching, primal heuristics, LNS, cut selection, and solver configuration. The reported gains are still strongly problem- and distribution-dependent, and learned components are not universal drop-in replacements for classical solver logic.**
 
 This is consistent with the recent survey literature, which treats machine learning and mathematical optimization as complementary technologies [2].
 
@@ -935,7 +925,7 @@ Examples:
 | Benders subproblem ranking | required exact subproblem checks are eventually performed |
 | solver configuration | tolerances and logic remain valid for the desired guarantee |
 
-In these cases, the AI policy can be wrong and merely make the solver slower.
+In these cases, a poor learned decision may hurt performance, but it need not invalidate the mathematical certificate.
 
 That is a much safer failure mode than returning an incorrect certificate.
 
@@ -960,7 +950,7 @@ But the guarantee has changed and should be reported accordingly.
 
 A particularly interesting 2026 direction is to combine learning with calibrated probabilistic guarantees.
 
-Clarke and Stellato train a model to estimate the true optimality gap from MILP solver states and then apply conformal prediction to calibrate an early-stopping rule. On five distributional MIPLIB families, they report more than 60% solve-time reduction while targeting a 0.1%-optimal solution with 95% probability [18].
+Clarke and Stellato train a model to estimate the true optimality gap from MILP solver states and then use conformal prediction to calibrate an early-stopping rule. On five distributional MIPLIB families, they report more than 60% solve-time reduction while targeting a 0.1%-optimal solution with 95% probability under their conformal calibration setting [19].
 
 This does not turn an approximate early stop into a deterministic exact certificate.
 
@@ -987,7 +977,7 @@ natural-language problem description
 → solution interpretation
 ```
 
-OptiMUS is an example of an LLM-based system that formulates and solves LP/MILP problems by generating mathematical models and solver code, debugging the code, and evaluating solutions [19].
+OptiMUS is an example of an LLM-based system that formulates and solves LP/MILP problems by generating mathematical models and solver code, debugging the code, and evaluating solutions [20].
 
 This is useful because mathematical modeling itself can be a bottleneck.
 
@@ -1019,9 +1009,7 @@ For example, it may:
 - use the wrong unit;
 - misunderstand an operational rule.
 
-Therefore:
-
-> **LLMs are promising optimization-modeling assistants, but the solver can only be correct with respect to the model it is given.**
+> **LLMs can assist with optimization modeling, but the solver can only be correct with respect to the model it is given.**
 
 A perfectly solved wrong model is still the wrong answer.
 
@@ -1031,9 +1019,9 @@ A perfectly solved wrong model is still the wrong answer.
 
 ### 14.1 Reusing Experience Across Instances
 
-Classical optimization usually treats every instance as new.
+General-purpose solver rules are usually designed without assuming that the next instance comes from a known recurring distribution.
 
-Learning can reuse information from previous instances.
+Learning can exploit information from previous related instances.
 
 This is especially valuable when:
 
@@ -1064,16 +1052,14 @@ Learning offers a way to adapt some decisions automatically to a specific instan
 
 ### 14.4 Combining Pattern Recognition with Mathematical Guarantees
 
-Neural models are good at detecting patterns.
-
-Optimization algorithms are good at:
+Learning models can provide statistical guidance from repeated data, while optimization algorithms provide mechanisms for:
 
 - enforcing feasibility;
 - computing bounds;
 - validating cuts;
 - proving optimality.
 
-The hybrid architecture can use each component for what it does best.
+A hybrid method can therefore use learning for statistical guidance while retaining optimization for feasibility, bounds, and certificates.
 
 ### 14.5 Improving Anytime Performance
 
@@ -1109,7 +1095,7 @@ $$
 
 If the two distributions differ substantially, solver performance can deteriorate.
 
-Generalization across instance sizes is easier than generalization across completely different mathematical structures.
+Several reported methods extrapolate to larger instances within the same problem family [4,5,15]. Transfer across substantially different mathematical structures is a much stronger requirement and remains less reliable.
 
 ### 15.2 Training Data Can Be Expensive
 
@@ -1238,11 +1224,13 @@ But tree size is not the same as runtime.
 
 ### 17.3 Primal Quality
 
-If a certified optimum $z^{\ast}$ is known, a generic relative objective error can be reported as
+If a certified optimum $z^{\ast}$ is known, one possible stabilized normalized objective error is
 
 $$
 \mathrm{Gap}=\frac{|z-z^{\ast}|}{\max(1,|z^{\ast}|)}\times100\%.
 $$
+
+This is an evaluation convention rather than a universal MILP gap definition.
 
 For time-limited solvers, the evolution of incumbent quality over time is often more informative than the final value alone.
 
@@ -1433,32 +1421,27 @@ model formulations
 problem classes
 ```
 
-The move from handcrafted features to GNNs, and more recently toward attention-based MILP backbones, is part of this effort [4,7].
+The move from handcrafted features to GNNs, and more recently toward attention-based MILP backbones, is part of the broader effort to build stronger and more transferable MILP representations [4,7].
 
-A useful future model should recognize mathematical structure rather than memorize one generator.
+A useful future model should capture mathematical structure rather than depend too heavily on one instance generator.
 
-### 19.2 Guarantee-Preserving Learning⭐⭐⭐
+### 19.2 Guarantee-Aware Learning⭐⭐⭐
 
-This is one of the most important directions for optimization.
+One important direction is to make the status of the guarantee explicit.
 
-Instead of asking only
+There are two different goals.
 
-> “Can AI make the solver faster?”
+The first is to **preserve the original deterministic optimization certificate**. Examples include:
 
-ask:
+- learned branching inside an otherwise exact Branch-and-Bound procedure;
+- learned ranking among mathematically valid cuts;
+- learned column ranking followed by exact pricing verification;
+- learned Benders prioritization followed by the required exact subproblem checks;
+- variable fixing only when a provable safe-fixing condition is available.
 
-> **“Can AI make the solver faster while keeping a clearly stated certificate?”**
+The second is to deliberately stop short of deterministic exactness but replace an informal heuristic with an **explicit statistical guarantee**. Conformal early stopping is an example of this second category [19].
 
-Examples include:
-
-- learned branching with exact Branch-and-Bound;
-- learned cut ranking among valid cuts;
-- learned column ranking with exact pricing verification;
-- learned Benders prioritization with exact final checks;
-- statistically calibrated early stopping [18];
-- safe variable fixing based on provable conditions.
-
-This direction fits optimization better than unrestricted black-box prediction.
+These two forms of guarantee should not be conflated.
 
 ### 19.3 Learning-Augmented Decomposition⭐⭐⭐
 
@@ -1494,7 +1477,7 @@ step-size control
 constraint selection
 ```
 
-These methods are especially attractive because they already split a difficult problem into repeated structured subproblems.
+Some of these ideas have already been demonstrated for Column Generation and Benders Decomposition [15-17], while others remain open research directions. Decomposition is attractive because it repeatedly exposes structured master/subproblem decisions that can generate reusable learning signals.
 
 ### 19.4 Learning Inside Branch-and-Price
 
@@ -1615,7 +1598,7 @@ Uncertainty-aware learning can provide a principled bridge between learned and c
 
 ### 19.10 LLM Modeling with Automatic Verification
 
-LLMs can reduce the cost of translating engineering requirements into optimization models [19].
+LLMs can reduce the cost of translating engineering requirements into optimization models [20].
 
 The next important step is not simply a larger language model.
 
@@ -1629,7 +1612,7 @@ It is a verification layer that can automatically check:
 - solver status;
 - solution interpretation.
 
-The long-term architecture is likely to be:
+A practical research architecture is:
 
 ```text
 language model
@@ -1657,7 +1640,7 @@ Useful benchmark families should include:
 - exactness labels;
 - training and inference cost.
 
-The ML4CO competition was an important step toward this distributional evaluation philosophy [17].
+The ML4CO competition was an important step toward this distributional evaluation philosophy [18].
 
 ### 19.12 AI as an Assistant, Not an Oracle⭐⭐⭐
 
@@ -1690,18 +1673,18 @@ This is the form of AI-assisted optimization that seems most compatible with the
 3. Branching is one of the most mature learning targets: strong branching provides a high-quality but expensive expert that can be imitated [3,4].
 4. MILPs naturally admit a variable-constraint bipartite graph representation, which explains the popularity of GNNs [4].
 5. Better prediction does not automatically mean a faster solver because inference cost matters [5].
-6. Learning has been applied to branching, cut selection, primal heuristics, node selection, LNS, solver configuration, Column Generation, and Benders Decomposition [2,8-17].
+6. Learning has been applied to branching, cut selection, primal heuristics, node selection, LNS, solver configuration, Column Generation, and Benders Decomposition [2,8-11,13-18].
 7. Learned cut selection can preserve exactness when the model only selects among mathematically valid cuts.
 8. Learned branching can preserve exactness when it changes search order without deleting valid parts of the search space.
 9. Learned primal heuristics and LNS are often most useful for improving anytime solution quality, but they do not by themselves prove global optimality.
-10. AI-assisted Column Generation is especially promising when learned ranking is combined with exact pricing verification [14].
-11. AI-assisted Benders methods can prioritize useful subproblems or approximate expensive recourse calculations, but exact certification requires appropriate verification [15,16].
+10. AI-assisted Column Generation is especially promising when learned ranking is combined with exact pricing verification [15].
+11. AI-assisted Benders methods can prioritize useful subproblems or approximate expensive recourse calculations, but exact certification requires appropriate verification [16,17].
 12. Generalization across instance distributions remains one of the central weaknesses of current methods.
 13. Training cost, inference overhead, hardware interaction, and solver integration must be included in any realistic performance comparison.
 14. A learned method should always state whether it is exact, heuristic, deterministically approximate, probabilistically calibrated, or uncertified.
-15. Recent work is beginning to combine learning with explicit uncertainty and probabilistic quality guarantees, such as conformal early stopping [18].
-16. LLMs are increasingly useful at the modeling and coding layer, but generated optimization models still require mathematical validation [19].
-17. Learning-augmented decomposition, Branch-and-Price, DP-based pricing, online adaptation, and guarantee-preserving learning remain particularly promising research directions.
+15. Recent work is beginning to combine learning with explicit uncertainty and probabilistic quality guarantees, such as conformal early stopping [19].
+16. LLMs are being explored at the modeling and coding layer, but generated optimization models still require mathematical validation [20].
+17. Learning-augmented decomposition, Branch-and-Price, DP-based pricing, online adaptation, and guarantee-aware learning remain particularly promising research directions.
 18. The safest design principle is:
 
 > **AI predicts what is promising; optimization verifies what must be true.**
@@ -1714,21 +1697,22 @@ This is the form of AI-assisted optimization that seems most compatible with the
 2. Scavuzzo, Lara, Karen Aardal, Andrea Lodi, and Neil Yorke-Smith. “Machine Learning Augmented Branch and Bound for Mixed Integer Linear Programming.” *Mathematical Programming* 217, 2026, 123–166. DOI: 10.1007/s10107-024-02130-y.
 3. Khalil, Elias B., Pierre Le Bodic, Le Song, George L. Nemhauser, and Bistra Dilkina. “Learning to Branch in Mixed Integer Programming.” *Proceedings of the AAAI Conference on Artificial Intelligence* 30(1), 2016, 724–731. DOI: 10.1609/aaai.v30i1.10080.
 4. Gasse, Maxime, Didier Chételat, Nicola Ferroni, Laurent Charlin, and Andrea Lodi. “Exact Combinatorial Optimization with Graph Convolutional Neural Networks.” *Advances in Neural Information Processing Systems* 32, 2019, 15554–15566.
-5. Gupta, Prateek, Maxime Gasse, Elias B. Khalil, M. Pawan Kumar, Andrea Lodi, and Yoshua Bengio. “Hybrid Models for Learning to Branch.” *Advances in Neural Information Processing Systems* 33, 2020.
+5. Gupta, Prateek, Maxime Gasse, Elias B. Khalil, M. Pawan Kumar, Andrea Lodi, and Yoshua Bengio. “Hybrid Models for Learning to Branch.” *Advances in Neural Information Processing Systems* 33, 2020, 18087–18097.
 6. Wang, Ruobing, Xin Li, Yangchuan Wang, Zijian Zhang, and Mingzhong Wang. “Generative Branching for Mixed-Integer Linear Programming.” *Proceedings of the AAAI Conference on Artificial Intelligence* 40(17), 2026, 14352–14360. DOI: 10.1609/aaai.v40i17.38450.
-7. Huang, Peixin, Yaoxin Wu, Yining Ma, Cathy Wu, Wen Song, and Wei Zhang. “A General Neural Backbone for Mixed-Integer Linear Optimization via Dual Attention.” *Proceedings of the 43rd International Conference on Machine Learning*, 2026. arXiv:2601.04509.
+7. Huang, Peixin, Yaoxin Wu, Yining Ma, Cathy Wu, Wen Song, and Wei Zhang. “A General Neural Backbone for Mixed-Integer Linear Optimization via Dual Attention.” *Proceedings of the 43rd International Conference on Machine Learning (ICML 2026)*, 2026. arXiv:2601.04509.
 8. Tang, Yunhao, Shipra Agrawal, and Yuri Faenza. “Reinforcement Learning for Integer Programming: Learning to Cut.” *Proceedings of the 37th International Conference on Machine Learning*, PMLR 119, 2020, 9367–9376.
 9. Deza, Arnaud, and Elias B. Khalil. “Machine Learning for Cutting Planes in Integer Programming: A Survey.” *Proceedings of the Thirty-Second International Joint Conference on Artificial Intelligence*, 2023, 6592–6600. DOI: 10.24963/ijcai.2023/739.
 10. Ding, Jian-Ya, Chao Zhang, Lei Shen, Shengyin Li, Bing Wang, Yinghui Xu, and Le Song. “Accelerating Primal Solution Findings for Mixed Integer Programs Based on Solution Prediction.” *Proceedings of the AAAI Conference on Artificial Intelligence* 34(02), 2020, 1452–1459. DOI: 10.1609/aaai.v34i02.5503.
 11. Khalil, Elias B., Christopher Morris, and Andrea Lodi. “MIP-GNN: A Data-Driven Framework for Guiding Combinatorial Solvers.” *Proceedings of the AAAI Conference on Artificial Intelligence* 36(9), 2022, 10219–10227. DOI: 10.1609/aaai.v36i9.21262.
-12. Song, Jialin, Ravi Lanka, Yisong Yue, and Bistra Dilkina. “A General Large Neighborhood Search Framework for Solving Integer Linear Programs.” *Advances in Neural Information Processing Systems* 33, 2020, 20012–20023.
-13. Wu, Yaoxin, Wen Song, Zhiguang Cao, and Jie Zhang. “Learning Large Neighborhood Search Policy for Integer Programming.” *Advances in Neural Information Processing Systems* 34, 2021, 30075–30087.
-14. Morabit, Mouad, Guy Desaulniers, and Andrea Lodi. “Machine-Learning–Based Column Selection for Column Generation.” *Transportation Science* 55(4), 2021, 815–831. DOI: 10.1287/trsc.2021.1045.
-15. Mitrai, Ilias, and Prodromos Daoutidis. “Computationally Efficient Solution of Mixed Integer Model Predictive Control Problems via Machine Learning Aided Benders Decomposition.” *Journal of Process Control* 137, 2024, 103207. DOI: 10.1016/j.jprocont.2024.103207.
-16. Donkiewicz, Tim. “Adaptive Subproblem Selection in Benders Decomposition for Survivable Network Design Problems.” *24th International Symposium on Experimental Algorithms (SEA 2026)*, LIPIcs 371, 2026, 17:1–17:20. DOI: 10.4230/LIPIcs.SEA.2026.17.
-17. Gasse, Maxime, et al. “The Machine Learning for Combinatorial Optimization Competition (ML4CO): Results and Insights.” *Proceedings of the NeurIPS 2021 Competitions and Demonstrations Track*, PMLR 176, 2022, 220–231.
-18. Clarke, Stefan, and Bartolomeo Stellato. “Conformal Prediction for Early Stopping in Mixed Integer Optimization.” *Proceedings of the 43rd International Conference on Machine Learning*, 2026. arXiv:2602.01476.
-19. Ahmaditeshnizi, Ali, Wenzhi Gao, and Madeleine Udell. “OptiMUS: Scalable Optimization Modeling with (MI)LP Solvers and Large Language Models.” *Proceedings of the 41st International Conference on Machine Learning*, PMLR 235, 2024, 577–596.
+12. Fischetti, Matteo, and Andrea Lodi. “Local Branching.” *Mathematical Programming* 98(1–3), 2003, 23–47. DOI: 10.1007/s10107-003-0395-5.
+13. Song, Jialin, Ravi Lanka, Yisong Yue, and Bistra Dilkina. “A General Large Neighborhood Search Framework for Solving Integer Linear Programs.” *Advances in Neural Information Processing Systems* 33, 2020, 20012–20023.
+14. Wu, Yaoxin, Wen Song, Zhiguang Cao, and Jie Zhang. “Learning Large Neighborhood Search Policy for Integer Programming.” *Advances in Neural Information Processing Systems* 34, 2021, 30075–30087.
+15. Morabit, Mouad, Guy Desaulniers, and Andrea Lodi. “Machine-Learning–Based Column Selection for Column Generation.” *Transportation Science* 55(4), 2021, 815–831. DOI: 10.1287/trsc.2021.1045.
+16. Mitrai, Ilias, and Prodromos Daoutidis. “Computationally Efficient Solution of Mixed Integer Model Predictive Control Problems via Machine Learning Aided Benders Decomposition.” *Journal of Process Control* 137, 2024, 103207. DOI: 10.1016/j.jprocont.2024.103207.
+17. Donkiewicz, Tim. “Adaptive Subproblem Selection in Benders Decomposition for Survivable Network Design Problems.” *24th International Symposium on Experimental Algorithms (SEA 2026)*, LIPIcs 371, 2026, 17:1–17:20. DOI: 10.4230/LIPIcs.SEA.2026.17.
+18. Gasse, Maxime, Simon Bowly, Quentin Cappart, Jonas Charfreitag, Laurent Charlin, Didier Chételat, Antonia Chmiela, Justin Dumouchelle, Ambros Gleixner, Aleksandr M. Kazachkov, Elias B. Khalil, Pawel Lichocki, Andrea Lodi, Miles Lubin, Chris J. Maddison, Christopher Morris, Dimitri J. Papageorgiou, Augustin Parjadis, Sebastian Pokutta, Antoine Prouvost, Lara Scavuzzo, and Giulia Zarpellon. “The Machine Learning for Combinatorial Optimization Competition (ML4CO): Results and Insights.” *Proceedings of the NeurIPS 2021 Competitions and Demonstrations Track*, PMLR 176, 2022, 220–231.
+19. Clarke, Stefan, and Bartolomeo Stellato. “Conformal Prediction for Early Stopping in Mixed Integer Optimization.” *Proceedings of the 43rd International Conference on Machine Learning (ICML 2026)*, 2026. arXiv:2602.01476.
+20. Ahmaditeshnizi, Ali, Wenzhi Gao, and Madeleine Udell. “OptiMUS: Scalable Optimization Modeling with (MI)LP Solvers and Large Language Models.” *Proceedings of the 41st International Conference on Machine Learning*, PMLR 235, 2024, 577–596.
 
 ---
 
@@ -1755,4 +1739,4 @@ The most relevant next topics are:
    Combines natural-language model generation with symbolic checks, solver execution, and post-solve validation.
 
 7. **Learning-Augmented Optimization with Guarantees**  
-   Studies safe fixing, uncertainty-aware fallback, calibrated early stopping, and other ways to combine statistical learning with explicit optimization guarantees.
+   Studies safe fixing, uncertainty-aware fallback, exact verification, calibrated early stopping, and the distinction between preserved deterministic certificates and statistical guarantees.
