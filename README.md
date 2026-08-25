@@ -22,6 +22,7 @@ A structured study series on Integer Linear Programming, from linear programming
 | 12  | [Knapsack Problem](notes/12-knapsack-problem.md)                                                                           | Completed |
 | 13  | [Assignment Problem and Hungarian Algorithm](notes/13-assignment-problem-and-hungarian-algorithm.md)                       | Completed |
 | 14  | [Convex Relaxation of Structured Binary Decisions via Mixed Norms](notes/14-convex-relaxation-of-structured-binary-decisions-via-mixed-norms.md) | Completed |
+| 15  | [AI-Assisted ILP and MILP](notes/15-ai-assisted-ilp-and-milp.md)                                                           | Completed |
 
 ## License
 
