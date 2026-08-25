@@ -555,7 +555,188 @@ Not in general.
 
 Exact support recovery can occur under special structural assumptions, but it is not a universal property of mixed-norm relaxation.
 
-### 8.4 Why the Surrogate Can Still Be Valuable
+### 8.4 How Large Can the Approximation Gap Be?⭐⭐⭐
+
+There is no universal numerical answer such as “the mixed-norm solution is always within 5% of the exact MILP optimum.”
+
+For a general activation MILP, the mixed-norm surrogate does **not** have a problem-independent constant approximation ratio. The gap depends on the geometry of the feasible set, the scale of each group, the regularization weights, and how closely group magnitude represents the original binary activation decision.
+
+#### 8.4.1 A Deterministic Lower Estimator from Group Upper Bounds
+
+Suppose every feasible group satisfies
+
+$$
+0\le\|x_g\|_2\le U_g,
+$$
+
+where $U_g>0$ is a valid upper bound.
+
+Define the exact weighted activation cost
+
+$$
+C(x)=\sum_{g=1}^{G}F_g\mathbf{1}\{\|x_g\|_2>0\}
+$$
+
+and the normalized mixed-norm penalty
+
+$$
+R_U(x)=\sum_{g=1}^{G}\frac{F_g}{U_g}\|x_g\|_2.
+$$
+
+For every feasible $x$,
+
+$$
+R_U(x)\le C(x).
+$$
+
+Indeed, if $x_g=0$, both terms for group $g$ are zero. If $x_g\ne0$, then $\|x_g\|_2/U_g\le1$.
+
+Therefore, for the minimization problem
+
+$$
+z^{\ast}=\min_{x\in\mathcal{C}}\quad f(x)+C(x),
+$$
+
+the convex model
+
+$$
+z_R^{\ast}=\min_{x\in\mathcal{C}}\quad f(x)+R_U(x)
+$$
+
+satisfies
+
+$$
+z_R^{\ast}\le z^{\ast}.
+$$
+
+Thus, with the specific choice
+
+$$
+\lambda\omega_g=\frac{F_g}{U_g},
+$$
+
+the mixed-norm objective provides a valid lower bound on the exact activation objective, provided the remaining feasible set is the same.
+
+This is stronger than using an arbitrary regularization weight, but it still does not by itself give a bounded relative gap.
+
+#### 8.4.2 When a Finite Multiplicative Bound Exists
+
+Suppose there is also a strictly positive lower activity level for every active group:
+
+$$
+x_g\ne0\Longrightarrow L_g\le\|x_g\|_2\le U_g,
+$$
+
+with $L_g>0$.
+
+Then
+
+$$
+\frac{F_g}{U_g}\|x_g\|_2\le F_g\mathbf{1}\{\|x_g\|_2>0\}\le\frac{F_g}{L_g}\|x_g\|_2.
+$$
+
+Define
+
+$$
+\rho=\max_g\frac{U_g}{L_g}.
+$$
+
+It follows that
+
+$$
+R_U(x)\le C(x)\le\rho R_U(x).
+$$
+
+If $f(x)\ge0$ for every feasible $x$, and $x^R$ is an optimizer of the normalized mixed-norm surrogate, then
+
+$$
+f(x^R)+C(x^R)\le\rho z^{\ast}.
+$$
+
+Hence this special structure gives a deterministic $\rho$-approximation guarantee for the original minimization objective.
+
+The quantity
+
+$$
+\frac{U_g}{L_g}
+$$
+
+is therefore informative. If $L_g$ and $U_g$ are close, the magnitude of an active group behaves almost like a binary indicator, and the mixed norm can approximate the fixed activation cost closely.
+
+If active groups can have arbitrarily small magnitude, no positive $L_g$ exists. In that case,
+
+$$
+\frac{F_g\mathbf{1}\{\|x_g\|_2>0\}}{(F_g/U_g)\|x_g\|_2}=\frac{U_g}{\|x_g\|_2}
+$$
+
+can become arbitrarily large as $\|x_g\|_2\to0^+$.
+
+This explains why no finite universal multiplicative gap can be expected for general activation MILPs.
+
+#### 8.4.3 Exact Support Recovery Exists Under Stronger Model Assumptions
+
+A different type of quantitative theory comes from statistical group-sparse models.
+
+For multivariate regression, Obozinski, Wainwright, and Jordan [6] derive high-probability thresholds for exact recovery of the nonzero row support by the multivariate Group LASSO. Their result relates recoverability to sample size, sparsity, design statistics, and the strength and overlap of the nonzero coefficient groups.
+
+Kadkhodaie Elyaderani et al. [7] give non-asymptotic guarantees for exact group-level support recovery under assumptions including a small number of active groups, sufficiently strong nonzero groups, and a suitably well-conditioned measurement matrix characterized through block coherence.
+
+Under such conditions, the recovered support can be exactly correct.
+
+However, these are **model-specific support-recovery theorems**. They do not imply that an arbitrary activation MILP solved through mixed-norm relaxation has zero objective gap or a universal approximation ratio.
+
+#### 8.4.4 Measuring the Gap in an Optimization Study
+
+When no suitable analytical bound is available, the most convincing quantitative evaluation is to use small instances for which the original MILP can be solved to proven optimality.
+
+Let
+
+$$
+z_{\mathrm{MILP}}^{\ast}
+$$
+
+denote the exact optimum of the original model.
+
+Solve the mixed-norm surrogate, extract its support, and re-optimize the original continuous objective on that support. Let the resulting value be $z_{\mathrm{MN}}$.
+
+For a minimization problem with $z_{\mathrm{MILP}}^{\ast}\ne0$, report
+
+$$
+\mathrm{Gap}_{\min}=\frac{z_{\mathrm{MN}}-z_{\mathrm{MILP}}^{\ast}}{|z_{\mathrm{MILP}}^{\ast}|}\times100\%.
+$$
+
+For a maximization problem with $z_{\mathrm{MILP}}^{\ast}\ne0$, report
+
+$$
+\mathrm{Gap}_{\max}=\frac{z_{\mathrm{MILP}}^{\ast}-z_{\mathrm{MN}}}{|z_{\mathrm{MILP}}^{\ast}|}\times100\%.
+$$
+
+If the exact optimum is zero or very close to zero, an absolute gap should be reported instead of an unstable relative percentage.
+
+The support itself should also be compared. Useful quantities include:
+
+- the number of active groups;
+- support precision and recall;
+- exact-support recovery rate over multiple instances;
+- the symmetric-difference size $|\mathcal{S}_{\mathrm{MN}}\triangle\mathcal{S}^{\ast}|$;
+- runtime and scalability.
+
+This separates three different questions:
+
+```text
+solver gap
+→ how accurately was the convex surrogate solved?
+
+objective gap
+→ how far is the mixed-norm solution from the exact MILP optimum?
+
+support gap
+→ how different is the selected active set from the exact active set?
+```
+
+The motivating study [1] reports that, in some simulated scenarios, its group-sparse design can reduce the number of active nodes substantially without loss of the chosen network-performance metric. This is useful empirical evidence for a performance-sparsity trade-off, but it is not the same as certifying the objective gap relative to an exact combinatorial activation optimum.
+
+### 8.5 Why the Surrogate Can Still Be Valuable
 
 In many engineering problems, the objective is not necessarily to certify the exact combinatorial activation pattern.
 
@@ -583,7 +764,7 @@ This does not mean the convex problem is free, but it removes the combinatorial 
 
 ### 9.2 Tractable Convex Structure
 
-When the resulting model belongs to a standard tractable convex class, it can be attacked with mature convex optimization methods. LPs and SOCPs, for example, admit polynomial-time algorithms to prescribed accuracy under standard complexity assumptions [6].
+When the resulting model belongs to a standard tractable convex class, it can be attacked with mature convex optimization methods. LPs and SOCPs, for example, admit polynomial-time algorithms to prescribed accuracy under standard complexity assumptions [8].
 
 Depending on the structure, suitable approaches include:
 
@@ -592,7 +773,7 @@ Depending on the structure, suitable approaches include:
 - accelerated first-order methods;
 - primal-dual methods;
 - ADMM-type methods when their assumptions hold;
-- block-coordinate and BSUM-type methods [5-7].
+- block-coordinate and BSUM-type methods [5,8,9].
 
 ### 9.3 Natural Group-Level Selection
 
@@ -934,7 +1115,7 @@ as the convex group-sparsity surrogate.
 
 Do not trust one arbitrary value of $\lambda$.
 
-Explore the performance-sparsity trade-off.
+Explore the performance-sparsity trade-off. When small exact instances are available, also compare the surrogate against the proven MILP optimum as described in Section 8.4.
 
 ### Step 8: Extract the Support
 
@@ -1020,7 +1201,7 @@ $$
 
 Each norm constraint is a second-order cone constraint.
 
-Therefore, if the rest of the model is linear or conic-representable, the mixed-norm problem can often be formulated as an SOCP [6].
+Therefore, if the rest of the model is linear or conic-representable, the mixed-norm problem can often be formulated as an SOCP [8].
 
 ### 14.2 Proximal Methods
 
@@ -1043,7 +1224,7 @@ If variables and constraints are separable into blocks, methods such as:
 - block coordinate methods;
 - BSUM-type algorithms;
 
-may exploit the problem structure [7].
+may exploit the problem structure [9].
 
 The appropriate solver depends on the exact coupling constraints and convergence assumptions.
 
@@ -1088,8 +1269,9 @@ Before using mixed-norm convex relaxation, ask:
 | Is the remaining continuous core convex? | Yes |
 | Is a high-quality sparse solution useful even without exact integer certification? | Yes |
 | Can the groups be normalized and weighted meaningfully? | Yes |
+| If active-group bounds exist, is $U_g/L_g$ reasonably small? | Yes |
 
-The strongest candidate is one in which the optimal activation state is completely determined by whether $\|x_g\|_2$ is zero, with an otherwise convex continuous model.
+The strongest candidate is one in which the optimal activation state is completely determined by whether $\|x_g\|_2$ is zero, with an otherwise convex continuous model. When positive lower and upper activity bounds are available, a smaller $U_g/L_g$ also indicates that group magnitude is a better proxy for the binary activation state.
 
 If several answers are “No,” forcing the problem into a mixed-norm formulation is likely to destroy important structure rather than simplify it.
 
@@ -1121,8 +1303,11 @@ $$
 12. Its main advantages are scalability, elimination of explicit activation binaries, natural group-level sparsity, and access to mature convex optimization algorithms.
 13. Regularization strength and group scaling strongly influence the selected support.
 14. A practical workflow is **mixed-norm optimization → support extraction → unpenalized re-optimization**.
-15. If exact optimality for the original MILP is required, use the mixed-norm solution as a warm start or search guide; heuristic variable deletion does not preserve exactness unless a safe fixing rule justifies it.
-16. Mixed-norm convex relaxation and Dantzig-Wolfe / column generation solve scale in different ways: the former replaces combinatorial group selection by a convex surrogate, while the latter preserves the underlying optimization model and attacks scale through decomposition.
+15. There is no universal constant objective gap for general mixed-norm activation relaxations. With valid bounds $L_g\le\|x_g\|_2\le U_g$ for every active group, special deterministic bounds can be derived, and the ratio $U_g/L_g$ quantifies how closely group magnitude can mimic an activation indicator.
+16. Exact support recovery is possible under stronger assumptions in specific statistical group-sparse models, but these results do not automatically extend to arbitrary MILPs.
+17. For engineering optimization, small-instance exact MILP anchors are the most direct way to measure objective gap, support gap, and runtime trade-offs.
+18. If exact optimality for the original MILP is required, use the mixed-norm solution as a warm start or search guide; heuristic variable deletion does not preserve exactness unless a safe fixing rule justifies it.
+19. Mixed-norm convex relaxation and Dantzig-Wolfe / column generation solve scale in different ways: the former replaces combinatorial group selection by a convex surrogate, while the latter preserves the underlying optimization model and attacks scale through decomposition.
 
 ---
 
@@ -1133,8 +1318,10 @@ $$
 3. Hong, Mingyi, Ruoyu Sun, Hadi Baligh, and Zhi-Quan Luo. “Joint Base Station Clustering and Beamformer Design for Partial Coordinated Transmission in Heterogeneous Networks.” *IEEE Journal on Selected Areas in Communications* 31(2), 2013, 226–240. DOI: 10.1109/JSAC.2013.130211.
 4. Shi, Yuanming, Jun Zhang, and Khaled B. Letaief. “Group Sparse Beamforming for Green Cloud-RAN.” *IEEE Transactions on Wireless Communications* 13(5), 2014, 2809–2823. DOI: 10.1109/TWC.2014.040214.131770.
 5. Bach, Francis, Rodolphe Jenatton, Julien Mairal, and Guillaume Obozinski. “Optimization with Sparsity-Inducing Penalties.” *Foundations and Trends in Machine Learning* 4(1), 2012, 1–106. DOI: 10.1561/2200000015.
-6. Boyd, Stephen, and Lieven Vandenberghe. *Convex Optimization*. Cambridge: Cambridge University Press, 2004. ISBN: 978-0-521-83378-3.
-7. Hong, Mingyi, Tsung-Hui Chang, Xiangfeng Wang, Meisam Razaviyayn, Shiqian Ma, and Zhi-Quan Luo. “A Block Successive Upper-Bound Minimization Method of Multipliers for Linearly Constrained Convex Optimization.” *Mathematics of Operations Research* 45(3), 2020, 833–861. DOI: 10.1287/moor.2019.1010.
+6. Obozinski, Guillaume, Martin J. Wainwright, and Michael I. Jordan. “Support Union Recovery in High-Dimensional Multivariate Regression.” *The Annals of Statistics* 39(1), 2011, 1–47. DOI: 10.1214/09-AOS776.
+7. Kadkhodaie Elyaderani, Mojtaba, Swayambhoo Jain, Jeffrey Druce, Stefano Gonella, and Jarvis Haupt. “Group-Level Support Recovery Guarantees for Group Lasso Estimator.” *2017 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)*, 2017, 4366–4370. DOI: 10.1109/ICASSP.2017.7952981.
+8. Boyd, Stephen, and Lieven Vandenberghe. *Convex Optimization*. Cambridge: Cambridge University Press, 2004. ISBN: 978-0-521-83378-3.
+9. Hong, Mingyi, Tsung-Hui Chang, Xiangfeng Wang, Meisam Razaviyayn, Shiqian Ma, and Zhi-Quan Luo. “A Block Successive Upper-Bound Minimization Method of Multipliers for Linearly Constrained Convex Optimization.” *Mathematics of Operations Research* 45(3), 2020, 833–861. DOI: 10.1287/moor.2019.1010.
 
 ---
 
