@@ -53,7 +53,7 @@ The previous notes developed the mathematical machinery:
 - [Dynamic Programming](11-dynamic-programming.md);
 - [Convex Relaxation of Structured Binary Decisions via Mixed Norms](14-convex-relaxation-of-structured-binary-decisions-via-mixed-norms.md).
 
-This final introductory note asks a different question:
+This introductory note asks a different question:
 
 > **Where can learning be inserted into these algorithms without losing the mathematical structure that makes optimization reliable?**
 
