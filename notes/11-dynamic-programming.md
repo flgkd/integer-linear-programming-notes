@@ -287,9 +287,9 @@ For nonnegative arc lengths, Dijkstra's algorithm is another standard alternativ
 
 ### 3.6 Example: Shortest Path from A to J
 
-The task is to determine the shortest distance from node $A$ to node $J$ and identify the corresponding shortest path or paths.
-
 Consider the graph below.
+
+The task is to determine the shortest distance from node $A$ to node $J$ and identify the corresponding shortest path or paths.
 
 <p align="center">
   <img src="../figures/chapter-11/chapter-11-fig2.png" alt="Shortest path from A to J" width="500">
