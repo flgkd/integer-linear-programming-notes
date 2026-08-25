@@ -105,6 +105,148 @@ In practice, for a dynamic-programming formulation, the most important tasks are
 2. describing the **optimal substructure**;
 3. deriving the **recurrence relation**.
 
+
+### 2.4 Integer Capacity and Weight Requirement of the Classical DP⭐⭐⭐
+
+The classical knapsack dynamic program used throughout this note takes the **capacity** as a state index:
+
+$$
+j=0,1,\ldots,V.
+$$
+
+Therefore, the standard $O(NV)$ capacity-indexed formulation assumes that the item volumes / weights and the knapsack capacity are integer-valued, or can be scaled to integers:
+
+$$
+v_i\in\mathbb{Z}_{>0},\quad V\in\mathbb{Z}_{\ge0}.
+$$
+
+This integer requirement comes from the **state space**, not from the objective values.
+
+The item values $w_i$ do **not** need to be integers for the recurrence itself. For example, values such as
+
+$$
+w=(3.7,5.2,8.6)
+$$
+
+cause no difficulty, because the values are stored in the DP table rather than used as array indices.
+
+The important distinction is:
+
+> **The quantity used as the DP index must be discretely enumerable. In the classical capacity-indexed knapsack DP, that quantity is the weight / capacity.**
+
+The Python implementations in this note read integer inputs for simplicity, but mathematically the value coefficients may be real numbers.
+
+#### What If the Weights or Capacity Are Not Integers?
+
+The knapsack problem itself does **not** require integer weights. What changes is whether the classical capacity-indexed DP can be used directly.
+
+There are several common cases.
+
+##### Case 1: Finite Decimal or Rational Weights
+
+If all weights and the capacity have a common finite precision, multiply them by a common scaling factor.
+
+For example,
+
+$$
+v=(1.2,2.7,3.5),\quad V=5.4
+$$
+
+can be multiplied by $10$ to obtain
+
+$$
+v'=(12,27,35),\quad V'=54.
+$$
+
+The ordinary integer-capacity DP can then be applied exactly.
+
+More generally, rational weights can be multiplied by a common denominator.
+
+However, scaling may make the capacity very large. If the original data have many decimal places, the scaled value $V'$ may become so large that an $O(NV')$ algorithm is no longer practical.
+
+##### Case 2: Integer Values but Non-Integer Weights
+
+If the values $w_i$ are nonnegative integers, the roles of weight and value can sometimes be reversed.
+
+Define
+
+$$
+g(i,p)=\text{minimum total weight required to obtain total value }p\text{ using the first }i\text{ items}.
+$$
+
+Then the 0-1 recurrence is
+
+$$
+g(i,p)=\min\{g(i-1,p),g(i-1,p-w_i)+v_i\}.
+$$
+
+The weights $v_i$ may now be non-integers because they are stored as DP values rather than used as state indices.
+
+After computing the table, the optimal value is the largest $p$ satisfying
+
+$$
+g(N,p)\le V.
+$$
+
+This is a **value-indexed dynamic program** rather than a capacity-indexed one.
+
+##### Case 3: General Real-Valued Data
+
+If neither the weights nor the values admit a useful discrete scaling, one can no longer rely on the simple $O(NV)$ table.
+
+Possible approaches include:
+
+- maintaining only nondominated $(\text{weight},\text{value})$ states;
+- solving the problem directly as a mixed-integer linear program;
+- using branch-and-bound or branch-and-cut;
+- using approximation algorithms when an exact solution is unnecessary.
+
+A nondominated-state method keeps a state $(W_1,P_1)$ over $(W_2,P_2)$ whenever
+
+$$
+W_1\le W_2
+$$
+
+and
+
+$$
+P_1\ge P_2.
+$$
+
+The dominated state $(W_2,P_2)$ can then be discarded.
+
+Such methods can handle non-integer weights, although the number of nondominated states may grow exponentially in the worst case.
+
+One special situation is also worth noting. If all item weights are integers but the capacity is not, for example
+
+$$
+V=10.7,
+$$
+
+then every feasible total weight is integer, so the constraint is equivalent to using
+
+$$
+\lfloor V\rfloor=10.
+$$
+
+In summary:
+
+```text
+integer / discretized weights and capacity
+→ classical capacity-indexed DP
+→ O(NV)
+
+finite decimals or rational weights
+→ scale to integers
+→ exact DP, but the scaled capacity may become large
+
+integer values but non-integer weights
+→ value-indexed DP may be possible
+
+general real-valued data
+→ sparse-state DP, MILP, branch-and-bound, or approximation methods
+```
+
 ---
 
 ## 3. 0-1 Knapsack Problem⭐⭐⭐
@@ -115,7 +257,7 @@ There are $N$ items and a knapsack with capacity $V$.
 
 Each item can be used **at most once**.
 
-The volume of item $i$ is $v_i$, and its value is $w_i$, where all parameters are positive integers.
+The volume of item $i$ is $v_i$, and its value is $w_i$. For the capacity-indexed DP used below, assume $v_i$ and $V$ are integers; $w_i$ does not need to be integer.
 
 We want to select a subset of items so that:
 
@@ -315,7 +457,7 @@ There are $N$ types of items and a knapsack with capacity $V$.
 
 Each type of item can be used **infinitely many times**.
 
-The volume of item type $i$ is $v_i$, and its value is $w_i$, where all parameters are positive integers.
+The volume of item type $i$ is $v_i$, and its value is $w_i$. For the capacity-indexed DP used below, assume $v_i$ and $V$ are integers; $w_i$ does not need to be integer.
 
 We want to maximize the total value subject to the capacity constraint.
 
@@ -535,6 +677,8 @@ Item type $i$ has:
 - value $w_i$,
 - quantity limit $s_i$.
 
+For the capacity-indexed DP used below, assume $v_i$ and $V$ are integers. The value $w_i$ may be non-integer, while $s_i$ is naturally a nonnegative integer.
+
 We want to maximize total value subject to the capacity constraint.
 
 ### 5.2 State Definition and Naive Recurrence
@@ -707,6 +851,8 @@ Each group contains several candidate items, and **at most one item may be selec
 
 If item $k$ in group $i$ is chosen, its volume is $v_{ik}$ and its value is $w_{ik}$.
 
+For the capacity-indexed DP used below, assume the item volumes $v_{ik}$ and the capacity $V$ are integers. The values $w_{ik}$ do not need to be integers.
+
 We want to maximize total value subject to the capacity constraint.
 
 ### 6.2 State Definition and Recurrence
@@ -853,6 +999,8 @@ bits to encode it.
 
 So an $O(NV)$ algorithm is generally **pseudo-polynomial**, not polynomial in the binary input length.
 
+This complexity also explains why the integer / discretized capacity assumption matters computationally. If decimal data are scaled by a factor $q$, the effective capacity becomes approximately $qV$, and the running time grows accordingly.
+
 This is exactly why 0-1 knapsack can be NP-hard even though it admits a practical DP algorithm.
 
 ### 8.2 Weak NP-Hardness
@@ -872,12 +1020,13 @@ That is one of the main reasons the knapsack problem is used so often in algorit
 
 1. The knapsack problem is a classical resource-allocation problem under a capacity constraint.
 2. The **decision** version is NP-complete, while the **optimization** version is NP-hard.
-3. The central DP task is to define a good state and derive the correct recurrence.
-4. For **0-1 knapsack**, the 1D capacity loop must go **from large to small**.
-5. For **complete knapsack**, the 1D capacity loop must go **from small to large**.
-6. **Multiple knapsack** can be efficiently reduced to a 0-1 knapsack problem by **binary splitting**.
-7. **Grouped knapsack** chooses at most one item from each group and also uses a descending capacity loop in the 1D version.
-8. The usual DP algorithms for knapsack are typically **pseudo-polynomial**, not polynomial in the encoded input length.
+3. The classical $O(NV)$ capacity-indexed DP assumes that weights and capacity are integer-valued or discretized to integers; the item values themselves do not need to be integers.
+4. The central DP task is to define a good state and derive the correct recurrence.
+5. For **0-1 knapsack**, the 1D capacity loop must go **from large to small**.
+6. For **complete knapsack**, the 1D capacity loop must go **from small to large**.
+7. **Multiple knapsack** can be efficiently reduced to a 0-1 knapsack problem by **binary splitting**.
+8. **Grouped knapsack** chooses at most one item from each group and also uses a descending capacity loop in the 1D version.
+9. The usual DP algorithms for knapsack are typically **pseudo-polynomial**, not polynomial in the encoded input length.
 
 ---
 
