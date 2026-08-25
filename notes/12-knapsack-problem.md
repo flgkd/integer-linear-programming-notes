@@ -51,6 +51,8 @@ In its most intuitive form, the knapsack problem asks:
 
 This is a **maximization problem under a capacity constraint**.
 
+The name comes from the physical interpretation of selecting the most valuable collection of items that can fit into a capacity-limited knapsack. Knapsack-type models and closely related subset-selection problems appear in resource allocation, combinatorial optimization, computational complexity, applied mathematics, and historically also in cryptographic constructions.
+
 A standard 0-1 formulation is
 
 $$
@@ -389,13 +391,21 @@ $$
 
 be the best value for capacity $j$ after processing some prefix of items.
 
-Then the 1D transition is
+Suppose the first $i-1$ items have already been processed. Before item $i$ is updated, the current array entry $f(j)$ represents the old state $f(i-1,j)$.
+
+Therefore:
+
+1. the term $f(i-1,j)$ is already stored in $f(j)$, so copying it explicitly is unnecessary;
+2. the transition involving item $i$ only needs to be considered when $j\ge v_i$, so the capacity loop can start from $v_i$;
+3. the remaining candidate is obtained from $f(j-v_i)+w_i$.
+
+This gives the compressed transition
 
 $$
 f(j)=\max\{f(j),f(j-v_i)+w_i\}.
 $$
 
-However, the **order of the capacity loop is crucial**.
+However, after compression, the **order of the capacity loop is crucial**.
 
 For 0-1 knapsack, we must traverse $j$ **from large to small**:
 
@@ -750,9 +760,25 @@ But this is generally **not valid**.
 
 The reason is that in the complete knapsack problem, item type $i$ may be chosen **arbitrarily many times**, so the recursive expansion is consistent.
 
-In the multiple knapsack problem, however, the number of copies of type $i$ is capped at $s_i$. If we write the complete-knapsack-style recurrence blindly, then repeated reuse of $f(i,j-v_i)$ may allow more than $s_i$ copies.
+In the multiple knapsack problem, however, the number of copies of type $i$ is capped at $s_i$. The direct recurrence contains only the terms corresponding to
 
-So the complete-knapsack simplification does not preserve the quantity limit in general.
+$$
+k=0,1,\ldots,s_i
+$$
+
+subject to the capacity limit.
+
+If we try to use $f(i,j-v_i)+w_i$, its expansion shifts the copy count upward by one. Whenever the capacity is large enough, this expression may contain a candidate corresponding to
+
+$$
+k=s_i+1,
+$$
+
+which violates the quantity limit.
+
+Therefore, repeated reuse of the current-layer state $f(i,j-v_i)$ is valid for complete knapsack but not for bounded knapsack in general.
+
+So the complete-knapsack simplification does not preserve the quantity limit.
 
 ### 5.5 Binary Splitting Optimization⭐⭐⭐
 
@@ -774,6 +800,10 @@ $$
 13=1+2+4+6.
 $$
 
+The important point is not that $13$ itself is being written in its ordinary binary representation. Rather, the copies are partitioned into bundles whose sizes are powers of two, together with one final remainder bundle.
+
+With the bundle sizes $1,2,4,6$, every integer number of copies from $0$ through $13$ can be represented by selecting an appropriate subset of the bundles. Thus the decision “how many copies of type $i$ should be taken?” can be replaced by several independent take-or-not-take decisions.
+
 Each group becomes an artificial 0-1 item:
 
 - group size $k$ has volume $k v_i$;
@@ -783,19 +813,19 @@ Then choosing a subset of these artificial items is equivalent to choosing any n
 
 So the multiple knapsack problem becomes a 0-1 knapsack problem after decomposition.
 
-This reduces the complexity from roughly
+If $s_{\max}=\max_i s_i$, the straightforward bounded-knapsack implementation is often summarized by the upper bound
 
 $$
-O(NVs)
+O(NVs_{\max}).
 $$
 
-to roughly
+After binary splitting, item type $i$ produces only $O(\log(s_i+1))$ artificial 0-1 items, giving
 
 $$
-O(V\sum_{i=1}^{N}\log s_i)
+O(V\sum_{i=1}^{N}\log(s_i+1))
 $$
 
-after splitting.
+time for the resulting 0-1 dynamic program.
 
 ### 5.6 Binary-Optimized Algorithm
 
@@ -926,6 +956,8 @@ The key point is the same as in 0-1 knapsack:
 
 > **The capacity index must be scanned from large to small, so that the values used by the current group still come from the previous group.**
 
+Each group should be treated as one DP stage. If the capacity were scanned from small to large, a state already updated using one item from the current group could be reused when considering another item from that same group, which could incorrectly select more than one item from the group.
+
 ```python
 import sys
 
@@ -1024,8 +1056,8 @@ That is one of the main reasons the knapsack problem is used so often in algorit
 4. The central DP task is to define a good state and derive the correct recurrence.
 5. For **0-1 knapsack**, the 1D capacity loop must go **from large to small**.
 6. For **complete knapsack**, the 1D capacity loop must go **from small to large**.
-7. **Multiple knapsack** can be efficiently reduced to a 0-1 knapsack problem by **binary splitting**.
-8. **Grouped knapsack** chooses at most one item from each group and also uses a descending capacity loop in the 1D version.
+7. **Multiple knapsack** can be efficiently reduced to a 0-1 knapsack problem by **binary splitting**, which replaces a copy-count decision by a logarithmic number of 0-1 bundle decisions.
+8. **Grouped knapsack** treats each group as one stage; a descending capacity loop prevents selecting more than one item from the same group in the 1D implementation.
 9. The usual DP algorithms for knapsack are typically **pseudo-polynomial**, not polynomial in the encoded input length.
 
 ---
