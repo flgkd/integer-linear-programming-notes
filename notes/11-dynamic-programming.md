@@ -374,7 +374,7 @@ An enumeration algorithm evaluates all $18$ paths separately.
 Every complete path contains four arcs, so evaluating one path length requires three additions. Under the simple convention of counting only additions and comparisons, exhaustive enumeration requires
 
 $$
-18	imes3+17=71
+18\times3+17=71
 $$
 
 elementary operations.
@@ -976,6 +976,20 @@ $$
 
 The difference from 0-1 knapsack is that each item type may now be selected multiple times.
 
+For the capacity-based dynamic programs below, assume
+
+$$
+a_j\in\mathbb{Z}_{>0},\quad j=1,\ldots,n.
+$$
+
+and
+
+$$
+B\in\mathbb{Z}_{>0}.
+$$
+
+The positive-weight assumption is essential: if an item had zero weight and positive profit, the unbounded knapsack problem would itself be unbounded.
+
 ### 5.2 State Definition
 
 Define
@@ -1367,6 +1381,16 @@ let
 - $s_t$: ending inventory;
 - $y_t\in\{0,1\}$: whether production is set up.
 
+Assume nonnegative demand and nonnegative setup, production, and holding costs.
+
+The Wagner-Whitin dynamic program in Sections 6.3-6.7 relies on a cost structure for which there is no speculative incentive to produce early merely to exploit a lower unit production cost. A standard sufficient condition is
+
+$$
+p_t+h_t\ge p_{t+1},\quad t=1,\ldots,n-1.
+$$
+
+Constant unit production cost is an important special case and satisfies this condition whenever holding costs are nonnegative. Under this cost structure, an optimal solution can be chosen to satisfy the zero-inventory ordering property used below [6,7].
+
 The standard formulation is
 
 $$
@@ -1433,7 +1457,7 @@ then
 
 ### 6.3 Zero-Inventory Ordering Property⭐
 
-A fundamental property of the uncapacitated deterministic lot-sizing problem is that there exists an optimal solution satisfying
+Under the Wagner-Whitin cost structure stated above, there exists an optimal solution satisfying
 
 $$
 s_{t-1}x_t=0,\quad t=1,\ldots,n.
@@ -1451,7 +1475,7 @@ $$
 x_t>0,
 $$
 
-the quantity produced in period $t$ can be taken to cover an integer block of future demands:
+the quantity produced in period $t$ can be taken to cover a consecutive block of future demands:
 
 $$
 x_t=D_{t,k}
@@ -1493,7 +1517,7 @@ $$
 H(k)
 $$
 
-be the minimum original cost for satisfying demands in periods $1,\ldots,k$.
+be the minimum original cost for satisfying demands in periods $1,\ldots,k$ with zero ending inventory after period $k$.
 
 Set
 
@@ -1567,7 +1591,7 @@ $$
 f_t+c_tD_{t,k}.
 $$
 
-Define $\widehat H(k)$ as the optimal value of this transformed objective for the first $k$ periods.
+Define $\widehat H(k)$ as the minimum accumulated transformed cost for covering demands in periods $1,\ldots,k$, with a regeneration point after period $k$.
 
 Then
 
@@ -1581,15 +1605,31 @@ $$
 \widehat H(k)=\min_{1\le t\le k}\{\widehat H(t-1)+f_t+c_tD_{t,k}\}.
 $$
 
-The original objective value is recovered by subtracting the corresponding constant.
+For each prefix, define
+
+$$
+C_k=\sum_{t=1}^{k}\bar h_td_t.
+$$
+
+The corresponding original-cost value is
+
+$$
+H(k)=\widehat H(k)-C_k.
+$$
 
 For the full horizon,
+
+$$
+C_n=C_0
+$$
+
+and therefore
 
 $$
 H(n)=\widehat H(n)-C_0.
 $$
 
-This distinction is important: $\widehat H(n)$ is the value of the **transformed** objective, not the original production-plus-inventory cost.
+This distinction is important: $\widehat H(k)$ is a transformed dynamic-programming value, whereas $H(k)$ is the corresponding production-plus-inventory cost.
 
 ### 6.6 Numerical Example
 
@@ -1720,6 +1760,20 @@ $$
 ```python
 def wagner_whitin(demand, setup, production_cost, holding_cost):
     n = len(demand)
+
+    if not (
+        len(setup) == n
+        and len(production_cost) == n
+        and len(holding_cost) == n
+    ):
+        raise ValueError("All input arrays must have the same length.")
+
+    for t in range(n - 1):
+        if production_cost[t] + holding_cost[t] < production_cost[t + 1]:
+            raise ValueError(
+                "The Wagner-Whitin recurrence used here assumes "
+                "p_t + h_t >= p_{t+1}."
+            )
 
     lot_cost = [[0] * n for _ in range(n)]
 
@@ -1860,3 +1914,5 @@ The difficult part is choosing a state that is:
 5. Agrawal, M., Kayal, N., and Saxena, N. “PRIMES is in P.” *Annals of Mathematics*, 160(2), 2004, pp. 781–793. DOI: `10.4007/annals.2004.160.781`.
 
 6. Wagner, H. M., and Whitin, T. M. “Dynamic Version of the Economic Lot Size Model.” *Management Science*, 5(1), 1958, pp. 89–96. DOI: `10.1287/mnsc.5.1.89`.
+
+7. Federgruen, A., and Tzur, M. “A Simple Forward Algorithm to Solve General Dynamic Lot Sizing Models with n Periods in O(n log n) or O(n) Time.” *Management Science*, 37(8), 1991, pp. 909–925. DOI: `10.1287/mnsc.37.8.909`.
