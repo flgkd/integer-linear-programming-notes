@@ -6,31 +6,41 @@
 
 ## 1. Preface
 
-Many ILP and MILP models contain binary variables whose purpose is not to represent an arbitrary integer quantity, but to answer a structural question:
+Some time ago, I read a paper by Yang et al. [1] and found one of its mathematical modeling ideas particularly interesting.
 
-> **Should this resource, node, subsystem, feature group, server, sensor, or communication component be active at all?**
+The underlying decision has a form that often appears in integer programming: **which resources should be active, and which should remain inactive?** A conventional modeling approach would naturally introduce binary activation variables. What caught my attention, however, was a different way of thinking about the problem.
 
-When this binary decision is tightly coupled to a group of continuous variables, the activation state can sometimes be represented indirectly through the **zero/nonzero support** of that continuous group.
+The key idea is **not** to first build an arbitrary finished ILP or MILP and then mechanically convert its binary variables into continuous variables. Instead, when the problem structure allows it, the model can be designed **from the beginning** so that each activation decision is represented by a group of continuous variables:
 
-This creates an important alternative to explicit integer optimization:
+```text
+entire continuous group = 0
+→ corresponding resource is inactive
 
-> **replace a combinatorial group-selection term by a convex mixed-norm penalty that encourages entire groups of continuous variables to become zero.**
+continuous group ≠ 0
+→ corresponding resource is active
+```
 
-The resulting technique is closely related to **group sparsity**, **Group LASSO**, and **mixed-norm convex regularization** [3-6].
+Once the discrete decision has been represented through the **zero/nonzero support** of a continuous group, a mixed $\ell_2/\ell_1$ norm can be introduced to encourage entire groups to become zero. In this way, a special class of activation-type combinatorial decisions that would naturally lead to an ILP or MILP can instead be handled through a group-sparse convex model.
 
-This note studies the method as a reusable optimization tool. The main questions are:
+This modeling philosophy is what motivated this note.
+
+What interested me most was the reusable modeling question:
+
+> **When facing a new optimization problem, can I recognize a structured binary decision early enough to model it through continuous group support and then use a mixed norm to obtain a tractable convex surrogate?**
+
+This technique is closely related to **group sparsity**, **Group LASSO**, and **mixed-norm convex regularization** [2-5].
+
+This note therefore focuses on the method itself rather than on any specific application. The main questions are:
 
 1. When can a structured ILP or MILP be transformed into a convex mixed-norm surrogate?
 2. What mathematical structure makes the transformation possible?
 3. Why can a mixed norm make an entire group exactly zero?
-4. What advantages are obtained after convexification?
+4. What advantages are obtained after convex relaxation?
 5. What optimality guarantees are lost?
 6. Which integer problems are suitable, and which are not?
 7. How can the method be combined with exact MILP techniques?
 
-The method was motivated by the group-sparse optimization construction in [2], but the discussion below is deliberately problem-independent.
-
-The most important point is:
+The central point is:
 
 > **Mixed-norm convex relaxation can turn some structured binary activation problems into tractable convex optimization problems, but it is not a universal exact convexification of arbitrary ILPs.**
 
@@ -46,7 +56,7 @@ A particularly favorable case occurs when:
 
 - the integer variables are binary activation indicators;
 - each binary indicator corresponds to a meaningful group of continuous variables;
-- an inactive resource is equivalent to that entire continuous group being zero;
+- inactivity forces the corresponding group to zero, while a zero group makes activation unnecessary at an optimum;
 - after removing the activation indicators, the remaining continuous model is convex.
 
 In this setting, the binary activation pattern can be represented by group support and approximated through a convex mixed norm.
@@ -76,11 +86,11 @@ Therefore:
 
 ### 2.2 Why There Cannot Be a Universal Exact Conversion
 
-General ILP is NP-hard [1].
+As discussed in [Computational Complexity Theory](10-computational-complexity-theory.md), general ILP is NP-hard.
 
-Suppose every ILP could be transformed, in polynomial time and with polynomial model size, into an equivalent convex optimization problem that could then be solved in polynomial time.
+Suppose every ILP could be transformed, in polynomial time and with polynomial model size, into an equivalent instance of a polynomial-time-solvable convex class, such as an LP or SOCP under the standard finite-precision complexity model.
 
-Then arbitrary ILPs could be solved in polynomial time.
+Then arbitrary ILPs could also be solved in polynomial time.
 
 Unless
 
@@ -94,7 +104,7 @@ So the correct question is not:
 
 > “Can mixed norms convexify every ILP?”
 
-The useful question is:
+The more useful question is:
 
 > **“Does my ILP contain a special group-activation structure whose discrete decisions can be represented by the support of continuous variables?”**
 
@@ -135,7 +145,7 @@ $$
 0\le x_{gj}\le M_{gj}y_g.
 $$
 
-A generic fixed-charge MILP is
+A generic fixed-charge mixed-integer activation model is
 
 $$
 \min_{x,y}\quad f(x)+\sum_{g=1}^{G}F_gy_g
@@ -147,51 +157,40 @@ $$
 y_g\in\{0,1\},\quad g=1,\ldots,G.
 $$
 
-Here $F_g>0$ is the cost of activating group $g$.
+Here $F_g>0$ is the cost of activating group $g$. When $f(x)$ is linear and the continuous constraints are linear, this is an MILP.
 
-### 3.2 The Critical Equivalence
+### 3.2 The Critical Support Relation
 
-The mixed-norm idea becomes natural when the physical meaning satisfies
-
-$$
-y_g=0\Longleftrightarrow x_g=0.
-$$
-
-Equivalently,
+The linking constraints directly enforce only one implication:
 
 $$
-y_g=1\Longleftrightarrow\|x_g\|_2>0.
+y_g=0\Longrightarrow x_g=0.
 $$
 
-This is the key bridge.
+They do **not** by themselves enforce the converse, because $y_g=1$ may still allow $x_g=0$.
 
-Examples include:
+For mixed-norm modeling, what matters is whether the activation state can be identified with support **at an optimal solution**. Typical examples are:
 
-- no traffic through a node $\Longleftrightarrow$ the node is unused;
-- all beamforming coefficients of a base station are zero $\Longleftrightarrow$ the base station is inactive;
-- all workloads assigned to a server are zero $\Longleftrightarrow$ the server is unused;
-- all coefficients of a feature group are zero $\Longleftrightarrow$ that feature group is excluded.
+- all traffic variables associated with a node are zero, so keeping that node activated brings no benefit;
+- all beamforming coefficients associated with a base station are zero, so the station need not remain active;
+- all workloads assigned to a server are zero, so an otherwise unnecessary active state can be removed;
+- all coefficients of a feature group are zero, so that group is excluded.
 
 ### 3.3 When Can the Binary Variable Be Eliminated?
 
 Suppose $y_g$ appears only as an activation indicator:
 
-- it links the continuous variables to an on/off decision;
-- it contributes a positive activation cost;
-- it does not participate in other logical constraints.
+- $y_g=0$ forces $x_g=0$;
+- $y_g$ contributes a strictly positive activation cost $F_g$;
+- $y_g$ has no other operational value and does not participate in additional logical constraints.
 
-Then at an optimal solution,
+Then an optimal solution never needs $y_g=1$ together with $x_g=0$. Therefore, at optimality,
 
 $$
 y_g=\mathbf{1}\{\|x_g\|_2>0\}.
 $$
 
-The reason is simple:
-
-- if $x_g\ne0$, the linking constraints force $y_g=1$;
-- if $x_g=0$, choosing $y_g=0$ avoids paying an unnecessary positive activation cost.
-
-The binary variable can therefore be eliminated conceptually.
+Under these assumptions, the binary activation variable can be represented by the zero/nonzero support of $x_g$.
 
 This does **not** work automatically when $y_g$ is also involved in constraints such as:
 
@@ -221,13 +220,11 @@ Despite the notation, $\|\cdot\|_{2,0}$ is not a norm.
 
 It is a discontinuous, nonconvex group-cardinality measure.
 
-With group-dependent activation costs,
+Under the assumptions of Section 3.3, group-dependent activation costs can be written exactly as
 
 $$
-\sum_{g=1}^{G}F_g\mathbf{1}\{\|x_g\|_2>0\}
+\sum_{g=1}^{G}F_g\mathbf{1}\{\|x_g\|_2>0\}.
 $$
-
-is the exact weighted activation cost.
 
 The original binary model can therefore be viewed as the continuous but nonconvex problem
 
@@ -247,7 +244,7 @@ This perspective reveals an important modeling principle:
 
 > **for activation-type MILPs, the hard discrete object is often the support pattern of continuous groups rather than the numerical symbols 0 and 1 themselves.**
 
-This is exactly why sparse optimization becomes relevant.
+This is why sparse optimization becomes relevant.
 
 ---
 
@@ -273,7 +270,7 @@ $$
 \|x\|_{2,1}=\sum_{g=1}^{G}\|x_g\|_2.
 $$
 
-This is the basic Group LASSO regularizer [3].
+This is the basic Group LASSO regularizer [2].
 
 The combinatorial model
 
@@ -293,7 +290,7 @@ $$
 \max_{x\in\mathcal{C}}\quad U(x)-\lambda\sum_{g=1}^{G}\omega_g\|x_g\|_2.
 $$
 
-Group-sparse formulations of this type are widely used in statistical learning, communications, signal processing, and network optimization [2-6].
+Group-sparse formulations of this type are widely used in statistical learning, communications, signal processing, and network optimization [1-5].
 
 ### 5.2 Why Is It Called a Mixed Norm?
 
@@ -316,7 +313,7 @@ So:
 - the inner $\ell_2$ norm treats all variables of one group as a single structural unit;
 - the outer $\ell_1$ aggregation encourages sparsity across those group magnitudes.
 
-This is why the construction is often described as an $\ell_2/\ell_1$ or $\ell_{2,1}$ mixed norm.
+This note follows the $\ell_2/\ell_1$ or $\ell_{2,1}$ terminology used in the motivating literature. Other sources reverse the index order, so the unambiguous definition to remember is simply the **sum of group $\ell_2$ norms**.
 
 ### 5.3 Why Not Use Ordinary $\ell_1$?
 
@@ -338,7 +335,7 @@ $$
 
 for complete groups.
 
-This distinction is fundamental.
+The distinction matters because the activation decision is group-level.
 
 ### 5.4 When Is the New Problem Convex?
 
@@ -346,9 +343,9 @@ For the minimization form, the mixed-norm model is convex if:
 
 1. $f(x)$ is convex;
 2. $\mathcal{C}$ is a convex feasible set;
-3. the weights satisfy $\omega_g>0$.
+3. the weights satisfy $\omega_g\ge0$.
 
-For the maximization form, $U(x)$ should be concave and $\mathcal{C}$ should be convex.
+Positive weights are normally used when every group is meant to be penalized. For the maximization form, $U(x)$ should be concave and $\mathcal{C}$ should be convex.
 
 Therefore the method does not create convexity from nothing.
 
@@ -430,19 +427,7 @@ $$
 h(x_g)=\lambda\omega_g\|x_g\|_2,
 $$
 
-the proximal mapping is
-
-$$
-\mathrm{prox}_{th}(v_g)=(1-\frac{t\lambda\omega_g}{\|v_g\|_2})_+v_g,
-$$
-
-where
-
-$$
-(a)_+=\max(a,0).
-$$
-
-If
+the proximal mapping has a simple threshold form. If
 
 $$
 \|v_g\|_2\le t\lambda\omega_g,
@@ -454,9 +439,21 @@ $$
 \mathrm{prox}_{th}(v_g)=0.
 $$
 
-The entire group disappears in one operation.
+If
 
-This is **group soft thresholding** or **block soft thresholding** [6].
+$$
+\|v_g\|_2>t\lambda\omega_g,
+$$
+
+then
+
+$$
+\mathrm{prox}_{th}(v_g)=(1-\frac{t\lambda\omega_g}{\|v_g\|_2})v_g.
+$$
+
+Thus the formula is well defined even when $v_g=0$, and an entire group can disappear in one operation.
+
+This is **group soft thresholding** or **block soft thresholding** [5].
 
 It is fundamentally different from arbitrary rounding.
 
@@ -504,11 +501,11 @@ The distinction can be summarized as follows.
 | Convexity | often convex if the remaining model is linear | convex if the continuous core is convex |
 | Exact original integer optimum | not guaranteed | not guaranteed |
 
-The method should therefore be understood as **support-based convexification**, not as simple fractional relaxation.
+The method should therefore be understood as a **support-based convex relaxation**, not as simple fractional relaxation.
 
 ---
 
-## 8. What Does the Convexification Guarantee?⭐⭐⭐
+## 8. What Does the Convex Surrogate Guarantee?⭐⭐⭐
 
 ### 8.1 Global Optimum of the Convex Problem
 
@@ -518,9 +515,7 @@ $$
 \min_{x\in\mathcal{C}}\quad f(x)+\lambda\sum_g\omega_g\|x_g\|_2
 $$
 
-is convex, then a correct convex optimization algorithm can find a globally optimal solution of this model.
-
-That is a strong guarantee.
+is convex, then standard convex-optimization methods target its global optimum rather than a merely local optimum. In numerical computation, the solution is obtained to a prescribed tolerance.
 
 ### 8.2 But Not Automatically the Original ILP Optimum
 
@@ -586,9 +581,9 @@ binary patterns.
 
 This does not mean the convex problem is free, but it removes the combinatorial branching caused by those activation variables.
 
-### 9.2 Polynomial-Time Solvable Convex Structure
+### 9.2 Tractable Convex Structure
 
-When the resulting model is a standard convex problem, it can be attacked with mature convex optimization methods.
+When the resulting model belongs to a standard tractable convex class, it can be attacked with mature convex optimization methods. LPs and SOCPs, for example, admit polynomial-time algorithms to prescribed accuracy under standard complexity assumptions [6].
 
 Depending on the structure, suitable approaches include:
 
@@ -597,7 +592,7 @@ Depending on the structure, suitable approaches include:
 - accelerated first-order methods;
 - primal-dual methods;
 - ADMM-type methods when their assumptions hold;
-- block-coordinate and BSUM-type methods [6-8].
+- block-coordinate and BSUM-type methods [5-7].
 
 ### 9.3 Natural Group-Level Selection
 
@@ -608,7 +603,7 @@ x_g = 0  → resource g inactive
 x_g ≠ 0  → resource g active
 ```
 
-This avoids an arbitrary post-processing rule such as thresholding a relaxed binary at $0.5$.
+This avoids an arbitrary modeling rule such as thresholding a relaxed binary at $0.5$. In actual numerical output, a small tolerance is still needed to decide whether a computed group norm should be treated as zero.
 
 ### 9.4 A Continuous Performance-Sparsity Trade-off
 
@@ -621,7 +616,7 @@ small λ  → prioritize the original performance objective
 large λ  → prioritize fewer or weaker active groups
 ```
 
-This creates a natural trade-off between performance and structural simplicity.
+This creates a natural trade-off between performance and structural simplicity. In a coupled constrained problem, however, increasing $\lambda$ does not guarantee that groups disappear one by one or that the active-set size changes monotonically.
 
 ### 9.5 Exploiting Large-Scale Structure
 
@@ -663,21 +658,15 @@ schedule 3 identical machines
 
 ### 10.2 Condition 2: Each Activation Has a Meaningful Continuous Group
 
-There should exist
+There should exist a continuous group $x_g$ for which inactivity forces zero activity, and for which keeping the resource active while $x_g=0$ is unnecessary in an optimal solution.
+
+Under the indicator-only assumptions of Section 3.3, this gives the optimal support relation
 
 $$
-x_g
+y_g=\mathbf{1}\{\|x_g\|_2>0\}.
 $$
 
-such that
-
-$$
-x_g=0\Longleftrightarrow\text{group }g\text{ is inactive}.
-$$
-
-This is the most important condition.
-
-Without it, there is no valid support representation of the binary decision.
+Without such a support interpretation, the mixed-norm substitution is not justified.
 
 ### 10.3 Condition 3: The Binary Variable Does Not Carry Essential Extra Logic
 
@@ -743,29 +732,29 @@ $$
 
 naturally means the station contributes nothing.
 
-Group-sparse beamforming is a well-established example [4,5].
+Group-sparse beamforming is a well-established example [3,4].
 
 **Sensor Selection**
 
 Let $x_g$ contain all decision variables associated with sensor $g$.
 
-A zero group means the sensor is unnecessary.
+If all of the modeled contribution of sensor $g$ is contained in this group, a zero group means that the sensor need not be selected.
 
 **Feature-Group Selection**
 
-Group LASSO was originally developed for selecting grouped explanatory variables [3].
+Group LASSO was originally developed for selecting grouped explanatory variables [2].
 
 **Server or Computing-Resource Activation**
 
 Let $x_g$ contain all workloads assigned to server $g$.
 
-If zero workload genuinely means the server can be inactive, group sparsity is a natural surrogate.
+If zero workload means that keeping the server active has no separate value or obligation, group sparsity is a natural surrogate.
 
 **Flow-Based Node or Link Activation**
 
 Let $x_g$ contain all flows using one candidate network resource.
 
-If zero group flow is equivalent to resource inactivity, the structure is highly suitable [2].
+If zero group flow is equivalent to resource inactivity, the structure is highly suitable [1].
 
 ### 11.2 Weak Candidates
 
@@ -837,7 +826,7 @@ So $\lambda$ is not merely a solver parameter.
 
 It changes the optimization model.
 
-### 12.2 Pareto-Frontier Tuning
+### 12.2 Trade-off Sweep
 
 A practical strategy is:
 
@@ -848,7 +837,7 @@ A practical strategy is:
 5. examine the performance-versus-sparsity frontier;
 6. choose the desired operating point.
 
-This is often more informative than selecting one $\lambda$ arbitrarily.
+This is often more informative than selecting one $\lambda$ arbitrarily. The resulting curve is a useful empirical trade-off curve; it should not be assumed to enumerate every cardinality level or every Pareto-efficient support.
 
 ### 12.3 Group Weights
 
@@ -866,14 +855,14 @@ $$
 \omega_g=\sqrt{d_g}.
 $$
 
-In engineering models, better weights may come from:
+In engineering models, useful weights may reflect:
 
 - fixed activation costs;
 - capacities;
 - normalized resource usage;
 - physical units.
 
-There is no universally optimal weighting rule.
+Using an activation cost as a weight can encode its relative importance, but it does not make the mixed-norm penalty exactly equal to a fixed-charge objective. There is no universally optimal weighting rule.
 
 ### 12.4 Shrinkage Bias
 
@@ -905,17 +894,15 @@ Do not include binaries that encode ordering, precedence, or complex logic.
 
 For every activation variable $y_g$, identify a vector $x_g$ containing all continuous activity associated with that resource.
 
-### Step 3: Verify the Support Equivalence
+### Step 3: Verify the Support Interpretation
 
 Check whether
 
-$$
-x_g=0\Longleftrightarrow y_g=0
-$$
+- $y_g=0$ forces $x_g=0$;
+- whenever $x_g=0$, keeping $y_g=1$ is unnecessary at an optimum;
+- $y_g$ is not needed to express additional discrete logic.
 
-is physically and mathematically valid.
-
-If not, stop. The mixed-norm route is not justified.
+If these conditions fail, the mixed-norm route is not justified.
 
 ### Step 4: Eliminate the Activation Indicators Conceptually
 
@@ -973,19 +960,33 @@ This reduces shrinkage bias.
 
 ### Step 10: If Exact Integer Optimality Is Required, Return to MILP
 
-Use the mixed-norm solution to reduce the candidate set and then solve the reduced exact MILP.
+A mixed-norm solution can be used to help construct a warm start or incumbent, or to guide branching and variable priorities.
 
-This gives the hybrid workflow
+Removing groups permanently is different. If groups are discarded only because the convex surrogate made them zero, solving the reduced MILP is exact **only for that reduced model**, not necessarily for the original MILP.
+
+Therefore there are two distinct workflows.
+
+A heuristic reduction is
 
 ```text
 structured MILP
 → mixed-norm convex surrogate
-→ support screening
+→ heuristic support screening
 → reduced MILP
-→ exact solver
 ```
 
-The mixed-norm stage is then used as an intelligent structural filter rather than as a replacement for exact optimization.
+This may be very effective, but it does not certify the optimum of the original MILP.
+
+For an exact workflow, use
+
+```text
+structured MILP
+→ mixed-norm convex surrogate
+→ warm start / priorities / candidate guidance
+→ original exact MILP solver
+```
+
+or remove variables only when a separate **safe fixing rule** proves that they cannot belong to any globally optimal solution.
 
 ---
 
@@ -1019,7 +1020,7 @@ $$
 
 Each norm constraint is a second-order cone constraint.
 
-Therefore, if the rest of the model is linear or conic-representable, the mixed-norm problem can often be formulated as an SOCP [7].
+Therefore, if the rest of the model is linear or conic-representable, the mixed-norm problem can often be formulated as an SOCP [6].
 
 ### 14.2 Proximal Methods
 
@@ -1029,7 +1030,7 @@ $$
 \min_x\quad f(x)+\lambda\sum_g\omega_g\|x_g\|_2
 $$
 
-with smooth $f$, proximal methods are natural because the nonsmooth mixed-norm term has a closed-form group-thresholding operator [6].
+with smooth $f$, proximal methods are natural because the nonsmooth mixed-norm term has a closed-form group-thresholding operator [5].
 
 This avoids treating nonsmoothness as an obstacle.
 
@@ -1042,7 +1043,7 @@ If variables and constraints are separable into blocks, methods such as:
 - block coordinate methods;
 - BSUM-type algorithms;
 
-may exploit the problem structure [8].
+may exploit the problem structure [7].
 
 The appropriate solver depends on the exact coupling constraints and convergence assumptions.
 
@@ -1070,7 +1071,7 @@ Relevant earlier notes are:
 
 These approaches can also complement each other.
 
-A mixed-norm model can screen thousands of candidate resources before an exact Branch-and-Price or MILP model is solved on the reduced set.
+A mixed-norm solution can provide a strong initial support, incumbent, or branching signal for an exact Branch-and-Price or MILP solver. If it is used to delete variables heuristically, the final solution is exact only for the reduced model unless the deletions are justified by a safe fixing argument.
 
 ---
 
@@ -1082,19 +1083,13 @@ Before using mixed-norm convex relaxation, ask:
 |:---:|:---|
 | Is the integer variable mainly an activation or selection indicator? | Yes |
 | Is there a meaningful continuous vector associated with that activation? | Yes |
-| Does zero activity mean the resource is genuinely inactive? | Yes |
+| Does zero activity make activation unnecessary at an optimum? | Yes |
 | Does the binary variable avoid essential extra Boolean logic? | Yes |
 | Is the remaining continuous core convex? | Yes |
 | Is a high-quality sparse solution useful even without exact integer certification? | Yes |
 | Can the groups be normalized and weighted meaningfully? | Yes |
 
-The strongest candidate has the form
-
-$$
-\text{resource }g\text{ active}\Longleftrightarrow\|x_g\|_2>0
-$$
-
-with an otherwise convex optimization model.
+The strongest candidate is one in which the optimal activation state is completely determined by whether $\|x_g\|_2$ is zero, with an otherwise convex continuous model.
 
 If several answers are “No,” forcing the problem into a mixed-norm formulation is likely to destroy important structure rather than simplify it.
 
@@ -1104,13 +1099,8 @@ If several answers are “No,” forcing the problem into a mixed-norm formulati
 
 1. Some structured ILP and MILP problems can be transformed into **convex mixed-norm surrogate problems**.
 2. The method is especially suitable when binary variables represent **group activation or group selection**.
-3. The central modeling requirement is
-
-$$
-x_g=0\Longleftrightarrow\text{group }g\text{ is inactive}.
-$$
-
-4. The exact discrete structure can be expressed through the nonconvex group-cardinality quantity
+3. The central modeling requirement is that inactivity forces $x_g=0$ and, under the model's objective and constraints, an active state with $x_g=0$ is unnecessary at an optimum.
+4. Under this indicator-only structure, the discrete activation cost can be expressed through the nonconvex group-cardinality quantity
 
 $$
 \|x\|_{2,0}.
@@ -1131,21 +1121,20 @@ $$
 12. Its main advantages are scalability, elimination of explicit activation binaries, natural group-level sparsity, and access to mature convex optimization algorithms.
 13. Regularization strength and group scaling strongly influence the selected support.
 14. A practical workflow is **mixed-norm optimization → support extraction → unpenalized re-optimization**.
-15. If exact integer optimality is required, use **mixed-norm screening → reduced exact MILP**.
-16. Mixed-norm convex relaxation and Dantzig-Wolfe / column generation solve scale in different ways: the former changes the combinatorial selection model into a convex surrogate, while the latter preserves the optimization structure and decomposes it.
+15. If exact optimality for the original MILP is required, use the mixed-norm solution as a warm start or search guide; heuristic variable deletion does not preserve exactness unless a safe fixing rule justifies it.
+16. Mixed-norm convex relaxation and Dantzig-Wolfe / column generation solve scale in different ways: the former replaces combinatorial group selection by a convex surrogate, while the latter preserves the underlying optimization model and attacks scale through decomposition.
 
 ---
 
 ## References
 
-1. Sun, Xiaoling, and Duan Li. *Integer Programming*. Beijing: Science Press, 2010. ISBN: 978-7-03-029380-0.（孙小玲、李端：《整数规划》，北京：科学出版社，2010年，ISBN：978-7-03-029380-0）
-2. Yang, Huiting, Wei Liu, Xiangfeng Wang, and Jiandong Li. “Group Sparse Space Information Network With Joint Virtual Network Function Deployment and Maximum Flow Routing Strategy.” *IEEE Transactions on Wireless Communications* 22(8), 2023, 5291–5305. DOI: 10.1109/TWC.2022.3233067.
-3. Yuan, Ming, and Yi Lin. “Model Selection and Estimation in Regression with Grouped Variables.” *Journal of the Royal Statistical Society: Series B (Statistical Methodology)* 68(1), 2006, 49–67. DOI: 10.1111/j.1467-9868.2005.00532.x.
-4. Hong, Mingyi, Ruoyu Sun, Hadi Baligh, and Zhi-Quan Luo. “Joint Base Station Clustering and Beamformer Design for Partial Coordinated Transmission in Heterogeneous Networks.” *IEEE Journal on Selected Areas in Communications* 31(2), 2013, 226–240. DOI: 10.1109/JSAC.2013.130211.
-5. Shi, Yuanming, Jun Zhang, and Khaled B. Letaief. “Group Sparse Beamforming for Green Cloud-RAN.” *IEEE Transactions on Wireless Communications* 13(5), 2014, 2809–2823. DOI: 10.1109/TWC.2014.040214.131770.
-6. Bach, Francis, Rodolphe Jenatton, Julien Mairal, and Guillaume Obozinski. “Optimization with Sparsity-Inducing Penalties.” *Foundations and Trends in Machine Learning* 4(1), 2012, 1–106. DOI: 10.1561/2200000015.
-7. Boyd, Stephen, and Lieven Vandenberghe. *Convex Optimization*. Cambridge: Cambridge University Press, 2004. ISBN: 978-0-521-83378-3.
-8. Hong, Mingyi, Tsung-Hui Chang, Xiangfeng Wang, Meisam Razaviyayn, Shiqian Ma, and Zhi-Quan Luo. “A Block Successive Upper-Bound Minimization Method of Multipliers for Linearly Constrained Convex Optimization.” *Mathematics of Operations Research* 45(3), 2020, 833–861. DOI: 10.1287/moor.2019.1010.
+1. Yang, Huiting, Wei Liu, Xiangfeng Wang, and Jiandong Li. “Group Sparse Space Information Network With Joint Virtual Network Function Deployment and Maximum Flow Routing Strategy.” *IEEE Transactions on Wireless Communications* 22(8), 2023, 5291–5305. DOI: 10.1109/TWC.2022.3233067.
+2. Yuan, Ming, and Yi Lin. “Model Selection and Estimation in Regression with Grouped Variables.” *Journal of the Royal Statistical Society: Series B (Statistical Methodology)* 68(1), 2006, 49–67. DOI: 10.1111/j.1467-9868.2005.00532.x.
+3. Hong, Mingyi, Ruoyu Sun, Hadi Baligh, and Zhi-Quan Luo. “Joint Base Station Clustering and Beamformer Design for Partial Coordinated Transmission in Heterogeneous Networks.” *IEEE Journal on Selected Areas in Communications* 31(2), 2013, 226–240. DOI: 10.1109/JSAC.2013.130211.
+4. Shi, Yuanming, Jun Zhang, and Khaled B. Letaief. “Group Sparse Beamforming for Green Cloud-RAN.” *IEEE Transactions on Wireless Communications* 13(5), 2014, 2809–2823. DOI: 10.1109/TWC.2014.040214.131770.
+5. Bach, Francis, Rodolphe Jenatton, Julien Mairal, and Guillaume Obozinski. “Optimization with Sparsity-Inducing Penalties.” *Foundations and Trends in Machine Learning* 4(1), 2012, 1–106. DOI: 10.1561/2200000015.
+6. Boyd, Stephen, and Lieven Vandenberghe. *Convex Optimization*. Cambridge: Cambridge University Press, 2004. ISBN: 978-0-521-83378-3.
+7. Hong, Mingyi, Tsung-Hui Chang, Xiangfeng Wang, Meisam Razaviyayn, Shiqian Ma, and Zhi-Quan Luo. “A Block Successive Upper-Bound Minimization Method of Multipliers for Linearly Constrained Convex Optimization.” *Mathematics of Operations Research* 45(3), 2020, 833–861. DOI: 10.1287/moor.2019.1010.
 
 ---
 
