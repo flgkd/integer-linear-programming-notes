@@ -1153,3 +1153,4 @@ The most relevant next topics are:
 
 4. **Hybrid Convex Screening and Exact MILP**  
    Uses a convex group-sparse model to reduce candidate variables before applying branch-and-bound, branch-and-cut, or Branch-and-Price to a smaller exact model.
+ 
