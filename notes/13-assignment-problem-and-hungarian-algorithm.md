@@ -283,7 +283,9 @@ $$
 
 such that every edge has one endpoint in $X$ and the other endpoint in $Y$.
 
-![A bipartite graph](../figures/chapter-13/chapter-13-fig1.png)
+<p align="center">
+  <img src="../figures/chapter-13/chapter-13-fig1.png" alt="A bipartite graph" width="500">
+</p>
 
 *Figure 1. A bipartite graph with vertex sets $X$ and $Y$. Adapted and redrawn from [11].*
 
@@ -305,7 +307,9 @@ a perfect matching has exactly $n$ edges.
 
 The following illustration uses a pairing interpretation. Boys and girls form the two vertex sets, and an edge represents an admissible pair.
 
-![Bipartite pairing graph](../figures/chapter-13/chapter-13-fig2.png)
+<p align="center">
+  <img src="../figures/chapter-13/chapter-13-fig2.png" alt="Bipartite pairing graph" width="500">
+</p>
 
 *Figure 2. A bipartite pairing graph. Adapted and redrawn from [11].*
 
@@ -331,7 +335,9 @@ If the matched and unmatched status of every edge on such a path is reversed, th
 
 This is the logic behind the familiar “try another partner for the currently matched vertex” interpretation.
 
-![Candidate edges for bipartite matching](../figures/chapter-13/chapter-13-fig3.png)
+<p align="center">
+  <img src="../figures/chapter-13/chapter-13-fig3.png" alt="Candidate edges for bipartite matching" width="500">
+</p>
 
 *Figure 3. Candidate edges in the bipartite matching example. Adapted and redrawn from [11].*
 
@@ -344,11 +350,15 @@ Consider the following sequence conceptually:
 
 The next figures illustrate this rerouting idea.
 
-![Augmenting-path rematching](../figures/chapter-13/chapter-13-fig4.png)
+<p align="center">
+  <img src="../figures/chapter-13/chapter-13-fig4.png" alt="Augmenting-path rematching" width="500">
+</p>
 
 *Figure 4. An augmenting-path rematching step. Adapted and redrawn from [11].*
 
-![Further matching updates](../figures/chapter-13/chapter-13-fig5.png)
+<p align="center">
+  <img src="../figures/chapter-13/chapter-13-fig5.png" alt="Further matching updates" width="500">
+</p>
 
 *Figure 5. Further matching updates in the same example. Adapted and redrawn from [11].*
 
@@ -412,7 +422,9 @@ A **vertex cover** is a set of vertices such that every edge has at least one en
 
 A **minimum vertex cover** is a vertex cover containing as few vertices as possible.
 
-![Alternating reachability and vertex cover](../figures/chapter-13/chapter-13-fig6.png)
+<p align="center">
+  <img src="../figures/chapter-13/chapter-13-fig6.png" alt="Alternating reachability and vertex cover" width="500">
+</p>
 
 *Figure 6. Alternating reachability used to construct a minimum vertex cover. Adapted and redrawn from [11].*
 
@@ -497,7 +509,9 @@ That is exactly the existence of a **perfect matching**.
 
 Row and column exchanges only relabel the row and column vertices. They do not change the underlying bipartite adjacency structure.
 
-![Permutation interpretation of the matrix game](../figures/chapter-13/chapter-13-fig7.png)
+<p align="center">
+  <img src="../figures/chapter-13/chapter-13-fig7.png" alt="Permutation interpretation of the matrix game" width="500">
+</p>
 
 *Figure 7. Row or column permutations can be interpreted as relabeling one side of the bipartite graph. Adapted and redrawn from [11].*
 
@@ -569,7 +583,9 @@ Another example uses a rectangular grid in which some cells are initially raised
 
 One operation presses an entire row or an entire column.
 
-![Grid representation of raised cells](../figures/chapter-13/chapter-13-fig8.png)
+<p align="center">
+  <img src="../figures/chapter-13/chapter-13-fig8.png" alt="Grid representation of raised cells" width="500">
+</p>
 
 *Figure 8. A grid with selected cells. Adapted and redrawn from [11].*
 
@@ -579,7 +595,9 @@ Construct a bipartite graph:
 - one right vertex for each column;
 - an edge $(X_i,Y_j)$ for every raised cell $(i,j)$.
 
-![Bipartite representation of the grid](../figures/chapter-13/chapter-13-fig9.png)
+<p align="center">
+  <img src="../figures/chapter-13/chapter-13-fig9.png" alt="Bipartite representation of the grid" width="500">
+</p>
 
 *Figure 9. Bipartite representation of the row-column grid. Adapted and redrawn from [11].*
 
@@ -603,7 +621,9 @@ A $1\times2$ domino covers two orthogonally adjacent cells.
 
 Color the board in a checkerboard pattern.
 
-![Checkerboard coloring](../figures/chapter-13/chapter-13-fig10.png)
+<p align="center">
+  <img src="../figures/chapter-13/chapter-13-fig10.png" alt="Checkerboard coloring" width="500">
+</p>
 
 *Figure 10. Checkerboard coloring of the board. Adapted and redrawn from [11].*
 
@@ -614,7 +634,9 @@ Every pair of orthogonally adjacent cells has opposite colors. Therefore every d
 
 After deleting unavailable cells:
 
-![Checkerboard with deleted cells](../figures/chapter-13/chapter-13-fig11.png)
+<p align="center">
+  <img src="../figures/chapter-13/chapter-13-fig11.png" alt="Checkerboard with deleted cells" width="500">
+</p>
 
 *Figure 11. A checkerboard with deleted cells. Adapted and redrawn from [11].*
 
@@ -940,10 +962,10 @@ The difference is not merely terminology. The underlying combinatorial structure
 6. Cohen, Reuven, Liran Katzir, and Danny Raz. “An Efficient Approximation for the Generalized Assignment Problem.” *Information Processing Letters* 100(4), 2006, 162-166. DOI: 10.1016/j.ipl.2006.06.003.
 7. “Generalized Assignment Problem.” *Wikipedia*. https://en.wikipedia.org/wiki/Generalized_assignment_problem.
 8. “Assignment Problem: Meaning, Methods and Variations | Operations Research.” *Engineering Notes*. https://www.engineeringenotes.com/project-management-2/operations-research/assignment-problem-meaning-methods-and-variations-operations-research/15652.
-9. SimyHsu. “Hungarian Algorithm匈牙利算法.” *CSDN Blog*. https://blog.csdn.net/u014754127/article/details/78086014.
-10. 银时莫问前程. “二分图匹配——匈牙利算法（时间复杂度O(nm)）.” *CSDN Blog*. https://blog.csdn.net/weixin_40477002/article/details/122799390.
-11. “算法学习笔记(5)：匈牙利算法.” *知乎专栏*. https://zhuanlan.zhihu.com/p/96229700.
-12. Matrix67. “二分图最大匹配的König定理及其证明.” *Matrix67 Blog*. http://www.matrix67.com/blog/archives/116.
+9. SimyHsu. “Hungarian Algorithm.” *CSDN Blog*. https://blog.csdn.net/u014754127/article/details/78086014.（SimyHsu：《Hungarian Algorithm匈牙利算法》，CSDN博客）
+10. Yinshi Mowen Qiancheng. “Bipartite Matching — Hungarian Algorithm (Time Complexity O(nm)).” *CSDN Blog*. https://blog.csdn.net/weixin_40477002/article/details/122799390.（银时莫问前程：《二分图匹配——匈牙利算法（时间复杂度O(nm)）》，CSDN博客）
+11. “Algorithm Study Notes (5): Hungarian Algorithm.” *Zhihu Column*. https://zhuanlan.zhihu.com/p/96229700.（《算法学习笔记(5)：匈牙利算法》，知乎专栏）
+12. Matrix67. “König's Theorem for Maximum Matching in Bipartite Graphs and Its Proof.” *Matrix67 Blog*. http://www.matrix67.com/blog/archives/116.（Matrix67：《二分图最大匹配的König定理及其证明》，Matrix67博客）
 
 ---
 
