@@ -8,7 +8,7 @@
 
 This note studies the **assignment problem** and the **Hungarian algorithm**, together with their connections to bipartite matching, combinatorial optimization, and integer programming.
 
-This note is primarily based on Sun and Li's *Integer Programming* [1]. The sections on bipartite matching, augmenting paths, minimum vertex cover, and several programming examples are also based on the online materials listed in References [8]-[12].
+This note is primarily based on Sun and Li's *Integer Programming* [1]. The weighted Hungarian-method overview also draws on [8,9], while the unweighted bipartite-matching discussion is supported by [10,11,12]. **All eleven figures in Sections 3-5 are adapted and redrawn from Pecco's Zhihu article [11]**, which is also the source of the three graph-modeling examples used there.
 
 Two assignment models should be distinguished from the beginning:
 
@@ -17,7 +17,7 @@ Two assignment models should be distinguished from the beginning:
 
 The classical assignment problem imposes a one-to-one correspondence between agents and tasks. In the balanced case, every agent receives exactly one task and every task is assigned to exactly one agent.
 
-The generalized assignment problem removes this one-to-one structure and introduces capacity constraints. A machine or agent may process several jobs as long as its resource capacity is respected.
+In the standard generalized assignment problem, each job is still assigned to one machine or agent, but the one-job-per-agent restriction is relaxed. A machine or agent may receive several jobs as long as its resource capacity is respected.
 
 This distinction has an important computational consequence:
 
@@ -27,7 +27,7 @@ A second distinction is equally important:
 
 > **The classical weighted assignment problem is a minimum-cost or maximum-weight perfect matching problem. An unweighted maximum-cardinality bipartite matching problem is related, but it is not the same optimization problem.**
 
-This matters because the phrase **Hungarian algorithm** is used in two different ways in practice. In operations research, it usually refers to the Kuhn-Munkres method for the weighted assignment problem [2,3]. In some competitive-programming materials, a DFS-based augmenting-path algorithm for unweighted bipartite maximum matching is also informally called the Hungarian algorithm. This note treats both ideas, while keeping them conceptually separate.
+This matters because the phrase **Hungarian algorithm** is used in two different ways in practice. In operations research, it usually refers to the Kuhn-Munkres method for the weighted assignment problem [2,3,9,14]. In some competitive-programming materials, a DFS-based augmenting-path algorithm for unweighted bipartite maximum matching is also informally called the Hungarian algorithm [10,11]. This note treats both ideas, while keeping them conceptually separate.
 
 ---
 
@@ -107,7 +107,7 @@ A feasible classical assignment selects exactly one incident edge for every vert
 
 With costs, the problem is a **minimum-cost perfect matching in a bipartite graph**.
 
-With profits, it is a **maximum-weight perfect matching in a bipartite graph**.
+With profits, it is a **maximum-weight perfect matching in a bipartite graph** [13,14].
 
 This is more precise than simply calling the classical assignment problem a “maximum matching problem.” Maximum cardinality matching only maximizes the **number** of matched pairs and ignores edge costs or profits.
 
@@ -127,7 +127,7 @@ $$
 x_{ij}\ge0,
 $$
 
-the extreme points of the balanced assignment polytope are permutation matrices. Therefore, solving the LP relaxation already yields an integral optimal solution.
+the constraints already imply $x_{ij}\le1$. By the Birkhoff-von Neumann theorem, the extreme points of the resulting balanced assignment polytope are exactly the permutation matrices [14]. Therefore, solving the LP relaxation already yields an integral optimal solution.
 
 This is one reason the classical assignment problem is polynomially solvable despite having a natural binary integer-programming formulation.
 
@@ -135,7 +135,7 @@ This example is also important for understanding what is meant when we say that 
 
 The statement does **not** mean that every optimization problem written in ILP form is individually NP-hard. Many special classes of ILP have additional structure and can be solved in polynomial time. The classical assignment problem is a particularly clear counterexample: it has a binary ILP formulation, yet it admits polynomial-time exact algorithms.
 
-The correct complexity statement is about the **general ILP problem**. General ILP is NP-hard, meaning that a polynomial-time algorithm capable of solving arbitrary ILP instances to global optimality would also solve NP-hard problems in polynomial time. Therefore, unless $P=NP$, there is no polynomial-time algorithm that solves every ILP instance.
+The correct complexity statement is about the **general ILP problem** under the usual finite binary encoding of its numerical data. General ILP is NP-hard, meaning that a polynomial-time algorithm capable of solving arbitrary ILP instances to global optimality would also solve NP-hard problems in polynomial time. Therefore, unless $P=NP$, there is no polynomial-time algorithm that solves every ILP instance.
 
 So the logical relationship is:
 
@@ -156,7 +156,7 @@ For a more detailed discussion of NP-hardness, special cases, and the difference
 
 ### 2.4 The Hungarian Method for Weighted Assignment⭐⭐⭐
 
-Kuhn introduced the Hungarian method for the assignment problem in 1955 [2], and Munkres later gave a refined algorithmic treatment [3].
+Kuhn introduced the Hungarian method for the assignment problem in 1955 [2], and Munkres later gave a refined algorithmic treatment and established its strongly polynomial character [3]. Modern refinements admit dense $O(n^3)$ implementations [14].
 
 For a square minimum-cost matrix $C=(c_{ij})$, the classical matrix interpretation proceeds conceptually as follows:
 
@@ -169,13 +169,13 @@ For a square minimum-cost matrix $C=(c_{ij})$, the classical matrix interpretati
 
 The row and column reductions preserve the relative cost of complete assignments, while the zero-creation steps progressively expose an optimal perfect matching [2,3,8].
 
-A standard implementation of the minimum-cost Hungarian algorithm runs in
+A standard modern implementation of the minimum-cost Hungarian algorithm runs in
 
 $$
 O(n^3)
 $$
 
-time for an $n\times n$ cost matrix.
+time for an $n\times n$ cost matrix [14].
 
 Therefore, the Hungarian algorithm finds a **globally optimal solution in polynomial time** for the classical assignment problem.
 
@@ -265,7 +265,7 @@ def hungarian_min_cost(cost):
     return min_cost, assignment
 ```
 
-For a maximum-profit problem, one can transform profits into costs, for example by replacing $c_{ij}$ with $M-c_{ij}$ for a sufficiently large constant $M$.
+For a balanced maximum-profit problem, one can transform profits into costs by replacing each profit $c_{ij}$ with $M-c_{ij}$. Because every feasible assignment uses exactly $n$ entries, the transformed objective differs from the original one by the constant $nM$. Thus any fixed $M$ gives an equivalent optimization problem; choosing $M=\max_{i,j}c_{ij}$ is convenient when nonnegative transformed costs are desired.
 
 ---
 
@@ -336,6 +336,8 @@ An augmenting path is a path that:
 - alternates between edges not in $M$ and edges in $M$.
 
 If the matched and unmatched status of every edge on such a path is reversed, the size of the matching increases by exactly one.
+
+Berge's augmenting-path theorem gives the converse criterion: a matching is maximum if and only if there is no augmenting path with respect to it [14]. This is what justifies stopping after all augmenting-path searches fail.
 
 This is the logic behind the familiar “try another partner for the currently matched vertex” interpretation.
 
@@ -458,7 +460,7 @@ For every bipartite graph,
 
 > **the size of a maximum matching equals the size of a minimum vertex cover.**
 
-This is **König's theorem** [12].
+This is **König's theorem** [12,14].
 
 If a maximum matching has size
 
@@ -796,10 +798,6 @@ if __name__ == "__main__":
     solve()
 ```
 
-### 5.4 Optional Video Explanation
-
-An additional intuitive explanation of the augmenting-path interpretation is available in the Zhihu video listed in Reference [14].
-
 ---
 
 ## 6. Generalized Assignment Problem (GAP)⭐⭐⭐
@@ -830,7 +828,7 @@ $$
 
 otherwise.
 
-The minimum-cost GAP formulation in [1] is
+The minimum-cost GAP formulation in [1,4] is
 
 $$
 \min \quad \sum_{i=1}^{m}\sum_{j=1}^{n}c_{ij}x_{ij}.
@@ -900,7 +898,7 @@ So the term **GAP** is used for closely related minimization and maximization fo
 
 ### 6.3 Why GAP Is Hard
 
-The generalized assignment problem is NP-hard [4].
+The generalized assignment problem is NP-hard [4,5,7].
 
 The classical assignment problem has only one-to-one matching constraints. GAP additionally introduces machine-dependent resource consumption and capacity limits.
 
@@ -918,7 +916,7 @@ For maximum GAP, LP-based approximation methods can achieve strong constant-fact
 
 The source material also presents the residual-profit framework of Cohen, Katzir, and Raz [6] for the version in which not every item must be assigned.
 
-Suppose an $\alpha$-approximation algorithm `ALG` is available for a single knapsack problem, where the approximation factor is written in the convention
+Suppose an $\alpha$-approximation algorithm `ALG` is available for a single knapsack problem, with $\alpha\ge1$, using the maximization convention
 
 $$
 \text{OPT}\le\alpha\cdot\text{ALG}.
@@ -930,7 +928,7 @@ $$
 1+\alpha
 $$
 
-approximation for GAP [6].
+approximation for GAP [6]. In particular, using a knapsack FPTAS with ratio $1+\varepsilon$ gives a $2+\varepsilon$ approximation within this combinatorial framework.
 
 ### 6.5 Residual-Profit Greedy Framework
 
@@ -1022,10 +1020,10 @@ The difference is not merely terminology. The underlying combinatorial structure
 8. “Assignment Problem: Meaning, Methods and Variations | Operations Research.” *Engineering Notes*. https://www.engineeringenotes.com/project-management-2/operations-research/assignment-problem-meaning-methods-and-variations-operations-research/15652.
 9. SimyHsu. “Hungarian Algorithm.” *CSDN Blog*. https://blog.csdn.net/u014754127/article/details/78086014.（SimyHsu：《Hungarian Algorithm匈牙利算法》，CSDN博客）
 10. Yinshi Mowen Qiancheng. “Bipartite Matching — Hungarian Algorithm (Time Complexity O(nm)).” *CSDN Blog*. https://blog.csdn.net/weixin_40477002/article/details/122799390.（银时莫问前程：《二分图匹配——匈牙利算法（时间复杂度O(nm)）》，CSDN博客）
-11. “Algorithm Study Notes (5): Hungarian Algorithm.” *Zhihu Column*. https://zhuanlan.zhihu.com/p/96229700.（《算法学习笔记(5)：匈牙利算法》，知乎专栏）
+11. Pecco. “Algorithm Study Notes (5): Hungarian Algorithm.” *Zhihu Column*. https://zhuanlan.zhihu.com/p/96229700.（Pecco：《算法学习笔记(5)：匈牙利算法》，知乎专栏）
 12. Matrix67. “König's Theorem for Maximum Matching in Bipartite Graphs and Its Proof.” *Matrix67 Blog*. http://www.matrix67.com/blog/archives/116.（Matrix67：《二分图最大匹配的König定理及其证明》，Matrix67博客）
 13. “Assignment Problem.” *Wikipedia*. https://en.wikipedia.org/wiki/Assignment_problem.
-14. “Hungarian Algorithm.” *Zhihu Video*. https://www.zhihu.com/zvideo/1492806232239349760.（《匈牙利算法 Hungarian Algorithm》，知乎视频）
+14. Burkard, Rainer E., Mauro Dell'Amico, and Silvano Martello. *Assignment Problems*. Philadelphia: Society for Industrial and Applied Mathematics (SIAM), 2009. ISBN: 978-0-89871-663-4. DOI: 10.1137/1.9781611972238.
 
 ---
 
