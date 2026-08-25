@@ -8,6 +8,8 @@
 
 This note studies **dynamic programming (DP)**, one of the most important methods for solving multi-stage decision problems.
 
+This note is primarily based on Sun and Li's *Integer Programming* [1].
+
 Dynamic programming is particularly useful when a problem can be divided into stages and the optimal decision at one stage can be expressed through optimal solutions of smaller subproblems. In integer programming, it can be used to solve several important special structures, including the 0-1 knapsack problem and the integer knapsack problem [1].
 
 The main examples in this note are:
@@ -49,11 +51,11 @@ top-down recursion + memoization
 bottom-up recursion + tabulation
 ```
 
-The original note mainly follows the second style: define a state-value function, derive a recurrence, and fill a table stage by stage.
+In this note, the main presentation follows the second style: define a state-value function, derive a recurrence, and fill a table stage by stage.
 
 ### 2.2 Three Important Structural Ideas
 
-The original note summarizes the usual conditions for applying dynamic programming as:
+A useful practical summary of the usual conditions for applying dynamic programming is:
 
 1. the principle of optimality / optimal substructure;
 2. no aftereffect;
@@ -67,7 +69,7 @@ This is a very useful practical checklist, but one qualification is needed.
 
 A problem has optimal substructure if an optimal solution contains optimal solutions to the relevant subproblems.
 
-For example, if a shortest path from $s$ to $t$ passes through $p$, then its $s$-$p$ and $p$-$t$ parts must themselves be shortest paths between those endpoints.
+For example, if a shortest path from $s$ to $t$ passes through $p$, then the subpath from $s$ to $p$ and the subpath from $p$ to $t$ must themselves be shortest paths between their respective endpoints.
 
 #### No Aftereffect / State Sufficiency
 
@@ -139,7 +141,7 @@ $$
 
 let $c_{ij}$ be its length.
 
-The original note assumes positive arc lengths. For the DAG recursion discussed below, the arc lengths do not actually need to be positive; the absence of directed cycles is enough.
+For the DAG recursion discussed below, the arc lengths do not need to be positive; the absence of directed cycles is enough.
 
 Given a source node $s$, the shortest-path problem asks for the minimum-length path from $s$ to another node $t$.
 
@@ -171,7 +173,7 @@ Then:
 
 The proof is by contradiction.
 
-If the $s$-$p$ subpath were not shortest, replace it by a shorter $s$-$p$ path. The resulting $s$-$t$ path would then be shorter than the assumed shortest path, which is impossible.
+If the subpath from $s$ to $p$ were not shortest, replace it by a shorter path from $s$ to $p$. The resulting path from $s$ to $t$ would then be shorter than the assumed shortest path, which is impossible.
 
 This is the shortest-path version of the **principle of optimality**.
 
@@ -221,7 +223,7 @@ $$
 
 time when the graph is stored using adjacency lists [3].
 
-This is stronger than the $O(|V||A|)$ bound that appears in the original derivation.
+This bound follows directly from processing the nodes once in topological order.
 
 The $O(|V||A|)$ recurrence belongs to a different but related dynamic program: the Bellman-Ford edge-count formulation.
 
@@ -284,6 +286,8 @@ general directed graph + Bellman-Ford recurrence
 For nonnegative arc lengths, Dijkstra's algorithm is another standard alternative.
 
 ### 3.6 Example: Shortest Path from A to J
+
+The task is to determine the shortest distance from node $A$ to node $J$ and identify the corresponding shortest path or paths.
 
 Consider the graph below.
 
@@ -363,7 +367,7 @@ Both have length $10$.
 
 ### 3.7 Dynamic Programming vs. Enumeration
 
-This example contains $18$ complete $A$-$J$ paths.
+This example contains 18 complete paths from $A$ to $J$.
 
 An enumeration algorithm evaluates all $18$ paths separately.
 
@@ -821,7 +825,9 @@ def knapsack_01(weights, profits, capacity):
     return dp[n][capacity], x, dp
 ```
 
-### 4.9 Numerical Example from the Original Note
+### 4.9 Numerical Example
+
+The task is to determine the maximum total value and recover an optimal 0-1 item-selection vector for the following knapsack problem.
 
 Consider
 
@@ -842,7 +848,7 @@ $$
 The DP table is:
 
 | Capacity $\lambda$ | $F_1$ | $F_2$ | $F_3$ | $F_4$ | $F_5$ | $F_6$ |
-|---:|---:|---:|---:|---:|---:|---:|
+|:---:|:---:|---:|---:|---:|---:|---:|
 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 2 | 3 | 3 | 3 | 3 | 3 | 3 |
@@ -1095,6 +1101,8 @@ def unbounded_knapsack(weights, profits, capacity):
 
 ### 5.7 Numerical Example
 
+The task is to determine the maximum total value and recover an optimal integer item-selection vector for the following unbounded knapsack problem.
+
 Consider
 
 $$
@@ -1114,7 +1122,7 @@ $$
 The DP table is:
 
 | Capacity $\lambda$ | $G_1$ | $G_2$ | $G_3$ | $G_4$ |
-|---:|---:|---:|---:|---:|
+|:---:|---:|---:|---:|---:|
 | 0 | 0 | 0 | 0 | 0 |
 | 1 | 0 | 0 | 0 | 0 |
 | 2 | 0 | 0 | 2 | 2 |
@@ -1415,9 +1423,9 @@ $$
 
 This is the classical Wagner-Whitin dynamic program [6].
 
-### 6.5 Equivalent Objective Transformation from the Original Note
+### 6.5 Equivalent Objective Transformation
 
-The original note also derives an equivalent transformed objective.
+An equivalent transformed objective is also useful.
 
 From the inventory-balance equations,
 
@@ -1488,6 +1496,8 @@ $$
 This distinction is important: $\widehat H(n)$ is the value of the **transformed** objective, not the original production-plus-inventory cost.
 
 ### 6.6 Numerical Example
+
+The task is to determine the minimum total cost and recover an optimal production and setup schedule over the four-period planning horizon.
 
 Consider
 
