@@ -1320,7 +1320,7 @@ ULS can be interpreted as a fixed-charge network-flow problem.
 The production decisions correspond to fixed-charge arcs, while inventory carries material from one period to the next.
 
 <p align="center">
-  <img src="../figures/chapter-11/chapter-11-fig4.png" alt="Uncapacitated lot-sizing network" width="500">
+  <img src="../figures/chapter-11/chapter-11-fig4.png" alt="Uncapacitated lot-sizing network" width="400">
 </p>
 
 <p align="center">
