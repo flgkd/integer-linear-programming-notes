@@ -284,7 +284,7 @@ $$
 such that every edge has one endpoint in $X$ and the other endpoint in $Y$.
 
 <p align="center">
-  <img src="../figures/chapter-13/chapter-13-fig1.png" alt="A bipartite graph" width="500">
+  <img src="../figures/chapter-13/chapter-13-fig1.png" alt="A bipartite graph" width="400">
 </p>
 
 *Figure 1. A bipartite graph with vertex sets $X$ and $Y$. Adapted and redrawn from [11].*
@@ -308,7 +308,7 @@ a perfect matching has exactly $n$ edges.
 The following illustration uses a pairing interpretation. Boys and girls form the two vertex sets, and an edge represents an admissible pair.
 
 <p align="center">
-  <img src="../figures/chapter-13/chapter-13-fig2.png" alt="Bipartite pairing graph" width="500">
+  <img src="../figures/chapter-13/chapter-13-fig2.png" alt="Bipartite pairing graph" width="400">
 </p>
 
 *Figure 2. A bipartite pairing graph. Adapted and redrawn from [11].*
@@ -336,7 +336,7 @@ If the matched and unmatched status of every edge on such a path is reversed, th
 This is the logic behind the familiar “try another partner for the currently matched vertex” interpretation.
 
 <p align="center">
-  <img src="../figures/chapter-13/chapter-13-fig3.png" alt="Candidate edges for bipartite matching" width="500">
+  <img src="../figures/chapter-13/chapter-13-fig3.png" alt="Candidate edges for bipartite matching" width="400">
 </p>
 
 *Figure 3. Candidate edges in the bipartite matching example. Adapted and redrawn from [11].*
@@ -584,7 +584,7 @@ Another example uses a rectangular grid in which some cells are initially raised
 One operation presses an entire row or an entire column.
 
 <p align="center">
-  <img src="../figures/chapter-13/chapter-13-fig8.png" alt="Grid representation of raised cells" width="500">
+  <img src="../figures/chapter-13/chapter-13-fig8.png" alt="Grid representation of raised cells" width="400">
 </p>
 
 *Figure 8. A grid with selected cells. Adapted and redrawn from [11].*
@@ -596,7 +596,7 @@ Construct a bipartite graph:
 - an edge $(X_i,Y_j)$ for every raised cell $(i,j)$.
 
 <p align="center">
-  <img src="../figures/chapter-13/chapter-13-fig9.png" alt="Bipartite representation of the grid" width="500">
+  <img src="../figures/chapter-13/chapter-13-fig9.png" alt="Bipartite representation of the grid" width="400">
 </p>
 
 *Figure 9. Bipartite representation of the row-column grid. Adapted and redrawn from [11].*
@@ -622,7 +622,7 @@ A $1\times2$ domino covers two orthogonally adjacent cells.
 Color the board in a checkerboard pattern.
 
 <p align="center">
-  <img src="../figures/chapter-13/chapter-13-fig10.png" alt="Checkerboard coloring" width="500">
+  <img src="../figures/chapter-13/chapter-13-fig10.png" alt="Checkerboard coloring" width="400">
 </p>
 
 *Figure 10. Checkerboard coloring of the board. Adapted and redrawn from [11].*
@@ -635,7 +635,7 @@ Every pair of orthogonally adjacent cells has opposite colors. Therefore every d
 After deleting unavailable cells:
 
 <p align="center">
-  <img src="../figures/chapter-13/chapter-13-fig11.png" alt="Checkerboard with deleted cells" width="500">
+  <img src="../figures/chapter-13/chapter-13-fig11.png" alt="Checkerboard with deleted cells" width="400">
 </p>
 
 *Figure 11. A checkerboard with deleted cells. Adapted and redrawn from [11].*
