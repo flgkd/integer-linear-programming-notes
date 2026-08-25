@@ -371,9 +371,31 @@ This example contains 18 complete paths from $A$ to $J$.
 
 An enumeration algorithm evaluates all $18$ paths separately.
 
+Every complete path contains four arcs, so evaluating one path length requires three additions. Under the simple convention of counting only additions and comparisons, exhaustive enumeration requires
+
+$$
+18	imes3+17=71
+$$
+
+elementary operations.
+
 Dynamic programming instead computes the best value of each intermediate state only once.
 
-The exact number of elementary additions and comparisons depends on the implementation and what is counted as an operation, so it is better not to attach too much importance to one small operation count.
+Using the same counting convention, the stage-by-stage calculations require:
+
+- Stage 2: $9$ additions and $6$ comparisons;
+- Stage 3: $6$ additions and $4$ comparisons;
+- Stage 4: $2$ additions and $1$ comparison.
+
+Thus the recurrence requires
+
+$$
+9+6+6+4+2+1=28
+$$
+
+additions and comparisons for this example, excluding simple initialization and assignment operations.
+
+The exact count depends on the implementation and the operation-counting convention, so the main point is not the particular number $28$.
 
 The important difference is structural:
 
@@ -427,11 +449,13 @@ The algorithm scans each arc once after the topological ordering is known.
 
 ### 3.9 Stages and States
 
-A **stage** is one part of a sequential decision process.
+A **stage** is one part of a sequential decision process. The stage index is commonly denoted by $k$.
 
-A **state** describes the information needed at the beginning of that stage.
+A **state** describes the information needed at the beginning of that stage. A state variable may be denoted by $s_k$.
 
-In the layered shortest-path example:
+In a layered shortest-path problem, nodes can be grouped into stages according to their position in the path. In the graph above, every node in the same stage is reached after the same number of arcs from the source.
+
+The stages are therefore:
 
 - Stage 1 states: $B,C,D$;
 - Stage 2 states: $E,F,G$;
@@ -441,6 +465,16 @@ In the layered shortest-path example:
 The state is what summarizes the past.
 
 Once we know the shortest distance to the current node, we do not need to remember every path used to reach it.
+
+This distinction between **stage** and **state** is important:
+
+```text
+stage
+→ where we are in the decision process
+
+state
+→ the information needed to continue optimally from that stage
+```
 
 ---
 
@@ -791,6 +825,20 @@ The lesson is simply:
 
 > **Never confuse the numerical magnitude of an integer with the length of its binary encoding.**
 
+#### Structural Size vs. Numerical Magnitude
+
+This distinction is easy to miss because, for many ordinary data structures, the natural size parameter and the encoded input length grow together.
+
+For example, if a graph is stored as an adjacency list, merely listing its vertices and arcs already requires a representation whose structural size grows with $|V|+|A|$. Therefore an $O(|V|+|A|)$ graph algorithm is polynomial in the encoded input size, apart from the additional bits needed to store labels or numerical edge data.
+
+A numerical parameter such as $B$ behaves differently.
+
+If $B$ is represented in binary using $s$ bits, increasing the representation by only one bit can almost double the range of possible values of $B$. An algorithm whose running time is proportional to $B$ may therefore require roughly twice as much work after the numerical input grows by only one bit.
+
+This is the intuition behind pseudo-polynomial time.
+
+It is also worth remembering that pseudo-polynomial does **not** mean useless in practice. If $B$ is moderate, the $O(nB)$ knapsack dynamic program can still be very effective even though it is not polynomial in the formal bit-length model.
+
 ### 4.8 Python Implementation
 
 ```python
@@ -848,7 +896,7 @@ $$
 The DP table is:
 
 | Capacity $\lambda$ | $F_1$ | $F_2$ | $F_3$ | $F_4$ | $F_5$ | $F_6$ |
-|:---:|:---:|---:|---:|---:|---:|---:|
+|:---:|---:|---:|---:|---:|---:|---:|
 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | 2 | 3 | 3 | 3 | 3 | 3 | 3 |
@@ -1181,6 +1229,28 @@ $$
 Z(\lambda)=\max\{0,\max_{j:a_j\le\lambda}[c_j+Z(\lambda-a_j)]\}.
 $$
 
+The recurrence can be justified in both directions.
+
+For any item type $j$ satisfying
+
+$$
+a_j\le\lambda,
+$$
+
+take an optimal solution for capacity $\lambda-a_j$ and add one copy of item $j$. This produces a feasible solution for capacity $\lambda$, so
+
+$$
+Z(\lambda)\ge c_j+Z(\lambda-a_j).
+$$
+
+Conversely, suppose an optimal solution for capacity $\lambda$ is nonzero. Then at least one item type $k$ is used. Remove one copy of item $k$. The remaining solution is feasible for capacity $\lambda-a_k$, so its value cannot exceed $Z(\lambda-a_k)$. Hence
+
+$$
+Z(\lambda)\le c_k+Z(\lambda-a_k).
+$$
+
+Together, these two inequalities establish the recurrence.
+
 For every fixed capacity $\lambda$, at most $n$ item types are checked.
 
 Therefore the total complexity remains
@@ -1189,10 +1259,16 @@ $$
 O(nB).
 $$
 
+Since $Z(\lambda)$ optimizes over all item types, it is equivalent to the last-stage value
+
+$$
+Z(\lambda)=G_n(\lambda).
+$$
+
 For the numerical example above,
 
 $$
-Z(10)=23.
+Z(10)=G_4(10)=23.
 $$
 
 ### 5.9 Integer Knapsack as a Longest-Path Problem⭐
@@ -1233,7 +1309,9 @@ $$
 (\lambda,\lambda+1).
 $$
 
-Then the integer knapsack value is the longest-path value from node $0$ to node $B$.
+For every capacity state $\lambda$, the value $Z(\lambda)$ is exactly the longest-path value from node $0$ to node $\lambda$ in this state-space graph.
+
+In particular, the integer knapsack optimum is the longest-path value from node $0$ to node $B$.
 
 The figure below corresponds to
 
@@ -1326,6 +1404,24 @@ $$
 ULS can be interpreted as a fixed-charge network-flow problem.
 
 The production decisions correspond to fixed-charge arcs, while inventory carries material from one period to the next.
+
+In the network below:
+
+- an arc from node $0$ to period $t$ represents production $x_t$ in period $t$;
+- opening that production arc incurs the fixed setup cost $f_t$;
+- flow on the production arc incurs unit production cost $p_t$;
+- an arc from period $t$ to period $t+1$ represents inventory carried forward and incurs holding cost $h_t$;
+- the outgoing demand arc at period $t$ represents demand $d_t$.
+
+Therefore the problem can be viewed in two steps conceptually:
+
+```text
+choose which production arcs are opened
+→ determine the production periods
+
+then
+→ send a minimum-cost feasible flow through the resulting network
+```
 
 <p align="center">
   <img src="../figures/chapter-11/chapter-11-fig4.png" alt="Uncapacitated lot-sizing network" width="400">
