@@ -287,7 +287,9 @@ such that every edge has one endpoint in $X$ and the other endpoint in $Y$.
   <img src="../figures/chapter-13/chapter-13-fig1.png" alt="A bipartite graph" width="250">
 </p>
 
-*Figure 1. A bipartite graph with vertex sets $X$ and $Y$. Adapted and redrawn from [11].*
+<p align="center">
+  A bipartite graph with vertex sets X and Y. Adapted and redrawn from [11].
+</p>
 
 ### 3.2 Matching, Maximum Matching, and Perfect Matching
 
@@ -311,7 +313,9 @@ The following illustration uses a pairing interpretation. Boys and girls form th
   <img src="../figures/chapter-13/chapter-13-fig2.png" alt="Bipartite pairing graph" width="250">
 </p>
 
-*Figure 2. A bipartite pairing graph. Adapted and redrawn from [11].*
+<p align="center">
+  A bipartite pairing graph. Adapted and redrawn from [11].
+</p>
 
 The maximum-matching problem asks:
 
@@ -339,7 +343,9 @@ This is the logic behind the familiar “try another partner for the currently m
   <img src="../figures/chapter-13/chapter-13-fig3.png" alt="Candidate edges for bipartite matching" width="250">
 </p>
 
-*Figure 3. Candidate edges in the bipartite matching example. Adapted and redrawn from [11].*
+<p align="center">
+  Candidate edges in the bipartite matching example. Adapted and redrawn from [11].
+</p>
 
 Consider the following sequence conceptually:
 
@@ -354,13 +360,17 @@ The next figures illustrate this rerouting idea.
   <img src="../figures/chapter-13/chapter-13-fig4.png" alt="Augmenting-path rematching" width="500">
 </p>
 
-*Figure 4. An augmenting-path rematching step. Adapted and redrawn from [11].*
+<p align="center">
+  An augmenting-path rematching step. Adapted and redrawn from [11].
+</p>
 
 <p align="center">
   <img src="../figures/chapter-13/chapter-13-fig5.png" alt="Further matching updates" width="500">
 </p>
 
-*Figure 5. Further matching updates in the same example. Adapted and redrawn from [11].*
+<p align="center">
+  Further matching updates in the same example. Adapted and redrawn from [11].
+</p>
 
 The precise drawing order is not important. The invariant is that after a successful augmenting-path search, the matching cardinality increases by one.
 
@@ -426,7 +436,9 @@ A **minimum vertex cover** is a vertex cover containing as few vertices as possi
   <img src="../figures/chapter-13/chapter-13-fig6.png" alt="Alternating reachability and vertex cover" width="500">
 </p>
 
-*Figure 6. Alternating reachability used to construct a minimum vertex cover. Adapted and redrawn from [11].*
+<p align="center">
+  Alternating reachability used to construct a minimum vertex cover. Adapted and redrawn from [11].
+</p>
 
 ### 4.2 König's Theorem⭐⭐⭐
 
@@ -513,7 +525,9 @@ Row and column exchanges only relabel the row and column vertices. They do not c
   <img src="../figures/chapter-13/chapter-13-fig7.png" alt="Permutation interpretation of the matrix game" width="500">
 </p>
 
-*Figure 7. Row or column permutations can be interpreted as relabeling one side of the bipartite graph. Adapted and redrawn from [11].*
+<p align="center">
+  Row or column permutations can be interpreted as relabeling one side of the bipartite graph. Adapted and redrawn from [11].
+</p>
 
 Therefore the matrix game is feasible if and only if the bipartite graph has matching size $n$.
 
@@ -587,7 +601,9 @@ One operation presses an entire row or an entire column.
   <img src="../figures/chapter-13/chapter-13-fig8.png" alt="Grid representation of raised cells" width="250">
 </p>
 
-*Figure 8. A grid with selected cells. Adapted and redrawn from [11].*
+<p align="center">
+  A grid with selected cells. Adapted and redrawn from [11].
+</p>
 
 Construct a bipartite graph:
 
@@ -599,7 +615,9 @@ Construct a bipartite graph:
   <img src="../figures/chapter-13/chapter-13-fig9.png" alt="Bipartite representation of the grid" width="250">
 </p>
 
-*Figure 9. Bipartite representation of the row-column grid. Adapted and redrawn from [11].*
+<p align="center">
+  Bipartite representation of the row-column grid. Adapted and redrawn from [11].
+</p>
 
 Pressing row $i$ removes all edges incident to row vertex $X_i$.
 
@@ -625,7 +643,9 @@ Color the board in a checkerboard pattern.
   <img src="../figures/chapter-13/chapter-13-fig10.png" alt="Checkerboard coloring" width="250">
 </p>
 
-*Figure 10. Checkerboard coloring of the board. Adapted and redrawn from [11].*
+<p align="center">
+  Checkerboard coloring of the board. Adapted and redrawn from [11].
+</p>
 
 Every pair of orthogonally adjacent cells has opposite colors. Therefore every domino always covers:
 
@@ -638,7 +658,9 @@ After deleting unavailable cells:
   <img src="../figures/chapter-13/chapter-13-fig11.png" alt="Checkerboard with deleted cells" width="250">
 </p>
 
-*Figure 11. A checkerboard with deleted cells. Adapted and redrawn from [11].*
+<p align="center">
+  A checkerboard with deleted cells. Adapted and redrawn from [11].
+</p>
 
 Construct a bipartite graph:
 
