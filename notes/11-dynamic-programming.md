@@ -154,7 +154,7 @@ enumerate all s-t paths
 But the number of paths can grow exponentially with the size of the graph.
 
 <p align="center">
-  <img src="../figures/chapter-11/chapter-11-fig1.png" alt="s-t shortest path" width="700">
+  <img src="../figures/chapter-11/chapter-11-fig1.png" alt="s-t shortest path" width="500">
 </p>
 
 <p align="center">
@@ -288,7 +288,7 @@ For nonnegative arc lengths, Dijkstra's algorithm is another standard alternativ
 Consider the graph below.
 
 <p align="center">
-  <img src="../figures/chapter-11/chapter-11-fig2.png" alt="Shortest path from A to J" width="700">
+  <img src="../figures/chapter-11/chapter-11-fig2.png" alt="Shortest path from A to J" width="500">
 </p>
 
 <p align="center">
@@ -1246,7 +1246,7 @@ $$
 The zero-weight arcs are omitted from the picture.
 
 <p align="center">
-  <img src="../figures/chapter-11/chapter-11-fig3.png" alt="Knapsack problem as a longest path problem" width="900">
+  <img src="../figures/chapter-11/chapter-11-fig3.png" alt="Knapsack problem as a longest path problem" width="500">
 </p>
 
 <p align="center">
@@ -1320,7 +1320,7 @@ ULS can be interpreted as a fixed-charge network-flow problem.
 The production decisions correspond to fixed-charge arcs, while inventory carries material from one period to the next.
 
 <p align="center">
-  <img src="../figures/chapter-11/chapter-11-fig4.png" alt="Uncapacitated lot-sizing network" width="700">
+  <img src="../figures/chapter-11/chapter-11-fig4.png" alt="Uncapacitated lot-sizing network" width="500">
 </p>
 
 <p align="center">
