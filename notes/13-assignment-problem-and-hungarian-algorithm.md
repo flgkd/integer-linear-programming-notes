@@ -372,6 +372,18 @@ The next figures illustrate this rerouting idea.
   Further matching updates in the same example. Adapted and redrawn from [11].
 </p>
 
+The concrete sequence in Figures 3-5 is useful for seeing the recursion more clearly:
+
+- first match $B_1$ with $G_2$;
+- when $B_2$ also needs $G_2$, recursively try to move $B_1$ to another available neighbor;
+- since $B_1$ can also use $G_4$, rematch $B_1$ with $G_4$ and then match $B_2$ with $G_2$;
+- $B_3$ can then be matched with $G_1$;
+- finally, $B_4$ can only use $G_4$. To free $G_4$, $B_1$ would have to move back to $G_2$, but $G_2$ is occupied by $B_2$, which has no alternative neighbor.
+
+Therefore no augmenting path starting from $B_4$ reaches an unmatched right-side vertex, and the matching cannot be enlarged further. The maximum matching size in this example is **3**.
+
+A different search order may produce a different maximum matching, but the maximum cardinality remains the same.
+
 The precise drawing order is not important. The invariant is that after a successful augmenting-path search, the matching cardinality increases by one.
 
 ### 3.4 DFS-Based Maximum Bipartite Matching
@@ -488,6 +500,16 @@ $$
 (X\setminus Z_X)\cup Z_Y.
 $$
 
+For the running example, consider the maximum matching $\{(B_1,G_4),(B_2,G_2),(B_3,G_1)\}$. The unmatched left vertex is $B_4$. Following alternating paths from $B_4$ reaches $G_4$, then $B_1$, then $G_2$, and then $B_2$. Thus the reached left vertices are $\{B_4,B_1,B_2\}$ and the reached right vertices are $\{G_4,G_2\}$.
+
+The resulting minimum vertex cover is therefore
+
+$$
+\{B_3,G_2,G_4\}.
+$$
+
+Its size is $3$, exactly equal to the maximum matching size, as guaranteed by König's theorem.
+
 This result is extremely useful because the augmenting-path computation for maximum matching can be reused to recover a minimum vertex cover.
 
 ---
@@ -497,6 +519,8 @@ This result is extremely useful because the augmenting-path computation for maxi
 The source material gives several problems that do not initially look like assignment or matching problems but become simple after an appropriate bipartite-graph transformation.
 
 ### 5.1 Matrix Game: Row and Column Permutations
+
+A representative problem is **Luogu P1129 [ZJOI2007] Matrix Game**.
 
 Consider an $n\times n$ binary matrix.
 
@@ -530,6 +554,8 @@ Row and column exchanges only relabel the row and column vertices. They do not c
 </p>
 
 Therefore the matrix game is feasible if and only if the bipartite graph has matching size $n$.
+
+There is also a direct connection to the combinatorial concept of a **system of distinct representatives (SDR)**. For each row $i$, let $S_i$ be the set of columns containing a $1$ in that row. Choosing one $1$ from every row with all chosen columns distinct is exactly the same as choosing one distinct representative from each set $S_i$. In graph language, this is a perfect matching.
 
 The following Python implementation corresponds to the source C++ code:
 
@@ -593,6 +619,8 @@ if __name__ == "__main__":
 
 ### 5.2 Row/Column Pressing and Minimum Vertex Cover
 
+A representative problem is **vijos1204, CoVH: Conan Unlocking**.
+
 Another example uses a rectangular grid in which some cells are initially raised.
 
 One operation presses an entire row or an entire column.
@@ -633,6 +661,8 @@ $$
 
 ### 5.3 Domino Tiling as Maximum Matching
 
+A representative problem is **TYVJ P1035, Chessboard Covering**.
+
 Consider an $n\times n$ chessboard with some cells deleted.
 
 A $1\times2$ domino covers two orthogonally adjacent cells.
@@ -669,6 +699,8 @@ Construct a bipartite graph:
 - connect two vertices if the corresponding cells are orthogonally adjacent.
 
 Each selected matching edge corresponds to one domino, and no two matching edges share a cell.
+
+Because every grid cell has at most four orthogonal neighbors, the resulting bipartite graph is sparse. For larger boards, an adjacency-list representation is therefore preferable to storing a dense adjacency matrix.
 
 Therefore,
 
@@ -763,6 +795,10 @@ def solve():
 if __name__ == "__main__":
     solve()
 ```
+
+### 5.4 Optional Video Explanation
+
+An additional intuitive explanation of the augmenting-path interpretation is available in the Zhihu video listed in Reference [14].
 
 ---
 
@@ -988,6 +1024,8 @@ The difference is not merely terminology. The underlying combinatorial structure
 10. Yinshi Mowen Qiancheng. “Bipartite Matching — Hungarian Algorithm (Time Complexity O(nm)).” *CSDN Blog*. https://blog.csdn.net/weixin_40477002/article/details/122799390.（银时莫问前程：《二分图匹配——匈牙利算法（时间复杂度O(nm)）》，CSDN博客）
 11. “Algorithm Study Notes (5): Hungarian Algorithm.” *Zhihu Column*. https://zhuanlan.zhihu.com/p/96229700.（《算法学习笔记(5)：匈牙利算法》，知乎专栏）
 12. Matrix67. “König's Theorem for Maximum Matching in Bipartite Graphs and Its Proof.” *Matrix67 Blog*. http://www.matrix67.com/blog/archives/116.（Matrix67：《二分图最大匹配的König定理及其证明》，Matrix67博客）
+13. “Assignment Problem.” *Wikipedia*. https://en.wikipedia.org/wiki/Assignment_problem.
+14. “Hungarian Algorithm.” *Zhihu Video*. https://www.zhihu.com/zvideo/1492806232239349760.（《匈牙利算法 Hungarian Algorithm》，知乎视频）
 
 ---
 
