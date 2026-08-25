@@ -19,7 +19,7 @@ A structured study series on Integer Linear Programming, from linear programming
 | 09  | [Benders Decomposition](notes/09-benders-decomposition.md)                                                                 | Completed |
 | 10  | [Computational Complexity Theory](notes/10-computational-complexity-theory.md)                                             | Completed |
 | 11  | [Dynamic Programming](notes/11-dynamic-programming.md)                                                                     | Completed |
-| 12  | Knapsack Problem                                                                                                           | Planned   |
+| 12  | [Knapsack Problem](notes/12-knapsack-problem.md)                                                                           | Completed |
 | 13  | Assignment Problem                                                                                                         | Planned   |
 
 ## License
