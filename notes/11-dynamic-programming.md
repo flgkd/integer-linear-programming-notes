@@ -1916,3 +1916,22 @@ The difficult part is choosing a state that is:
 6. Wagner, H. M., and Whitin, T. M. “Dynamic Version of the Economic Lot Size Model.” *Management Science*, 5(1), 1958, pp. 89–96. DOI: `10.1287/mnsc.5.1.89`.
 
 7. Federgruen, A., and Tzur, M. “A Simple Forward Algorithm to Solve General Dynamic Lot Sizing Models with n Periods in O(n log n) or O(n) Time.” *Management Science*, 37(8), 1991, pp. 909–925. DOI: `10.1287/mnsc.37.8.909`.
+
+## Suggested Follow-up Reading
+
+The most relevant next topics are:
+
+1. **Advanced Knapsack Problems**  
+   Builds on the knapsack dynamic-programming methods introduced in this note, with deeper study of structural properties, exact algorithms, bounded and multiple knapsack variants, and approximation methods.
+
+2. **Assignment Problem**  
+   A useful example of a structured integer optimization problem that admits polynomial-time algorithms despite having a binary integer programming formulation.
+
+3. **Resource-Constrained Shortest Path Problems**  
+   Extends the ordinary shortest-path problem by introducing additional resource constraints, leading naturally to richer state definitions, labeling algorithms, and dynamic-programming techniques.
+
+4. **Approximation Algorithms**  
+   Especially relevant for NP-hard problems such as knapsack, where exact polynomial-time algorithms may not exist but solutions with provable approximation guarantees can still be obtained.
+
+5. **Stochastic and Approximate Dynamic Programming**  
+   Extends classical dynamic programming to problems with uncertainty or very large state spaces, where exact tabulation becomes impractical and value functions may need to be approximated.
