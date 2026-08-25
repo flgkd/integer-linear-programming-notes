@@ -18,15 +18,15 @@ The knapsack problem is important for at least three reasons:
 
 A point that should be stated carefully is the following:
 
-> **The decision version of knapsack is NP-complete, while the optimization version is NP-hard.**
+> **For the standard 0-1 knapsack problem with binary-encoded integer data, the decision version is NP-complete, while the optimization version is NP-hard [3].**
 
-So when people casually say that “the knapsack problem is NP-complete,” what they usually mean is its **decision form**.
+So when people casually say that “the knapsack problem is NP-complete,” they are normally referring to the standard **decision form**, not the optimization problem itself.
 
 This note mainly focuses on several standard variants:
 
 - 0-1 knapsack;
-- complete / unbounded knapsack;
-- multiple / bounded knapsack;
+- unbounded / complete knapsack;
+- bounded knapsack;
 - grouped knapsack.
 
 Since the previous note already introduced the general idea of dynamic programming, this note will emphasize how those ideas are specialized to knapsack-type models.
@@ -51,7 +51,7 @@ In its most intuitive form, the knapsack problem asks:
 
 This is a **maximization problem under a capacity constraint**.
 
-The name comes from the physical interpretation of selecting the most valuable collection of items that can fit into a capacity-limited knapsack. Knapsack-type models and closely related subset-selection problems appear in resource allocation, combinatorial optimization, computational complexity, applied mathematics, and historically also in cryptographic constructions.
+The name comes from the physical interpretation of selecting the most valuable collection of items that can fit into a capacity-limited knapsack. Knapsack-type models and closely related subset-selection problems appear in resource allocation, combinatorial optimization, computational complexity, and applied mathematics [2,3]. They also appeared historically in public-key cryptographic constructions, notably the Merkle-Hellman trapdoor-knapsack scheme [4].
 
 A standard 0-1 formulation is
 
@@ -99,7 +99,7 @@ Its structure is suitable for DP because:
 2. many subproblems repeat, so intermediate results should be stored;
 3. the problem can be decomposed into smaller subproblems through a **state transition equation**.
 
-The key structural property is **optimal substructure**.
+The key structural property is **optimal substructure**. This state-based recursive viewpoint is part of the classical dynamic-programming framework developed by Bellman [5].
 
 In practice, for a dynamic-programming formulation, the most important tasks are:
 
@@ -176,21 +176,39 @@ $$
 g(i,p)=\text{minimum total weight required to obtain total value }p\text{ using the first }i\text{ items}.
 $$
 
-Then the 0-1 recurrence is
+For the 0-1 problem, initialize
+
+$$
+g(0,0)=0
+$$
+
+and
+
+$$
+g(0,p)=+\infty,\quad p>0.
+$$
+
+For $p\ge w_i$, the recurrence is
 
 $$
 g(i,p)=\min\{g(i-1,p),g(i-1,p-w_i)+v_i\}.
 $$
 
+For $p<w_i$,
+
+$$
+g(i,p)=g(i-1,p).
+$$
+
 The weights $v_i$ may now be non-integers because they are stored as DP values rather than used as state indices.
 
-After computing the table, the optimal value is the largest $p$ satisfying
+After computing states for $p=0,1,\ldots,\sum_{i=1}^{N}w_i$, the optimal value is the largest $p$ satisfying
 
 $$
 g(N,p)\le V.
 $$
 
-This is a **value-indexed dynamic program** rather than a capacity-indexed one.
+This is a **value-indexed dynamic program** rather than a capacity-indexed one. Its running time is $O(NP)$, where $P=\sum_{i=1}^{N}w_i$, so it is pseudo-polynomial in the total integer value [3].
 
 ##### Case 3: General Real-Valued Data
 
@@ -203,7 +221,7 @@ Possible approaches include:
 - using branch-and-bound or branch-and-cut;
 - using approximation algorithms when an exact solution is unnecessary.
 
-A nondominated-state method keeps a state $(W_1,P_1)$ over $(W_2,P_2)$ whenever
+In a nondominated-state method, state $(W_1,P_1)$ **dominates** state $(W_2,P_2)$ if
 
 $$
 W_1\le W_2
@@ -212,12 +230,12 @@ $$
 and
 
 $$
-P_1\ge P_2.
+P_1\ge P_2,
 $$
 
-The dominated state $(W_2,P_2)$ can then be discarded.
+with at least one strict inequality. The dominated state $(W_2,P_2)$ can then be discarded because it uses no less weight and provides no greater value.
 
-Such methods can handle non-integer weights, although the number of nondominated states may grow exponentially in the worst case.
+Such methods can handle non-integer weights, although the number of nondominated states may grow exponentially in the worst case [3].
 
 One special situation is also worth noting. If all item weights are integers but the capacity is not, for example
 
@@ -459,7 +477,7 @@ So for **0-1 knapsack**:
 
 ---
 
-## 4. Complete / Unbounded Knapsack Problem⭐⭐⭐
+## 4. Unbounded / Complete Knapsack Problem⭐⭐⭐
 
 ### 4.1 Problem Description
 
@@ -675,7 +693,7 @@ So for **complete knapsack**:
 
 ---
 
-## 5. Multiple / Bounded Knapsack Problem⭐⭐⭐
+## 5. Bounded Knapsack Problem⭐⭐⭐
 
 ### 5.1 Problem Description
 
@@ -760,7 +778,7 @@ But this is generally **not valid**.
 
 The reason is that in the complete knapsack problem, item type $i$ may be chosen **arbitrarily many times**, so the recursive expansion is consistent.
 
-In the multiple knapsack problem, however, the number of copies of type $i$ is capped at $s_i$. The direct recurrence contains only the terms corresponding to
+In the bounded knapsack problem, however, the number of copies of type $i$ is capped at $s_i$. The direct recurrence contains only the terms corresponding to
 
 $$
 k=0,1,\ldots,s_i
@@ -782,7 +800,7 @@ So the complete-knapsack simplification does not preserve the quantity limit.
 
 ### 5.5 Binary Splitting Optimization⭐⭐⭐
 
-A standard optimization is to transform the bounded problem into a 0-1 knapsack problem by **binary decomposition**.
+A standard optimization is to transform the bounded problem into a 0-1 knapsack problem by **binary decomposition** [2,3].
 
 Suppose type $i$ has $s_i$ copies.
 
@@ -811,7 +829,7 @@ Each group becomes an artificial 0-1 item:
 
 Then choosing a subset of these artificial items is equivalent to choosing any number from $0$ to $s_i$ copies of the original item type.
 
-So the multiple knapsack problem becomes a 0-1 knapsack problem after decomposition.
+So the bounded knapsack problem becomes a 0-1 knapsack problem after decomposition.
 
 If $s_{\max}=\max_i s_i$, the straightforward bounded-knapsack implementation is often summarized by the upper bound
 
@@ -871,13 +889,15 @@ if __name__ == "__main__":
 
 ---
 
-## 6. Grouped Knapsack Problem⭐⭐⭐
+## 6. Grouped / Multiple-Choice Knapsack Problem⭐⭐⭐
 
 ### 6.1 Problem Description
 
 There are $N$ groups of items and a knapsack with capacity $V$.
 
 Each group contains several candidate items, and **at most one item may be selected from each group**.
+
+This is the grouped form used in this note and is closely related to the **multiple-choice knapsack problem (MCKP)** [3]. Some MCKP formulations require exactly one item from each group; the at-most-one version can be represented in that form by adding a zero-volume, zero-value dummy item to every group.
 
 If item $k$ in group $i$ is chosen, its volume is $v_{ik}$ and its value is $w_{ik}$.
 
@@ -1005,9 +1025,9 @@ A useful summary is the following.
 | Variant | Item availability | State transition idea | Capacity loop direction in 1D DP |
 | :-- | :-- | :-- | :--: |
 | 0-1 knapsack | each item at most once | take / do not take | descending |
-| complete knapsack | unlimited copies | reuse current item type | ascending |
-| multiple knapsack | limited copies | enumerate copies or split into binary groups | descending after binary splitting |
-| grouped knapsack | at most one item per group | choose none or one from current group | descending |
+| unbounded / complete knapsack | unlimited copies | reuse current item type | ascending |
+| bounded knapsack | limited copies | enumerate copies or split into binary groups | descending after binary splitting |
+| grouped / multiple-choice knapsack | at most one item per group | choose none or one from current group | descending |
 
 This table captures the most important algorithmic difference among the standard knapsack variants.
 
@@ -1017,9 +1037,9 @@ This table captures the most important algorithmic difference among the standard
 
 ### 8.1 Pseudo-Polynomial Nature
 
-The dynamic-programming algorithms above often run in time polynomial in $N$ and $V$.
+For 0-1 and unbounded knapsack, the standard capacity-indexed dynamic programs run in $O(NV)$ time. Bounded and grouped variants introduce additional factors associated with copy limits or group sizes.
 
-However, this does **not** mean they are polynomial in the formal complexity-theoretic sense.
+However, dependence on the numerical capacity $V$ does **not** make these algorithms polynomial in the formal complexity-theoretic sense [3].
 
 The reason is that the capacity $V$ is a **numerical value**, while the input length only needs
 
@@ -1037,7 +1057,7 @@ This is exactly why 0-1 knapsack can be NP-hard even though it admits a practica
 
 ### 8.2 Weak NP-Hardness
 
-The ordinary 0-1 knapsack problem is a classical example of a **weakly NP-hard** optimization problem.
+The ordinary 0-1 knapsack optimization problem is a classical example of a **weakly NP-hard** problem [3].
 
 This means:
 
@@ -1056,8 +1076,8 @@ That is one of the main reasons the knapsack problem is used so often in algorit
 4. The central DP task is to define a good state and derive the correct recurrence.
 5. For **0-1 knapsack**, the 1D capacity loop must go **from large to small**.
 6. For **complete knapsack**, the 1D capacity loop must go **from small to large**.
-7. **Multiple knapsack** can be efficiently reduced to a 0-1 knapsack problem by **binary splitting**, which replaces a copy-count decision by a logarithmic number of 0-1 bundle decisions.
-8. **Grouped knapsack** treats each group as one stage; a descending capacity loop prevents selecting more than one item from the same group in the 1D implementation.
+7. **Bounded knapsack** can be efficiently reduced to a 0-1 knapsack problem by **binary splitting**, which replaces a copy-count decision by a logarithmic number of 0-1 bundle decisions.
+8. **Grouped / multiple-choice knapsack** treats each group as one stage; a descending capacity loop prevents selecting more than one item from the same group in the 1D implementation.
 9. The usual DP algorithms for knapsack are typically **pseudo-polynomial**, not polynomial in the encoded input length.
 
 ---
@@ -1067,7 +1087,8 @@ That is one of the main reasons the knapsack problem is used so often in algorit
 1. Sun, Xiaoling, and Duan Li. *Integer Programming*. Beijing: Science Press, 2010. ISBN: 978-7-03-029380-0.（孙小玲、李端：《整数规划》，北京：科学出版社，2010年，ISBN：978-7-03-029380-0）
 2. Martello, Silvano, and Paolo Toth. *Knapsack Problems: Algorithms and Computer Implementations*. Chichester: John Wiley & Sons, 1990. ISBN: 978-0-471-92420-3.
 3. Kellerer, Hans, Ulrich Pferschy, and David Pisinger. *Knapsack Problems*. Berlin: Springer, 2004. DOI: 10.1007/978-3-540-24777-7.
-4. Bellman, Richard. *Dynamic Programming*. Princeton, NJ: Princeton University Press, 1957.
+4. Merkle, Ralph C., and Martin E. Hellman. “Hiding Information and Signatures in Trapdoor Knapsacks.” *IEEE Transactions on Information Theory* 24(5), 1978, 525–530. DOI: 10.1109/TIT.1978.1055927.
+5. Bellman, R. *Dynamic Programming*. Princeton University Press, 1957. ISBN: 978-0-691-07951-6.
 
 ---
 
